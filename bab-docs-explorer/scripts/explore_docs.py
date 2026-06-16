@@ -818,7 +818,14 @@ def main():
     
     args = parser.parse_args()
     
-    explorer = DocExplorer(args.docs_dir)
+    docs_dir_path = Path(args.docs_dir).resolve()
+    # Auto-fallback to the root of the BABSkills repository (grandparent of scripts folder)
+    if not (docs_dir_path / "DataDictionary").exists() and not (docs_dir_path / "README.md").exists():
+        fallback_path = Path(__file__).resolve().parent.parent.parent
+        if (fallback_path / "DataDictionary").exists() or (fallback_path / "README.md").exists():
+            docs_dir_path = fallback_path
+            
+    explorer = DocExplorer(docs_dir_path)
     
     # Verify documentation directory has index or structure
     if not (explorer.docs_dir / "README.md").exists() and not (explorer.docs_dir / "DataDictionary").exists():

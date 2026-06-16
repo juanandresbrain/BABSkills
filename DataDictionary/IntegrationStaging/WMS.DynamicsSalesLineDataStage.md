@@ -1,0 +1,107 @@
+﻿# WMS.DynamicsSalesLineDataStage
+
+**Database:** IntegrationStaging  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| BarCode | nvarchar | 8000 | 1 |  |  |  |
+| BusinessDate | datetime | 8 | 1 |  |  |  |
+| CancelledTransactionNumber | nvarchar | 8000 | 1 |  |  |  |
+| CashDiscountAmount | float | 8 | 1 |  |  |  |
+| CategoryHierarchyName | nvarchar | 8000 | 1 |  |  |  |
+| CategoryName | nvarchar | 8000 | 1 |  |  |  |
+| ChannelListingID | nvarchar | 8000 | 1 |  |  |  |
+| CostAmount | float | 8 | 1 |  |  |  |
+| Currency | nvarchar | 8000 | 1 |  |  |  |
+| CustomerAccount | nvarchar | 8000 | 1 |  |  |  |
+| CustomerDiscount | float | 8 | 1 |  |  |  |
+| CustomerInvoiceDiscountAmount | float | 8 | 1 |  |  |  |
+| dataAreaId | nvarchar | 8000 | 1 |  |  |  |
+| DiscountAmountForPrinting | float | 8 | 1 |  |  |  |
+| DiscountAmountWithoutTax | float | 8 | 1 |  |  |  |
+| ElectronicDeliveryEmail | nvarchar | 8000 | 1 |  |  |  |
+| FixedPriceCharges | float | 8 | 1 |  |  |  |
+| GiftCard | nvarchar | 510 | 1 |  |  |  |
+| InventoryStatus | nvarchar | 510 | 1 |  |  |  |
+| IsLineDiscounted | nvarchar | 510 | 1 |  |  |  |
+| IsLinkedProductNotOriginal | nvarchar | 510 | 1 |  |  |  |
+| IsOriginalOfLinkedProductList | nvarchar | 510 | 1 |  |  |  |
+| IsPriceChange | nvarchar | 510 | 1 |  |  |  |
+| IsReturnNoSale | nvarchar | 510 | 1 |  |  |  |
+| IsScaleProduct | nvarchar | 510 | 1 |  |  |  |
+| IsWeightManuallyEntered | nvarchar | 510 | 1 |  |  |  |
+| IsWeightProduct | nvarchar | 510 | 1 |  |  |  |
+| ItemColor | nvarchar | 8000 | 1 |  |  |  |
+| ItemConfigId | nvarchar | 8000 | 1 |  |  |  |
+| ItemId | nvarchar | 8000 | 1 |  |  |  |
+| ItemRelation | nvarchar | 8000 | 1 |  |  |  |
+| ItemSalesTaxGroup | nvarchar | 8000 | 1 |  |  |  |
+| ItemSize | nvarchar | 8000 | 1 |  |  |  |
+| ItemStyle | nvarchar | 8000 | 1 |  |  |  |
+| ItemVersion | nvarchar | 8000 | 1 |  |  |  |
+| KeyboardProductEntry | nvarchar | 510 | 1 |  |  |  |
+| LineDiscount | float | 8 | 1 |  |  |  |
+| LineManualDiscountAmount | float | 8 | 1 |  |  |  |
+| LineManualDiscountPercentage | float | 8 | 1 |  |  |  |
+| LineNumber | float | 8 | 1 |  |  |  |
+| LinePercentageDiscount | float | 8 | 1 |  |  |  |
+| LogisticLocationId | nvarchar | 8000 | 1 |  |  |  |
+| LogisticsPostalAddressValidFrom | datetime | 8 | 1 |  |  |  |
+| LotID | nvarchar | 8000 | 1 |  |  |  |
+| ModeOfDelivery | nvarchar | 8000 | 1 |  |  |  |
+| NetAmount | float | 8 | 1 |  |  |  |
+| NetAmountInclusiveTax | float | 8 | 1 |  |  |  |
+| NetPrice | float | 8 | 1 |  |  |  |
+| OfferNumber | nvarchar | 8000 | 1 |  |  |  |
+| OperatingUnitNumber | nvarchar | 8000 | 1 |  |  |  |
+| OriginalItemSalesTaxGroup | nvarchar | 8000 | 1 |  |  |  |
+| OriginalPrice | float | 8 | 1 |  |  |  |
+| OriginalSalesTaxGroup | nvarchar | 8000 | 1 |  |  |  |
+| PeriodicDiscountAmount | float | 8 | 1 |  |  |  |
+| PeriodicDiscountGroup | nvarchar | 8000 | 1 |  |  |  |
+| PeriodicDiscountPercentage | float | 8 | 1 |  |  |  |
+| PickupEndTime | int | 4 | 1 |  |  |  |
+| PickupStartTime | int | 4 | 1 |  |  |  |
+| Price | float | 8 | 1 |  |  |  |
+| PriceGroups | nvarchar | 8000 | 1 |  |  |  |
+| PriceInBarCode | nvarchar | 510 | 1 |  |  |  |
+| ProductScanned | nvarchar | 510 | 1 |  |  |  |
+| Quantity | float | 8 | 1 |  |  |  |
+| ReasonCodeDiscount | float | 8 | 1 |  |  |  |
+| ReceiptNumber | nvarchar | 8000 | 1 |  |  |  |
+| RequestedReceiptDate | datetime | 8 | 1 |  |  |  |
+| RequestedShipDate | datetime | 8 | 1 |  |  |  |
+| RetailEmailAddressContent | nvarchar | 8000 | 1 |  |  |  |
+| ReturnLineNumber | float | 8 | 1 |  |  |  |
+| ReturnOperatingUnitNumber | nvarchar | 8000 | 1 |  |  |  |
+| ReturnQuantity | float | 8 | 1 |  |  |  |
+| ReturnTerminal | nvarchar | 8000 | 1 |  |  |  |
+| ReturnTrackingStatus | nvarchar | 510 | 1 |  |  |  |
+| ReturnTransactionNumber | nvarchar | 8000 | 1 |  |  |  |
+| RFIDTagId | nvarchar | 8000 | 1 |  |  |  |
+| SalesTaxAmount | float | 8 | 1 |  |  |  |
+| SalesTaxGroup | nvarchar | 8000 | 1 |  |  |  |
+| SectionNumber | nvarchar | 8000 | 1 |  |  |  |
+| SerialNumber | nvarchar | 8000 | 1 |  |  |  |
+| ShelfNumber | nvarchar | 8000 | 1 |  |  |  |
+| SiteId | nvarchar | 8000 | 1 |  |  |  |
+| SkipReports | nvarchar | 510 | 1 |  |  |  |
+| StandardNetPrice | float | 8 | 1 |  |  |  |
+| TaxExemptPriceInclusiveOriginalPrice | float | 8 | 1 |  |  |  |
+| TaxExemptPriceInclusiveReductionAmount | float | 8 | 1 |  |  |  |
+| Terminal | nvarchar | 8000 | 1 |  |  |  |
+| TotalDiscount | float | 8 | 1 |  |  |  |
+| TotalDiscountInfoCodeLineNum | float | 8 | 1 |  |  |  |
+| TotalDiscountPercentage | float | 8 | 1 |  |  |  |
+| TransactionCode | nvarchar | 510 | 1 |  |  |  |
+| TransactionDate | datetime | 8 | 1 |  |  |  |
+| TransactionNumber | nvarchar | 8000 | 1 |  |  |  |
+| TransactionStatus | nvarchar | 510 | 1 |  |  |  |
+| Unit | nvarchar | 8000 | 1 |  |  |  |
+| UnitPrice | float | 8 | 1 |  |  |  |
+| UnitQuantity | float | 8 | 1 |  |  |  |
+| VariantNumber | nvarchar | 8000 | 1 |  |  |  |
+| Warehouse | nvarchar | 8000 | 1 |  |  |  |
+

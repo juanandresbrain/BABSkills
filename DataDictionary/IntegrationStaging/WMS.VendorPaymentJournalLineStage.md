@@ -1,0 +1,106 @@
+﻿# WMS.VendorPaymentJournalLineStage
+
+**Database:** IntegrationStaging  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| AccountDisplayValue | nvarchar | 8000 | 1 |  |  |  |
+| AccountType | nvarchar | 510 | 1 |  |  |  |
+| BankTransactionType | nvarchar | 8000 | 1 |  |  |  |
+| CalculateWithholdingTax | nvarchar | 510 | 1 |  |  |  |
+| CategoryPurpose | bigint | 8 | 1 |  |  |  |
+| CentralBankImportDate | datetime | 8 | 1 |  |  |  |
+| CentralBankPurposeCode | nvarchar | 8000 | 1 |  |  |  |
+| CentralBankPurposeText | nvarchar | 8000 | 1 |  |  |  |
+| ChargeBearer | bigint | 8 | 1 |  |  |  |
+| CheckNumber | nvarchar | 8000 | 1 |  |  |  |
+| ChineseVoucher | nvarchar | 8000 | 1 |  |  |  |
+| ChineseVoucherType | nvarchar | 8000 | 1 |  |  |  |
+| Company | nvarchar | 8000 | 1 |  |  |  |
+| ContactPerson | nvarchar | 8000 | 1 |  |  |  |
+| CreditAmount | float | 8 | 1 |  |  |  |
+| CurrencyCode | nvarchar | 8000 | 1 |  |  |  |
+| dataAreaId | nvarchar | 8000 | 1 |  |  |  |
+| DebitAmount | float | 8 | 1 |  |  |  |
+| DefaultDimensionsForAccountDisplayValue | nvarchar | 8000 | 1 |  |  |  |
+| DefaultDimensionsForOffsetAccountDisplayValue | nvarchar | 8000 | 1 |  |  |  |
+| ErrorCodePayment | nvarchar | 8000 | 1 |  |  |  |
+| ExchangeRate | float | 8 | 1 |  |  |  |
+| FeeAccount | nvarchar | 8000 | 1 |  |  |  |
+| FullPrimaryRemittanceAddress | nvarchar | 8000 | 1 |  |  |  |
+| InstructionKey1 | nvarchar | 510 | 1 |  |  |  |
+| InstructionKey2 | nvarchar | 510 | 1 |  |  |  |
+| InstructionKey3 | nvarchar | 510 | 1 |  |  |  |
+| InstructionKey4 | nvarchar | 510 | 1 |  |  |  |
+| IsPrepayment | nvarchar | 510 | 1 |  |  |  |
+| ItemWithholdingTaxGroupCode | nvarchar | 8000 | 1 |  |  |  |
+| JournalBatchNumber | nvarchar | 8000 | 1 |  |  |  |
+| LineNumber | float | 8 | 1 |  |  |  |
+| LocalInstrument | bigint | 8 | 1 |  |  |  |
+| MarkedInvoice | nvarchar | 8000 | 1 |  |  |  |
+| MarkedInvoiceCompany | nvarchar | 8000 | 1 |  |  |  |
+| NACHAIATForeignExchangeIndicator | nvarchar | 510 | 1 |  |  |  |
+| NACHAIATForeignExchangeReference | nvarchar | 8000 | 1 |  |  |  |
+| NACHAIATForeignExchangeReferenceIndicator | nvarchar | 510 | 1 |  |  |  |
+| NACHAIATOFACScreeningIndicator | nvarchar | 510 | 1 |  |  |  |
+| NACHAIATOFACSecondaryScreeningIndicator | nvarchar | 510 | 1 |  |  |  |
+| NACHAIATOriginatingDFIQualifier | nvarchar | 510 | 1 |  |  |  |
+| NACHAIATReceivingDFIQualifier | nvarchar | 510 | 1 |  |  |  |
+| NewJournalBatchNumber | nvarchar | 8000 | 1 |  |  |  |
+| OffsetAccountDisplayValue | nvarchar | 8000 | 1 |  |  |  |
+| OffsetAccountType | nvarchar | 510 | 1 |  |  |  |
+| OffsetCompany | nvarchar | 8000 | 1 |  |  |  |
+| OffsetTransactionText | nvarchar | 8000 | 1 |  |  |  |
+| OverrideSalesTax | nvarchar | 510 | 1 |  |  |  |
+| PaymentId | nvarchar | 8000 | 1 |  |  |  |
+| PaymentMethodName | nvarchar | 8000 | 1 |  |  |  |
+| PaymentReference | nvarchar | 8000 | 1 |  |  |  |
+| PaymentSpecification | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckBankBranch | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckBankName | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckCashierDisplayValue | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckIsReplacementCheck | nvarchar | 510 | 1 |  |  |  |
+| PostdatedCheckMaturityDate | datetime | 8 | 1 |  |  |  |
+| PostdatedCheckNumber | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckOriginalCheckNumber | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckReasonForStop | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckReceivedDate | datetime | 8 | 1 |  |  |  |
+| PostdatedCheckReplacementComments | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckSalespersonDisplayValue | nvarchar | 8000 | 1 |  |  |  |
+| PostdatedCheckStopPayment | nvarchar | 510 | 1 |  |  |  |
+| PostingProfile | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressCity | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressCountry | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressCountryISOCode | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressCounty | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressDescription | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressDistrictName | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressLatitude | float | 8 | 1 |  |  |  |
+| RemittanceAddressLongitude | float | 8 | 1 |  |  |  |
+| RemittanceAddressState | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressStreet | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceAddressTimeZone | nvarchar | 510 | 1 |  |  |  |
+| RemittanceAddressValidFrom | datetime | 8 | 1 |  |  |  |
+| RemittanceAddressValidTo | datetime | 8 | 1 |  |  |  |
+| RemittanceAddressZipCode | nvarchar | 8000 | 1 |  |  |  |
+| RemittanceLocationId | nvarchar | 8000 | 1 |  |  |  |
+| ReportingCurrencyExchRate | float | 8 | 1 |  |  |  |
+| ReportingCurrencyExchRateSecondary | float | 8 | 1 |  |  |  |
+| RestrictedForwarding | nvarchar | 510 | 1 |  |  |  |
+| SecondaryExchangeRate | float | 8 | 1 |  |  |  |
+| ServiceLevel | bigint | 8 | 1 |  |  |  |
+| SettleVoucher | nvarchar | 510 | 1 |  |  |  |
+| TaxGroup | nvarchar | 8000 | 1 |  |  |  |
+| TaxItemGroup | nvarchar | 8000 | 1 |  |  |  |
+| TaxWithholdGroup | nvarchar | 8000 | 1 |  |  |  |
+| ThirdPartyBankAccountId | nvarchar | 8000 | 1 |  |  |  |
+| TransactionDate | datetime | 8 | 1 |  |  |  |
+| TransactionText | nvarchar | 8000 | 1 |  |  |  |
+| UseSalesTaxDirectionFromMainAccount | nvarchar | 510 | 1 |  |  |  |
+| VendorName | nvarchar | 8000 | 1 |  |  |  |
+| VendorPaymentJournalFee | nvarchar | -1 | 1 |  |  |  |
+| VendorPaymentJournalLineEntityRole | nvarchar | -1 | 1 |  |  |  |
+| Voucher | nvarchar | 8000 | 1 |  |  |  |
+

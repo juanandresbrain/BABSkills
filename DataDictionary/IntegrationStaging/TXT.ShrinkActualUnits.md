@@ -1,0 +1,13 @@
+﻿# TXT.ShrinkActualUnits
+
+**Database:** IntegrationStaging  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| ItemID | nvarchar | 20 | 1 |  |  |  |
+| ShrinkActualUnits | decimal | 9 | 1 |  |  |  |
+| ShrinkActualUnitsColumn | nvarchar | 200 | 1 |  |  |  |
+| Fiscal_year_pd | nvarchar | 20 | 1 |  |  |  |
+
