@@ -103,6 +103,39 @@ def parse_sp_file(file_path):
         "code": code
     }
 
+def parse_view_file(file_path):
+    try:
+        content = file_path.read_text(encoding='utf-8-sig', errors='ignore')
+    except Exception:
+        return None
+
+    h1_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+    view_name = h1_match.group(1).strip() if h1_match else file_path.stem
+
+    db_match = re.search(r'\*\*Database:\*\*\s*(.+)$', content, re.MULTILINE)
+    database = db_match.group(1).strip() if db_match else "Unknown"
+
+    dependencies = []
+    dep_sec = re.search(r'## Table Dependencies\s*\n\s*\n(.*?)(?=\n\n|\Z)', content, re.DOTALL)
+    if dep_sec:
+        table_lines = dep_sec.group(1).strip().split('\n')
+        if len(table_lines) > 2:
+            for line in table_lines[2:]:
+                parts = [p.strip() for p in line.split('|')[1:-1]]
+                if parts and parts[0]:
+                    dependencies.append(parts[0])
+
+    code_match = re.search(r'## View Code\s*\n\s*\n```sql\s*\n(.*?)\n```', content, re.DOTALL | re.IGNORECASE)
+    code = code_match.group(1).strip() if code_match else ""
+
+    return {
+        "file_path": str(file_path),
+        "view_name": view_name,
+        "database": database,
+        "dependencies": dependencies,
+        "code": code
+    }
+
 def parse_package_file(file_path):
     try:
         content = file_path.read_text(encoding='utf-8-sig', errors='ignore')
@@ -237,6 +270,7 @@ class DocExplorer:
         self.docs_dir = Path(docs_dir).resolve()
         self.tables = {}
         self.sps = {}
+        self.views = {}
         self.packages = {}
         self.jobs = {}
         self._loaded = False
@@ -262,6 +296,15 @@ class DocExplorer:
                     sp = parse_sp_file(f)
                     if sp:
                         self.sps[sp["sp_name"]] = sp
+
+        # Load Views
+        view_dir = self.docs_dir / "Views"
+        if view_dir.exists():
+            for f in view_dir.rglob("*.md"):
+                if f.name != "_index.md":
+                    view = parse_view_file(f)
+                    if view:
+                        self.views[view["view_name"]] = view
                         
         # Load SSIS Packages
         ssis_dir = self.docs_dir / "SSIS"
@@ -297,6 +340,14 @@ class DocExplorer:
         for name, sp in self.sps.items():
             if name_matches(name, query):
                 results.append(sp)
+        return results
+
+    def find_view(self, query):
+        self.load_all()
+        results = []
+        for name, view in self.views.items():
+            if name_matches(name, query):
+                results.append(view)
         return results
 
     def find_package(self, query):
@@ -338,8 +389,6 @@ class DocExplorer:
                 is_dep = any(name_matches(dep, table) for dep in sp["dependencies"])
                 in_code = False
                 if not is_dep:
-                    # check code block
-                    # search for table name as a whole word or in brackets
                     norm_table = normalize_name(table)
                     norm_code = normalize_name(sp["code"])
                     if norm_table in norm_code:
@@ -349,6 +398,24 @@ class DocExplorer:
                         "name": sp_name,
                         "file_path": sp["file_path"],
                         "database": sp["database"],
+                        "type": "dependency_table" if is_dep else "referenced_in_code"
+                    })
+
+            # 2b. Check Views
+            trace_results.setdefault("views", [])
+            for view_name, view in self.views.items():
+                is_dep = any(name_matches(dep, table) for dep in view["dependencies"])
+                in_code = False
+                if not is_dep:
+                    norm_table = normalize_name(table)
+                    norm_code = normalize_name(view["code"])
+                    if norm_table in norm_code:
+                        in_code = True
+                if is_dep or in_code:
+                    trace_results["views"].append({
+                        "name": view_name,
+                        "file_path": view["file_path"],
+                        "database": view["database"],
                         "type": "dependency_table" if is_dep else "referenced_in_code"
                     })
                     
@@ -579,6 +646,11 @@ class DocExplorer:
         for name, sp in self.sps.items():
             if kw_lower in name.lower() or kw_lower in sp["code"].lower():
                 results.append({"type": "Stored Procedure", "name": name, "file": sp["file_path"]})
+
+        # Search Views
+        for name, view in self.views.items():
+            if kw_lower in name.lower() or kw_lower in view["code"].lower():
+                results.append({"type": "View", "name": name, "file": view["file_path"]})
                 
         # Search SSIS Packages
         for name, pkg in self.packages.items():
@@ -619,6 +691,25 @@ def format_sp_markdown(sp):
         md.append("_No documented table dependencies._")
     md.append("\n## SQL Code Snippet (first 100 lines)\n")
     code_lines = sp["code"].split('\n')
+    snippet = "\n".join(code_lines[:100])
+    if len(code_lines) > 100:
+        snippet += "\n\n... (truncated)"
+    md.append(f"```sql\n{snippet}\n```")
+    return "\n".join(md)
+
+def format_view_markdown(view):
+    md = []
+    md.append(f"# View: {view['view_name']}")
+    md.append(f"**Database:** {view['database']}  ")
+    md.append(f"**Documentation File:** [{Path(view['file_path']).name}](file:///{view['file_path'].replace(os.sep, '/')})  \n")
+    md.append("## Table Dependencies\n")
+    if view["dependencies"]:
+        for dep in view["dependencies"]:
+            md.append(f"- {dep}")
+    else:
+        md.append("_No documented table dependencies._")
+    md.append("\n## View Code Snippet (first 100 lines)\n")
+    code_lines = view["code"].split('\n')
     snippet = "\n".join(code_lines[:100])
     if len(code_lines) > 100:
         snippet += "\n\n... (truncated)"
@@ -680,21 +771,27 @@ def format_trace_markdown(trace):
     md = []
     md.append(f"# Lineage Trace: {trace['query']}")
     md.append(f"**Matching Tables found:** {', '.join(trace['matched_tables']) if trace['matched_tables'] else 'None'}\n")
-    
+
     md.append("## Stored Procedures referencing table")
     if trace["stored_procedures"]:
         for sp in trace["stored_procedures"]:
             md.append(f"- **{sp['name']}** (DB: {sp['database']}, Match: {sp['type']}) - [File]({sp['file_path']})")
     else:
         md.append("_None found._")
-        
+
+    md.append("\n## Views referencing table")
+    for view in trace.get("views", []):
+        md.append(f"- **{view['name']}** (DB: {view['database']}, Match: {view['type']}) - [File]({view['file_path']})")
+    if not trace.get("views"):
+        md.append("_None found._")
+
     md.append("\n## SSIS Packages referencing table")
     if trace["ssis_packages"]:
         for pkg in trace["ssis_packages"]:
             md.append(f"- **{pkg['name']}** (Project: {pkg['project']}, Role: {pkg['role']}) - [File]({pkg['file_path']})")
     else:
         md.append("_None found._")
-        
+
     md.append("\n## SQL Agent Jobs referencing table")
     if trace["sql_agent_jobs"]:
         for job in trace["sql_agent_jobs"]:
@@ -702,7 +799,7 @@ def format_trace_markdown(trace):
             md.append(f"- **{job['name']}** (Enabled: {job['enabled']}) - steps: {steps_desc} - [File]({job['file_path']})")
     else:
         md.append("_None found._")
-        
+
     return "\n".join(md)
 
 def format_lineage_tree_markdown(tree):
@@ -799,6 +896,10 @@ def main():
     # describe-sp
     p_desc_sp = subparsers.add_parser("describe-sp", help="Inspect a stored procedure by name")
     p_desc_sp.add_argument("sp_name", help="Name of the stored procedure")
+
+    # describe-view
+    p_desc_view = subparsers.add_parser("describe-view", help="Inspect a view by name")
+    p_desc_view.add_argument("view_name", help="Name of the view")
     
     # describe-job
     p_desc_job = subparsers.add_parser("describe-job", help="Inspect a SQL Agent job by name")
@@ -861,6 +962,16 @@ def main():
             else:
                 result_data = sps[0] if len(sps) == 1 else sps
                 output_text = "\n\n---\n\n".join(format_sp_markdown(s) for s in sps)
+
+        elif args.command == "describe-view":
+            views = explorer.find_view(args.view_name)
+            if not views:
+                print(f"[WARNING] No view matched query '{args.view_name}'", file=sys.stderr)
+                result_data = {"error": f"No view matched query '{args.view_name}'"}
+                output_text = f"# View Search: {args.view_name}\n\nNo matching view found."
+            else:
+                result_data = views[0] if len(views) == 1 else views
+                output_text = "\n\n---\n\n".join(format_view_markdown(v) for v in views)
                 
         elif args.command == "describe-job":
             jobs = explorer.find_job(args.job_name)

@@ -1,13 +1,13 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation. Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation. Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It is designed to trace data lineage across 6 databases, 931 tables, 547 stored procedures, 239 SSIS projects, and 290 SQL Agent jobs. Use this skill to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It is designed to trace data lineage across 6 databases, 931 tables, 547 stored procedures, 308 views, 239 SSIS projects, and 290 SQL Agent jobs. Use this skill to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
 
 ## Dependencies
 None.
@@ -32,10 +32,10 @@ Generates a structured, tree-like lineage map tracing who populates the table.
   python .agents/skills/bab-docs-explorer/scripts/explore_docs.py trace-lineage CustomerLeadGenStage
   ```
 - **Output**: Writes the visual tree and description to `explorer_output.md` showing:
-  `Table` 🡨 `SSIS Package` / `Stored Procedure` 🡨 `SQL Agent Job(s)` 🡨 `Parent Job(s)`
+  `Table` 🡨 `View` / `SSIS Package` / `Stored Procedure` 🡨 `SQL Agent Job(s)` 🡨 `Parent Job(s)`
 
 ### 2. `trace-table <table_name>`
-Finds all Stored Procedures, SSIS Packages, and SQL Agent Jobs referencing the table.
+Finds all Stored Procedures, Views, SSIS Packages, and SQL Agent Jobs referencing the table.
 - **Example**:
   ```bash
   python .agents/skills/bab-docs-explorer/scripts/explore_docs.py trace-table CustomerLeadGenStage
@@ -55,22 +55,29 @@ Inspects stored procedure parameters, table dependencies, and displays the sourc
   python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-sp sp_BlitzCache
   ```
 
-### 5. `describe-package <package_name>`
+### 5. `describe-view <view_name>`
+Inspects a view's table dependencies and displays its source SQL code snippet.
+- **Example**:
+  ```bash
+  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-view vw_BAB_POS_Pricebook
+  ```
+
+### 6. `describe-package <package_name>`
 Inspects SSIS connection managers, control flow tasks, sources, and destinations.
 - **Example**:
   ```bash
   python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-package ExactTargetLeadGen
   ```
 
-### 6. `describe-job <job_name>`
+### 7. `describe-job <job_name>`
 Shows step-by-step instructions, subsystems (TSQL, SSIS, CmdExec), and source code commands for a SQL Agent Job.
 - **Example**:
   ```bash
   python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-job CustomerTransactionETL
   ```
 
-### 7. `search-all <keyword>`
-Searches for text references in names, column descriptions, and code blocks across all components.
+### 8. `search-all <keyword>`
+Searches for text references in names, column descriptions, and code blocks across all components — including Views.
 - **Example**:
   ```bash
   python .agents/skills/bab-docs-explorer/scripts/explore_docs.py search-all "FirstData"
@@ -83,5 +90,6 @@ Searches for text references in names, column descriptions, and code blocks acro
 
 ## Common Mistakes
 1. **Wrong Schema Context**: Forgetting that tables are matched loosely (e.g. typing `CustomerLeadGenStage` matches `dbo.CustomerLeadGenStage` automatically). Do not type unnecessary brackets or quotes.
-2. **Missing Out-of-Doc references**: Tracing will highlight if a Stored Procedure or Job command references an object that has no dedicated documentation file (it will note it as a reference, but won't be able to fetch its columns).
+2. **Missing Out-of-Doc references**: Tracing will highlight if a Stored Procedure, View, or Job command references an object that has no dedicated documentation file (it will note it as a reference, but won't be able to fetch its columns).
 3. **Checking stdout instead of output files**: The script writes details to `explorer_output.md` to prevent terminal output truncation. Always view the generated file to read the full report.
+
