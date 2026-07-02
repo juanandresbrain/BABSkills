@@ -1,0 +1,18 @@
+﻿# TXT.BOPOHUnitsTotal
+
+**Database:** IntegrationStaging  
+**Server:** STL-SSIS-P-01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| ItemID | nvarchar | 20 | 1 |  |  |  |
+| BOPOHUnitsTotalColumn | nvarchar | 200 | 1 |  |  |  |
+| Fiscal_year_pd | nvarchar | 20 | 1 |  |  |  |
+| BOPOHUnitsTotal | decimal | 13 | 1 |  |  |  |
+
+## Referenced By Stored Procedures
+
+- [IntegrationStaging: TXT.spOnHandFields](../../StoredProcedures/IntegrationStaging/TXT.spOnHandFields.md)
+

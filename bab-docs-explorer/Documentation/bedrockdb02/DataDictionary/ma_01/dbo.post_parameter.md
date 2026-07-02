@@ -1,0 +1,90 @@
+﻿# dbo.post_parameter
+
+**Database:** ma_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| parameter_id | decimal | 9 | 0 | YES |  |  |
+| parameter_label | nvarchar | 120 | 0 |  |  |  |
+| parameter_value | nvarchar | 510 | 0 |  |  |  |
+| display_flag | bit | 1 | 0 |  |  |  |
+
+## Referenced By Stored Procedures
+
+- [me_01: dbo.z_ib_notax_cleanup_$sp](../../StoredProcedures/me_01/dbo.z_ib_notax_cleanup_$sp.md)
+- [ma_01: dbo.dl_hist_group_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_group_vld_$sp.md)
+- [ma_01: dbo.dl_hist_oh_group_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_oh_group_vld_$sp.md)
+- [ma_01: dbo.dl_hist_oh_sku_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_oh_sku_vld_$sp.md)
+- [ma_01: dbo.dl_hist_oh_style_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_oh_style_vld_$sp.md)
+- [ma_01: dbo.dl_hist_oh_styleclr_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_oh_styleclr_vld_$sp.md)
+- [ma_01: dbo.dl_hist_sku_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_sku_vld_$sp.md)
+- [ma_01: dbo.dl_hist_style_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_style_vld_$sp.md)
+- [ma_01: dbo.dl_hist_styleclr_vld_$sp](../../StoredProcedures/ma_01/dbo.dl_hist_styleclr_vld_$sp.md)
+- [ma_01: dbo.get_beg_wk_cur_period_ly_$fn](../../StoredProcedures/ma_01/dbo.get_beg_wk_cur_period_ly_$fn.md)
+- [ma_01: dbo.get_curr_pd_$fn](../../StoredProcedures/ma_01/dbo.get_curr_pd_$fn.md)
+- [ma_01: dbo.get_curr_pd_ly_$fn](../../StoredProcedures/ma_01/dbo.get_curr_pd_ly_$fn.md)
+- [ma_01: dbo.get_curr_wk_$fn](../../StoredProcedures/ma_01/dbo.get_curr_wk_$fn.md)
+- [ma_01: dbo.get_curr_wk_ly_$fn](../../StoredProcedures/ma_01/dbo.get_curr_wk_ly_$fn.md)
+- [ma_01: dbo.get_curr_yr_$fn](../../StoredProcedures/ma_01/dbo.get_curr_yr_$fn.md)
+- [ma_01: dbo.get_last_pd_$fn](../../StoredProcedures/ma_01/dbo.get_last_pd_$fn.md)
+- [ma_01: dbo.get_last_wk_$fn](../../StoredProcedures/ma_01/dbo.get_last_wk_$fn.md)
+- [ma_01: dbo.get_last_x_pds_$fn](../../StoredProcedures/ma_01/dbo.get_last_x_pds_$fn.md)
+- [ma_01: dbo.get_last_x_pds_ly_$fn](../../StoredProcedures/ma_01/dbo.get_last_x_pds_ly_$fn.md)
+- [ma_01: dbo.get_last_x_wks_$fn](../../StoredProcedures/ma_01/dbo.get_last_x_wks_$fn.md)
+- [ma_01: dbo.get_last_x_wks_ly_$fn](../../StoredProcedures/ma_01/dbo.get_last_x_wks_ly_$fn.md)
+- [ma_01: dbo.get_last_x_yrs_$fn](../../StoredProcedures/ma_01/dbo.get_last_x_yrs_$fn.md)
+- [ma_01: dbo.get_last_yr_$fn](../../StoredProcedures/ma_01/dbo.get_last_yr_$fn.md)
+- [ma_01: dbo.get_last_yr_beg_prd_$fn](../../StoredProcedures/ma_01/dbo.get_last_yr_beg_prd_$fn.md)
+- [ma_01: dbo.get_last_yr_beg_wk_$fn](../../StoredProcedures/ma_01/dbo.get_last_yr_beg_wk_$fn.md)
+- [ma_01: dbo.get_next_x_pds_$fn](../../StoredProcedures/ma_01/dbo.get_next_x_pds_$fn.md)
+- [ma_01: dbo.get_next_x_wks_$fn](../../StoredProcedures/ma_01/dbo.get_next_x_wks_$fn.md)
+- [ma_01: dbo.get_next_x_yrs_$fn](../../StoredProcedures/ma_01/dbo.get_next_x_yrs_$fn.md)
+- [ma_01: dbo.get_prev_last_x_pds_$fn](../../StoredProcedures/ma_01/dbo.get_prev_last_x_pds_$fn.md)
+- [ma_01: dbo.get_prev_last_x_pds_ly_$fn](../../StoredProcedures/ma_01/dbo.get_prev_last_x_pds_ly_$fn.md)
+- [ma_01: dbo.get_prev_last_x_wks_$fn](../../StoredProcedures/ma_01/dbo.get_prev_last_x_wks_$fn.md)
+- [ma_01: dbo.get_prev_last_x_wks_ly_$fn](../../StoredProcedures/ma_01/dbo.get_prev_last_x_wks_ly_$fn.md)
+- [ma_01: dbo.get_prev_last_x_yrs_$fn](../../StoredProcedures/ma_01/dbo.get_prev_last_x_yrs_$fn.md)
+- [ma_01: dbo.get_this_yr_beg_prd_$fn](../../StoredProcedures/ma_01/dbo.get_this_yr_beg_prd_$fn.md)
+- [ma_01: dbo.get_this_yr_beg_wk_$fn](../../StoredProcedures/ma_01/dbo.get_this_yr_beg_wk_$fn.md)
+- [ma_01: dbo.import_hist_cmp_group_$sp](../../StoredProcedures/ma_01/dbo.import_hist_cmp_group_$sp.md)
+- [ma_01: dbo.import_hist_cmp_sku_$sp](../../StoredProcedures/ma_01/dbo.import_hist_cmp_sku_$sp.md)
+- [ma_01: dbo.import_hist_cmp_style_$sp](../../StoredProcedures/ma_01/dbo.import_hist_cmp_style_$sp.md)
+- [ma_01: dbo.import_hist_cmp_styleclr_$sp](../../StoredProcedures/ma_01/dbo.import_hist_cmp_styleclr_$sp.md)
+- [ma_01: dbo.initial_load_job_header_$sp](../../StoredProcedures/ma_01/dbo.initial_load_job_header_$sp.md)
+- [ma_01: dbo.initial_load_posting_parameter_$sp](../../StoredProcedures/ma_01/dbo.initial_load_posting_parameter_$sp.md)
+- [ma_01: dbo.nsb_otb_chain_$sp](../../StoredProcedures/ma_01/dbo.nsb_otb_chain_$sp.md)
+- [ma_01: dbo.nsb_otb_location_$sp](../../StoredProcedures/ma_01/dbo.nsb_otb_location_$sp.md)
+- [ma_01: dbo.nsb_par_chain_$sp](../../StoredProcedures/ma_01/dbo.nsb_par_chain_$sp.md)
+- [ma_01: dbo.nsb_par_chain_rim_$sp](../../StoredProcedures/ma_01/dbo.nsb_par_chain_rim_$sp.md)
+- [ma_01: dbo.nsb_par_location_$sp](../../StoredProcedures/ma_01/dbo.nsb_par_location_$sp.md)
+- [ma_01: dbo.nsb_style_analysis_$sp](../../StoredProcedures/ma_01/dbo.nsb_style_analysis_$sp.md)
+- [ma_01: dbo.post_hist_group_rim_$sp](../../StoredProcedures/ma_01/dbo.post_hist_group_rim_$sp.md)
+- [ma_01: dbo.reclass_hist_oh_$sp](../../StoredProcedures/ma_01/dbo.reclass_hist_oh_$sp.md)
+- [ma_01: dbo.reclass_oh_post_adjust_cmp_$sp](../../StoredProcedures/ma_01/dbo.reclass_oh_post_adjust_cmp_$sp.md)
+- [ma_01: dbo.roll_oh_group_loc_pd_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_group_loc_pd_$sp.md)
+- [ma_01: dbo.roll_oh_group_loc_wk_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_group_loc_wk_$sp.md)
+- [ma_01: dbo.roll_oh_group_loc_yr_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_group_loc_yr_$sp.md)
+- [ma_01: dbo.roll_oh_sku_loc_pd_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_sku_loc_pd_$sp.md)
+- [ma_01: dbo.roll_oh_sku_loc_wk_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_sku_loc_wk_$sp.md)
+- [ma_01: dbo.roll_oh_sku_loc_yr_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_sku_loc_yr_$sp.md)
+- [ma_01: dbo.roll_oh_style_color_loc_pd_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_style_color_loc_pd_$sp.md)
+- [ma_01: dbo.roll_oh_style_color_loc_wk_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_style_color_loc_wk_$sp.md)
+- [ma_01: dbo.roll_oh_style_color_loc_yr_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_style_color_loc_yr_$sp.md)
+- [ma_01: dbo.roll_oh_style_loc_pd_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_style_loc_pd_$sp.md)
+- [ma_01: dbo.roll_oh_style_loc_wk_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_style_loc_wk_$sp.md)
+- [ma_01: dbo.roll_oh_style_loc_yr_$sp](../../StoredProcedures/ma_01/dbo.roll_oh_style_loc_yr_$sp.md)
+- [ma_01: dbo.rpt_merchandise_allocation_$sp](../../StoredProcedures/ma_01/dbo.rpt_merchandise_allocation_$sp.md)
+- [ma_01: dbo.rpt_otb_chain_$sp](../../StoredProcedures/ma_01/dbo.rpt_otb_chain_$sp.md)
+- [ma_01: dbo.rpt_otb_location_$sp](../../StoredProcedures/ma_01/dbo.rpt_otb_location_$sp.md)
+- [ma_01: dbo.rpt_par_chain_$sp](../../StoredProcedures/ma_01/dbo.rpt_par_chain_$sp.md)
+- [ma_01: dbo.rpt_par_chain_rim_$sp](../../StoredProcedures/ma_01/dbo.rpt_par_chain_rim_$sp.md)
+- [ma_01: dbo.rpt_par_location_home_$sp](../../StoredProcedures/ma_01/dbo.rpt_par_location_home_$sp.md)
+- [ma_01: dbo.rpt_par_location_local_$sp](../../StoredProcedures/ma_01/dbo.rpt_par_location_local_$sp.md)
+- [ma_01: dbo.rpt_style_analysis_$sp](../../StoredProcedures/ma_01/dbo.rpt_style_analysis_$sp.md)
+- [ma_01: dbo.rpt_style_listing_class_vendor_$sp](../../StoredProcedures/ma_01/dbo.rpt_style_listing_class_vendor_$sp.md)
+- [ma_01: dbo.startup_hist_rim_oh_group_$sp](../../StoredProcedures/ma_01/dbo.startup_hist_rim_oh_group_$sp.md)
+- [ma_01: dbo.validate_wrk_ib_inventory_$sp](../../StoredProcedures/ma_01/dbo.validate_wrk_ib_inventory_$sp.md)
+

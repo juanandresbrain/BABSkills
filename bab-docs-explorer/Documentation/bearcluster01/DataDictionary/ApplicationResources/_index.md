@@ -1,0 +1,41 @@
+﻿# Data Dictionary: ApplicationResources
+
+| Schema | Table | Columns |
+|---|---|---|
+| dbo | [aspnet_Applications](dbo.aspnet_Applications.md) | 4 |
+| dbo | [aspnet_Membership](dbo.aspnet_Membership.md) | 21 |
+| dbo | [aspnet_Paths](dbo.aspnet_Paths.md) | 4 |
+| dbo | [aspnet_PersonalizationAllUsers](dbo.aspnet_PersonalizationAllUsers.md) | 3 |
+| dbo | [aspnet_PersonalizationPerUser](dbo.aspnet_PersonalizationPerUser.md) | 5 |
+| dbo | [aspnet_Profile](dbo.aspnet_Profile.md) | 5 |
+| dbo | [aspnet_Roles](dbo.aspnet_Roles.md) | 5 |
+| dbo | [aspnet_SchemaVersions](dbo.aspnet_SchemaVersions.md) | 3 |
+| dbo | [aspnet_Users](dbo.aspnet_Users.md) | 7 |
+| dbo | [aspnet_UsersInRoles](dbo.aspnet_UsersInRoles.md) | 2 |
+| dbo | [aspnet_WebEvent_Events](dbo.aspnet_WebEvent_Events.md) | 15 |
+| dbo | [BossDivertMessage](dbo.BossDivertMessage.md) | 2 |
+| dbo | [BossWMSLog](dbo.BossWMSLog.md) | 6 |
+| dbo | [BossWMSProcess](dbo.BossWMSProcess.md) | 3 |
+| POS | [JumpMindAPI_Logging](POS.JumpMindAPI_Logging.md) | 15 |
+| POS | [JumpMindAPI_Logging_BH20230809](POS.JumpMindAPI_Logging_BH20230809.md) | 11 |
+| dbo | [KeyVault](dbo.KeyVault.md) | 4 |
+| POS | [NSBTransactionNumbers](POS.NSBTransactionNumbers.md) | 4 |
+| POS | [NSBTranslate_batch](POS.NSBTranslate_batch.md) | 7 |
+| POS | [NSBTranslate_Debug](POS.NSBTranslate_Debug.md) | 12 |
+| POS | [NSBTranslate_LogTrans](POS.NSBTranslate_LogTrans.md) | 15 |
+| dbo | [PrintAndApplyMigration](dbo.PrintAndApplyMigration.md) | 8 |
+| dbo | [Service](dbo.Service.md) | 2 |
+| dbo | [ServiceLoggingGeneralUsage](dbo.ServiceLoggingGeneralUsage.md) | 8 |
+| dbo | [ServiceLoggingGeneralUsage_Archive](dbo.ServiceLoggingGeneralUsage_Archive.md) | 8 |
+| dbo | [ServiceTransactionNumbers](dbo.ServiceTransactionNumbers.md) | 3 |
+| dbo | [ServiceTransactionNumbers_1_1](dbo.ServiceTransactionNumbers_1_1.md) | 3 |
+| dbo | [state_province](dbo.state_province.md) | 4 |
+| dbo | [sysdiagrams](dbo.sysdiagrams.md) | 5 |
+| dbo | [sysssislog](dbo.sysssislog.md) | 12 |
+| dbo | [tax_authority](dbo.tax_authority.md) | 5 |
+| dbo | [tax_authority_BH20240301](dbo.tax_authority_BH20240301.md) | 5 |
+| dbo | [tblLinksResource_Links_Dim](dbo.tblLinksResource_Links_Dim.md) | 6 |
+| dbo | [tblLinksResource_Screen_Dim](dbo.tblLinksResource_Screen_Dim.md) | 3 |
+| dbo | [tblLinksResources_Application_Dim](dbo.tblLinksResources_Application_Dim.md) | 2 |
+| dbo | [tblLinksResources_Type_Dim](dbo.tblLinksResources_Type_Dim.md) | 2 |
+| dbo | [tmpTransDMT](dbo.tmpTransDMT.md) | 4 |

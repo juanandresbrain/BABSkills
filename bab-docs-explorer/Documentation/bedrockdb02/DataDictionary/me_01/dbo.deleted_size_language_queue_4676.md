@@ -1,0 +1,13 @@
+﻿# dbo.deleted_size_language_queue_4676
+
+**Database:** me_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| size_code | nvarchar | 34 | 1 |  |  |  |
+| size_category_code | nvarchar | 16 | 1 |  |  |  |
+| locale_identifier | smallint | 2 | 1 |  |  |  |
+

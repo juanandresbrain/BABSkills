@@ -1,0 +1,43 @@
+﻿# dbo.sp_delete_maintenance_plan_db
+
+**Database:** msdb  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.sp_delete_maintenance_plan_db"]
+    dbo_sysdbmaintplan_databases(["dbo.sysdbmaintplan_databases"]) --> SP
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.sysdbmaintplan_databases |
+
+## Stored Procedure Code
+
+```sql
+CREATE PROCEDURE sp_delete_maintenance_plan_db
+  @plan_id uniqueidentifier,
+  @db_name sysname
+AS
+BEGIN
+  /*check if the (plan_id, db_name) exists in the table*/
+  IF (NOT EXISTS(SELECT *
+                 FROM msdb.dbo.sysdbmaintplan_databases
+                 WHERE @plan_id=plan_id AND @db_name=database_name))
+  BEGIN
+    DECLARE @syserr VARCHAR(300)
+    SELECT @syserr=CONVERT(VARCHAR(100),@plan_id)+' + '+@db_name
+    RAISERROR(14262,-1,-1,'@plan_id+@db_name',@syserr)
+    RETURN(1)
+  END
+  /*delete the pair*/
+  DELETE FROM msdb.dbo.sysdbmaintplan_databases
+  WHERE plan_id=@plan_id AND database_name=@db_name
+END
+```
+

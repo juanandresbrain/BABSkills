@@ -1,0 +1,31 @@
+﻿# dbo.get_max_ib_allocation_id_$sp
+
+**Database:** ma_01  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.get_max_ib_allocation_id_$sp"]
+    dbo_job_error_handler__sp(["dbo.job_error_handler_$sp"]) --> SP
+    dbo_job_progress_handler__sp(["dbo.job_progress_handler_$sp"]) --> SP
+    dbo_return_debug_flag__sp(["dbo.return_debug_flag_$sp"]) --> SP
+    dbo_syn_ib_allocation(["dbo.syn_ib_allocation"]) --> SP
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.job_error_handler_$sp |
+| dbo.job_progress_handler_$sp |
+| dbo.return_debug_flag_$sp |
+| dbo.syn_ib_allocation |
+
+## Stored Procedure Code
+
+```sql
+
+```
+

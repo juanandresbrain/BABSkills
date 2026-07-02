@@ -1,0 +1,83 @@
+﻿# dbo.DELETE_FLOW
+
+**Database:** POSCONFIG  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.DELETE_FLOW"]
+    dbo_EJ_LINE_BLOCK(["dbo.EJ_LINE_BLOCK"]) --> SP
+    dbo_FL_FLOW(["dbo.FL_FLOW"]) --> SP
+    dbo_FL_FUNCTION_PATH(["dbo.FL_FUNCTION_PATH"]) --> SP
+    dbo_FL_FUNCTION_PATH_RULE(["dbo.FL_FUNCTION_PATH_RULE"]) --> SP
+    dbo_FL_FUNCTION_RETURN_TARGET(["dbo.FL_FUNCTION_RETURN_TARGET"]) --> SP
+    dbo_FL_FUNCTION_RULE(["dbo.FL_FUNCTION_RULE"]) --> SP
+    dbo_FL_STATE(["dbo.FL_STATE"]) --> SP
+    dbo_FL_STATE_FUNCTION_PATH(["dbo.FL_STATE_FUNCTION_PATH"]) --> SP
+    dbo_GROUP_CONFIG(["dbo.GROUP_CONFIG"]) --> SP
+    dbo_POS_HELP_TEXT(["dbo.POS_HELP_TEXT"]) --> SP
+    dbo_RECEIPT_LINE_BLOCK(["dbo.RECEIPT_LINE_BLOCK"]) --> SP
+    dbo_UI_COMP_PROP_OVRD(["dbo.UI_COMP_PROP_OVRD"]) --> SP
+    dbo_UI_COMP_PROP_OVRD_VALUE(["dbo.UI_COMP_PROP_OVRD_VALUE"]) --> SP
+    dbo_UI_COMPONENT(["dbo.UI_COMPONENT"]) --> SP
+    dbo_UI_COMPONENT_PROP(["dbo.UI_COMPONENT_PROP"]) --> SP
+    dbo_UI_COMPONENT_PROP_VALUE(["dbo.UI_COMPONENT_PROP_VALUE"]) --> SP
+    dbo_UI_DFLT_EVENT_MAP(["dbo.UI_DFLT_EVENT_MAP"]) --> SP
+    dbo_UI_EVENT_MAP(["dbo.UI_EVENT_MAP"]) --> SP
+    dbo_UI_EVENT_MAP_OVRD(["dbo.UI_EVENT_MAP_OVRD"]) --> SP
+    dbo_UI_EVENT_MAP_OVRD_VALUE(["dbo.UI_EVENT_MAP_OVRD_VALUE"]) --> SP
+    dbo_UI_LINE_DISPLAY_BLOCK(["dbo.UI_LINE_DISPLAY_BLOCK"]) --> SP
+    dbo_UI_LINE_DISPLAY_RECEIPT(["dbo.UI_LINE_DISPLAY_RECEIPT"]) --> SP
+    dbo_UI_LOCALIZATION_SCOPE(["dbo.UI_LOCALIZATION_SCOPE"]) --> SP
+    dbo_UI_LOCALIZED_RESOURCE(["dbo.UI_LOCALIZED_RESOURCE"]) --> SP
+    dbo_UI_SCREEN(["dbo.UI_SCREEN"]) --> SP
+    dbo_UI_SCREEN_INPUT_PROCESSOR(["dbo.UI_SCREEN_INPUT_PROCESSOR"]) --> SP
+    dbo_UI_SCREEN_PROP(["dbo.UI_SCREEN_PROP"]) --> SP
+    dbo_UI_SCREEN_PROP_VALUE(["dbo.UI_SCREEN_PROP_VALUE"]) --> SP
+    dbo_UI_SCREEN_VALIDATOR(["dbo.UI_SCREEN_VALIDATOR"]) --> SP
+    dbo_UI_USER_MESSAGE(["dbo.UI_USER_MESSAGE"]) --> SP
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.EJ_LINE_BLOCK |
+| dbo.FL_FLOW |
+| dbo.FL_FUNCTION_PATH |
+| dbo.FL_FUNCTION_PATH_RULE |
+| dbo.FL_FUNCTION_RETURN_TARGET |
+| dbo.FL_FUNCTION_RULE |
+| dbo.FL_STATE |
+| dbo.FL_STATE_FUNCTION_PATH |
+| dbo.GROUP_CONFIG |
+| dbo.POS_HELP_TEXT |
+| dbo.RECEIPT_LINE_BLOCK |
+| dbo.UI_COMP_PROP_OVRD |
+| dbo.UI_COMP_PROP_OVRD_VALUE |
+| dbo.UI_COMPONENT |
+| dbo.UI_COMPONENT_PROP |
+| dbo.UI_COMPONENT_PROP_VALUE |
+| dbo.UI_DFLT_EVENT_MAP |
+| dbo.UI_EVENT_MAP |
+| dbo.UI_EVENT_MAP_OVRD |
+| dbo.UI_EVENT_MAP_OVRD_VALUE |
+| dbo.UI_LINE_DISPLAY_BLOCK |
+| dbo.UI_LINE_DISPLAY_RECEIPT |
+| dbo.UI_LOCALIZATION_SCOPE |
+| dbo.UI_LOCALIZED_RESOURCE |
+| dbo.UI_SCREEN |
+| dbo.UI_SCREEN_INPUT_PROCESSOR |
+| dbo.UI_SCREEN_PROP |
+| dbo.UI_SCREEN_PROP_VALUE |
+| dbo.UI_SCREEN_VALIDATOR |
+| dbo.UI_USER_MESSAGE |
+
+## Stored Procedure Code
+
+```sql
+
+```
+

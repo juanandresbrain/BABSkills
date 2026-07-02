@@ -1,0 +1,47 @@
+﻿# Data Dictionary: BABWPartyPlanner_Restore
+
+| Schema | Table | Columns |
+|---|---|---|
+| dbo | [Comment](dbo.Comment.md) | 6 |
+| dbo | [Comment_Archive](dbo.Comment_Archive.md) | 6 |
+| dbo | [Country](dbo.Country.md) | 7 |
+| dbo | [CountryOptionXref](dbo.CountryOptionXref.md) | 2 |
+| dbo | [Customer](dbo.Customer.md) | 15 |
+| dbo | [DepositLevel](dbo.DepositLevel.md) | 3 |
+| dbo | [Event](dbo.Event.md) | 10 |
+| dbo | [Event_Archive](dbo.Event_Archive.md) | 9 |
+| dbo | [Event_BJB20190719](dbo.Event_BJB20190719.md) | 10 |
+| dbo | [Occasion](dbo.Occasion.md) | 4 |
+| dbo | [Option](dbo.Option.md) | 11 |
+| dbo | [OptionCategory](dbo.OptionCategory.md) | 2 |
+| dbo | [OptionPartyXref](dbo.OptionPartyXref.md) | 2 |
+| dbo | [OptionStoreXref](dbo.OptionStoreXref.md) | 2 |
+| dbo | [Package](dbo.Package.md) | 14 |
+| dbo | [PackagePartyXref](dbo.PackagePartyXref.md) | 2 |
+| dbo | [PackageStyle](dbo.PackageStyle.md) | 8 |
+| dbo | [PackageStyleXref](dbo.PackageStyleXref.md) | 2 |
+| dbo | [ParticipationWaiverRequest](dbo.ParticipationWaiverRequest.md) | 3 |
+| dbo | [Party](dbo.Party.md) | 14 |
+| dbo | [Party_Archive](dbo.Party_Archive.md) | 11 |
+| dbo | [PartyEnterpriseSellingXRef](dbo.PartyEnterpriseSellingXRef.md) | 4 |
+| dbo | [PartyLedger](dbo.PartyLedger.md) | 5 |
+| dbo | [PartyLedgerPartyXref](dbo.PartyLedgerPartyXref.md) | 2 |
+| dbo | [PartyLedgerTypes](dbo.PartyLedgerTypes.md) | 2 |
+| dbo | [PartyState](dbo.PartyState.md) | 3 |
+| dbo | [PortalUserRole](dbo.PortalUserRole.md) | 2 |
+| dbo | [PortalUsers](dbo.PortalUsers.md) | 5 |
+| dbo | [PrivacyProtection](dbo.PrivacyProtection.md) | 7 |
+| dbo | [PrivacyRegulation](dbo.PrivacyRegulation.md) | 3 |
+| dbo | [PurchaseOrder](dbo.PurchaseOrder.md) | 3 |
+| dbo | [Store](dbo.Store.md) | 17 |
+| dbo | [Store_DEL_After_20220331](dbo.Store_DEL_After_20220331.md) | 17 |
+| dbo | [StoreBookingHour](dbo.StoreBookingHour.md) | 5 |
+| dbo | [StoreBookingHour_DEL_After_20220430](dbo.StoreBookingHour_DEL_After_20220430.md) | 5 |
+| dbo | [StoreGroup](dbo.StoreGroup.md) | 3 |
+| dbo | [StoreGroupBookingHour](dbo.StoreGroupBookingHour.md) | 4 |
+| dbo | [StorePackageXref](dbo.StorePackageXref.md) | 2 |
+| dbo | [StorePackageXref_BJB20191007](dbo.StorePackageXref_BJB20191007.md) | 2 |
+| dbo | [Style](dbo.Style.md) | 5 |
+| dbo | [sysdiagrams](dbo.sysdiagrams.md) | 5 |
+| dbo | [Theme](dbo.Theme.md) | 6 |
+| dbo | [ThemePackageXref](dbo.ThemePackageXref.md) | 2 |

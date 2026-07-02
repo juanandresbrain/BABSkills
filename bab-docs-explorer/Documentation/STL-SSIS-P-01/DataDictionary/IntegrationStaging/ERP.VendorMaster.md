@@ -1,0 +1,201 @@
+﻿# ERP.VendorMaster
+
+**Database:** IntegrationStaging  
+**Server:** STL-SSIS-P-01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| ADDRESSBOOKS | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSCITY | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSCOUNTRYREGIONID | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSCOUNTRYREGIONISOCODE | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSCOUNTYID | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSDISTRICTNAME | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSLATITUDE | numeric | 17 | 1 |  |  |  |
+| ADDRESSLOCATIONID | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSLOCATIONROLES | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSLONGITUDE | numeric | 17 | 1 |  |  |  |
+| ADDRESSSTATEID | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSSTREET | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSTIMEZONE | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSVALIDFROM | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSVALIDTO | nvarchar | 1000 | 1 |  |  |  |
+| ADDRESSZIPCODE | nvarchar | 1000 | 1 |  |  |  |
+| AREPRICESINCLUDINGSALESTAX | nvarchar | 1000 | 1 |  |  |  |
+| BANKACCOUNTID | nvarchar | 1000 | 1 |  |  |  |
+| BUSINESSSEGMENTCODE | nvarchar | 1000 | 1 |  |  |  |
+| BUSINESSSUBSEGMENTCODE | nvarchar | 1000 | 1 |  |  |  |
+| BUYERGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| CASHDISCOUNTCODE | nvarchar | 1000 | 1 |  |  |  |
+| CENTRALBANKPURPOSECODE | nvarchar | 1000 | 1 |  |  |  |
+| CENTRALBANKPURPOSETEXT | nvarchar | 1000 | 1 |  |  |  |
+| CHARGEVENDORGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| CLEARINGPERIODPAYMENTTERMSID | nvarchar | 1000 | 1 |  |  |  |
+| COMPANYCHAINNAME | nvarchar | 1000 | 1 |  |  |  |
+| CREDITLIMIT | numeric | 17 | 1 |  |  |  |
+| CREDITRATING | nvarchar | 1000 | 1 |  |  |  |
+| CURRENCYCODE | nvarchar | 1000 | 1 |  |  |  |
+| CUSIPDETAILS | nvarchar | 1000 | 1 |  |  |  |
+| CUSIPIDENTIFICATIONNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTCASHDISCOUNTUSAGE | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTDELIVERYMODEID | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTDELIVERYTERMSCODE | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTINVENTORYSTATUSID | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTLEDGERDIMENSIONDISPLAYVALUE | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTOFFSETACCOUNTTYPE | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTOFFSETLEDGERACCOUNTDISPLAYVALUE | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTPAYMENTDAYNAME | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTPAYMENTSCHEDULENAME | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTPAYMENTTERMSNAME | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTPROCUMENTWAREHOUSEID | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTPURCHASEORDERPOOLID | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTPURCHASESITEID | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTSUPPLEMENTARYPRODUCTVENDORGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTTOTALDISCOUNTVENDORGROUPCODE | nvarchar | 1000 | 1 |  |  |  |
+| DEFAULTVENDORPAYMENTMETHODNAME | nvarchar | 1000 | 1 |  |  |  |
+| DESTINATIONCODE | nvarchar | 1000 | 1 |  |  |  |
+| DUNSNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| ELECTRONICLOCATIONID | nvarchar | 1000 | 1 |  |  |  |
+| ETHNICORIGINID | nvarchar | 1000 | 1 |  |  |  |
+| FORMATTEDPRIMARYADDRESS | nvarchar | 1000 | 1 |  |  |  |
+| HASONLYTAKENBIDS | nvarchar | 1000 | 1 |  |  |  |
+| INVOICEVENDORACCOUNTNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| ISCHANGEMANAGEMENTACTIVATED | nvarchar | 1000 | 1 |  |  |  |
+| ISCHANGEMANGEMENTOVERRIDEBYVENDORALLOWED | nvarchar | 1000 | 1 |  |  |  |
+| ISCUSIPIDENTIFICATIONNUMBERAPPLICABLE | nvarchar | 1000 | 1 |  |  |  |
+| ISFLAGGEDWITHSECONDTIN | nvarchar | 1000 | 1 |  |  |  |
+| ISFOREIGNENTITY | nvarchar | 1000 | 1 |  |  |  |
+| ISMINORITYOWNED | nvarchar | 1000 | 1 |  |  |  |
+| ISONETIMEVENDOR | nvarchar | 1000 | 1 |  |  |  |
+| ISOWNERDISABLED | nvarchar | 1000 | 1 |  |  |  |
+| ISPRIMARYEMAILADDRESSIMENABLED | nvarchar | 1000 | 1 |  |  |  |
+| ISPRIMARYPHONENUMBERMOBILE | nvarchar | 1000 | 1 |  |  |  |
+| ISPURCHASEORDERCHANGEREQUESTOVERRIDEALLOWED | nvarchar | 1000 | 1 |  |  |  |
+| ISREPORTINGTAX1099 | nvarchar | 1000 | 1 |  |  |  |
+| ISSERVICEVETERANOWNED | nvarchar | 1000 | 1 |  |  |  |
+| ISSMALLBUSINESS | nvarchar | 1000 | 1 |  |  |  |
+| ISSUBCONTRACTOR | nvarchar | 1000 | 1 |  |  |  |
+| ISVENDORLOCALLYOWNED | nvarchar | 1000 | 1 |  |  |  |
+| ISVENDORLOCATEDINHUBZONE | nvarchar | 1000 | 1 |  |  |  |
+| ISW9CHECKINGENABLED | nvarchar | 1000 | 1 |  |  |  |
+| ISW9RECEIVED | nvarchar | 1000 | 1 |  |  |  |
+| ISWITHHOLDINGTAXCALCULATED | nvarchar | 1000 | 1 |  |  |  |
+| ISWOMANOWNER | nvarchar | 1000 | 1 |  |  |  |
+| LANGUAGEID | nvarchar | 1000 | 1 |  |  |  |
+| LINEDISCOUNTVENDORGROUPCODE | nvarchar | 1000 | 1 |  |  |  |
+| LINEOFBUSINESSID | nvarchar | 1000 | 1 |  |  |  |
+| MAINCONTACTPERSONNELNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| MULTILINEDISCOUNTVENDORGROUPCODE | nvarchar | 1000 | 1 |  |  |  |
+| NAMECONTROL | nvarchar | 1000 | 1 |  |  |  |
+| NOTES | nvarchar | 1000 | 1 |  |  |  |
+| NUMBERSEQUENCEGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| OIDINVESTORTYPE | nvarchar | 1000 | 1 |  |  |  |
+| OIDNOMINEEDETAILS | nvarchar | 1000 | 1 |  |  |  |
+| ONHOLDSTATUS | nvarchar | 1000 | 1 |  |  |  |
+| ORGANIZATIONABCCODE | nvarchar | 1000 | 1 |  |  |  |
+| ORGANIZATIONEMPLOYEEAMOUNT | int | 4 | 1 |  |  |  |
+| ORGANIZATIONNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| ORGANIZATIONPHONETICNAME | nvarchar | 1000 | 1 |  |  |  |
+| OURACCOUNTNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| PAYMENTID | nvarchar | 1000 | 1 |  |  |  |
+| PAYMENTSPECIFICATIONID | nvarchar | 1000 | 1 |  |  |  |
+| PERSONANNIVERSARYDAY | nvarchar | 1000 | 1 |  |  |  |
+| PERSONANNIVERSARYMONTH | nvarchar | 1000 | 1 |  |  |  |
+| PERSONANNIVERSARYYEAR | nvarchar | 1000 | 1 |  |  |  |
+| PERSONBIRTHDAY | nvarchar | 1000 | 1 |  |  |  |
+| PERSONBIRTHMONTH | nvarchar | 1000 | 1 |  |  |  |
+| PERSONBIRTHYEAR | nvarchar | 1000 | 1 |  |  |  |
+| PERSONCHILDRENNAMES | nvarchar | 1000 | 1 |  |  |  |
+| PERSONFIRSTNAME | nvarchar | 1000 | 1 |  |  |  |
+| PERSONGENDER | nvarchar | 1000 | 1 |  |  |  |
+| PERSONHOBBIES | nvarchar | 1000 | 1 |  |  |  |
+| PERSONINITIALS | nvarchar | 1000 | 1 |  |  |  |
+| PERSONLASTNAME | nvarchar | 1000 | 1 |  |  |  |
+| PERSONLASTNAMEPREFIX | nvarchar | 1000 | 1 |  |  |  |
+| PERSONMARITALSTATUS | nvarchar | 1000 | 1 |  |  |  |
+| PERSONMIDDLENAME | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPERSONALSUFFIX | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPERSONALTITLE | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPHONETICFIRSTNAME | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPHONETICLASTNAME | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPHONETICMIDDLENAME | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPROFESSIONALSUFFIX | nvarchar | 1000 | 1 |  |  |  |
+| PERSONPROFESSIONALTITLE | nvarchar | 1000 | 1 |  |  |  |
+| PRICEVENDORGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYCONTACTPERSONID | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYEMAILADDRESS | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYEMAILADDRESSDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYEMAILADDRESSPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFACEBOOK | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFACEBOOKDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFACEBOOKPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFAXNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFAXNUMBERDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFAXNUMBEREXTENSION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYFAXNUMBERPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYLINKEDIN | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYLINKEDINDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYLINKEDINPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYPHONENUMBER | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYPHONENUMBERDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYPHONENUMBEREXTENSION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYPHONENUMBERPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYTELEX | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYTELEXDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYTELEXPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYTWITTER | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYTWITTERDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYTWITTERPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYURL | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYURLDESCRIPTION | nvarchar | 1000 | 1 |  |  |  |
+| PRIMARYURLPURPOSE | nvarchar | 1000 | 1 |  |  |  |
+| PRODUCTDESCRIPTIONVENDORGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| PURCHASEREBATEVENDORGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| PURCHASEWORKCALENDARID | nvarchar | 1000 | 1 |  |  |  |
+| SALESTAXGROUPCODE | nvarchar | 1000 | 1 |  |  |  |
+| TAX1099BOXID | nvarchar | 1000 | 1 |  |  |  |
+| TAX1099DOINGBUSINESSASNAME | nvarchar | 1000 | 1 |  |  |  |
+| TAX1099FEDERALTAXID | nvarchar | 1000 | 1 |  |  |  |
+| TAX1099IDTYPE | nvarchar | 1000 | 1 |  |  |  |
+| TAX1099NAMETOUSE | nvarchar | 1000 | 1 |  |  |  |
+| TAX1099TYPE | nvarchar | 1000 | 1 |  |  |  |
+| TAXEXEMPTNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| UPSFREIGHTZONE | nvarchar | 1000 | 1 |  |  |  |
+| VENDORACCOUNTNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| VENDOREXCEPTIONGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| VENDORGROUPID | nvarchar | 200 | 1 |  |  |  |
+| VENDORHOLDRELEASEDATE | nvarchar | 1000 | 1 |  |  |  |
+| VENDORINVOICELINEMATCHINGPOLICY | nvarchar | 1000 | 1 |  |  |  |
+| VENDORKNOWNASNAME | nvarchar | 1000 | 1 |  |  |  |
+| VENDORORGANIZATIONNAME | nvarchar | 1000 | 1 |  |  |  |
+| VENDORPARTYNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| VENDORPARTYTYPE | nvarchar | 1000 | 1 |  |  |  |
+| VENDORPORTALCOLLABORATIONMETHOD | nvarchar | 1000 | 1 |  |  |  |
+| VENDORPRICETOLERANCEGROUPID | nvarchar | 1000 | 1 |  |  |  |
+| VENDORSEARCHNAME | nvarchar | 1000 | 1 |  |  |  |
+| WILLINVOICEPROCESSINGSUMMARYUPDATEPURCHASEORDER | nvarchar | 1000 | 1 |  |  |  |
+| WILLPRODUCTRECEIPTPROCESSINGSUMMARYUPDATEPURCHASEORDER | nvarchar | 1000 | 1 |  |  |  |
+| WILLPURCHASEORDERINCLUDEPRICESANDAMOUNTS | nvarchar | 1000 | 1 |  |  |  |
+| WILLPURCHASEORDERPROCESSINGSUMMARYUPDATEPURCHASEORDER | nvarchar | 1000 | 1 |  |  |  |
+| WILLRECEIPTSLISTPROCESSINGSUMMARYUPDATEPURCHASEORDER | nvarchar | 1000 | 1 |  |  |  |
+| WITHHOLDINGTAXGROUPCODE | nvarchar | 1000 | 1 |  |  |  |
+| ZAKATREGISTRATIONNUMBER | nvarchar | 1000 | 1 |  |  |  |
+| Entity | nvarchar | 20 | 1 |  |  |  |
+| InsertDate | datetime | 8 | 1 |  |  |  |
+| UpdateDate | datetime | 8 | 1 |  |  |  |
+| BABFactoryCode | nvarchar | 200 | 1 |  |  |  |
+| BABFOBPort | nvarchar | 200 | 1 |  |  |  |
+| BABVendorCode | nvarchar | 200 | 1 |  |  |  |
+
+## Referenced By Stored Procedures
+
+- [IntegrationStaging: ERP.spMergeVendorMaster](../../StoredProcedures/IntegrationStaging/ERP.spMergeVendorMaster.md)
+- [IntegrationStaging: ERP.spMergeVendorMasterBACKUP20231113](../../StoredProcedures/IntegrationStaging/ERP.spMergeVendorMasterBACKUP20231113.md)
+- [IntegrationStaging: WMS.spEmailPOExportSummary](../../StoredProcedures/IntegrationStaging/WMS.spEmailPOExportSummary.md)
+- [IntegrationStaging: WMS.spEmailPOExportSummaryBAK20220801](../../StoredProcedures/IntegrationStaging/WMS.spEmailPOExportSummaryBAK20220801.md)
+- [IntegrationStaging: WMS.spEmailVendorsWithSameVendorFactory](../../StoredProcedures/IntegrationStaging/WMS.spEmailVendorsWithSameVendorFactory.md)
+- [IntegrationStaging: WMS.spMergeShipmentInvoiceFromPOReceipt](../../StoredProcedures/IntegrationStaging/WMS.spMergeShipmentInvoiceFromPOReceipt.md)
+

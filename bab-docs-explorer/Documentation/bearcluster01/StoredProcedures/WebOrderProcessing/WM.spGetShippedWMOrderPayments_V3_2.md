@@ -1,0 +1,343 @@
+﻿# WM.spGetShippedWMOrderPayments_V3_2
+
+**Database:** WebOrderProcessing  
+**Server:** bearcluster01  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["WM.spGetShippedWMOrderPayments_V3_2"]
+    WM_Orders(["WM.Orders"]) --> SP
+    WM_tmpOrderOrderTransactionIdentifier(["WM.tmpOrderOrderTransactionIdentifier"]) --> SP
+    WM_vwTransactionDetailPayments_V2(["WM.vwTransactionDetailPayments_V2"]) --> SP
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| WM.Orders |
+| WM.tmpOrderOrderTransactionIdentifier |
+| WM.vwTransactionDetailPayments_V2 |
+
+## Stored Procedure Code
+
+```sql
+CREATE PROCEDURE [WM].[spGetShippedWMOrderPayments_V3_2] 
+
+-- =============================================================================================================
+-- Name: WM.spGetShippedWMOrderPayments
+--
+-- Description:	Get Shipped WM Orders Payments for Sales Audit Translate
+--
+-- Output: 
+--	
+-- Dependencies: 
+--
+-- Revision History
+--		Name:			Date:			Comments:
+--		Ben Barud		9/10/2017		Initial Creation
+--		Ben Barud		10/16/2017		Added Amex Translation for SalesAuditTranslate.cs.  Amex cards are coming into
+--										SA as Debit Cards
+--		Ben Barud		10/18/2017		Add StoreCredit PaymentType
+--		Ben Barud		11/08/2017		Added Logic for Amazon/ChannelAdvisor
+--		Ben Barud		11/15/2017		Updated Logic for Amazon/ChannelAdvisor for Deck integration
+--		Ben Barud		09/06/2025		Added Sum logic to band-aide Adyen_GiftCard PaymentTypes.  PSP Reference 
+--										Numbers do not line up with the TransactionGeneric3 mapping in Transaction Detail Files and it is causing transactions to be out of balance.
+-- =============================================================================================================
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	WITH OrderNumberPickupStore(OrderNumber, TransactionID, PickupStore)
+	AS
+	(
+	SELECT o.OrderNum AS OrderNumber
+	      ,td.TransactionID
+		  ,v.PickupStore
+    FROM [WebOrderProcessing].[WM].[vwTransactionDetailPayments_V2] td
+	INNER JOIN [WebOrderProcessing].[WM].[tmpOrderOrderTransactionIdentifier] v ON td.TransactionID = v.TransactionID AND td.OrderTransactionIdentifier = v.OrderTransactionIdentifier
+	INNER JOIN [WebOrderProcessing].[WM].[Orders] o ON v.OrderId = o.OrderID AND v.PickupStore = o.PickupStore AND OrderStatus IN ('Complete', 'Shipped', 'StorePickedForPickup')
+	--GROUP BY td.TransactionID, v.PickupStore
+	), distinctTransactions (OrderNumber, TransactionID, PaymentID, PaymentMethod, PaymentTransactionType, CurrencyMultiplier, PaymentAmount, PaymentAuthCode, PaymentNum, CardType, CreditCardNumber, ExpirationMonth, ExpirationYear, GiftCardNumber, PaymentProcessor)
+	AS
+	(
+		SELECT DISTINCT v.[OrderNumber] AS 'OrderNumber'
+	      ,td.TransactionID
+	      ,v.[OrderTransactionIdentifier] AS 'PaymentID'
+          ,CASE
+		    WHEN o.OrderType = 'CC' THEN 'Costco'
+			WHEN PaymentGeneric1 LIKE '%Facebook%' THEN 'Facebook'
+			WHEN PaymentGeneric1 LIKE '%Instagram%' THEN 'Facebook'
+			WHEN [PaymentType] = 'GiftCard' THEN 'GiftCard'
+			WHEN [PaymentType] = 'Adyen_GiftCard' THEN 'GiftCard'
+			WHEN [PaymentType] LIKE '%PayPal%' THEN 'PayPal'
+			WHEN [PaymentType] = 'Klarna' THEN 'Klarna'
+			WHEN [PaymentType] = 'Adyen_Klarna' THEN 'Klarna'
+			WHEN [PaymentType] = 'Globale' THEN 'Globale'
+			WHEN [PaymentType] = 'Amazon' THEN 'Amazon'
+			WHEN MAX(v.[OrderNumber]) LIKE 'C%' THEN 'Amazon'
+			WHEN [PaymentType] = 'Cash' THEN 'StoreCredit'
+			ELSE 'CreditCard'
+		   END AS 'PaymentMethod'
+		  ,[PaymentTransactionType]
+		  ,MAX([CurrencyMultiplier]) AS 'CurrencyMultiplier'
+          ,[TransactionAmount] AS 'PaymentAmount'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentAuthCode'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentNum'
+		  ,CASE
+			 WHEN [PaymentGeneric1] = 'Amex' THEN 'American Express'
+		     ELSE [PaymentGeneric1]
+		   END AS 'CardType'
+          ,CASE
+			WHEN [PaymentGeneric2] = 'null' THEN '0000'
+			ELSE [PaymentGeneric2]
+		  END AS 'CreditCardNumber'
+          ,LEFT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 2) AS 'ExpirationMonth'
+          ,RIGHT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 4) AS 'ExpirationYear'
+		  ,CASE
+		     --WHEN MAX(v.OrderNumber) LIKE 'C%' THEN MAX(o.EnterpriseSellingID)
+			 WHEN o.OrderType = 'CC' THEN MAX(o.EnterpriseSellingID)
+			 WHEN PaymentType = 'Amazon' THEN MAX(OrderCustom3)
+			 WHEN LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			 WHEN  TransactionGeneric1 = 'undefined' THEN '0000000000000000'
+			 ELSE TransactionGeneric1
+		   END AS 'GiftCardNumber'
+		   ,CASE
+	         WHEN [Processor] LIKE 'Adyen%' THEN 'Cybersource'
+		     ELSE [Processor]
+	        END AS 'PaymentProcessor'
+	FROM [WebOrderProcessing].[WM].[vwTransactionDetailPayments_V2] td
+	INNER JOIN [WebOrderProcessing].[WM].[tmpOrderOrderTransactionIdentifier] v ON td.TransactionID = v.TransactionID AND td.OrderTransactionIdentifier = v.OrderTransactionIdentifier
+	INNER JOIN [WebOrderProcessing].[WM].[Orders] o ON td.TransactionID = o.TransactionID AND o.OrderId = v.OrderId
+	--WHERE OrderNum = 'U0628653'
+	WHERE PaymentType NOT IN ('Adyen_GiftCard')
+	GROUP BY v.OrderNumber, td.TransactionID, v.[OrderTransactionIdentifier], PaymentTransactionType, [TransactionAmount], TransactionGeneric1, [PaymentGeneric1], [PaymentGeneric2], [PaymentGeneric3], PaymentType, o.OrderType, Processor 
+	UNION
+	SELECT DISTINCT v.[OrderNumber] AS 'OrderNumber'
+	      ,td.TransactionID
+	      ,v.[OrderTransactionIdentifier] AS 'PaymentID'
+          ,CASE
+		    WHEN o.OrderType = 'CC' THEN 'Costco'
+			WHEN PaymentGeneric1 LIKE '%Facebook%' THEN 'Facebook'
+			WHEN PaymentGeneric1 LIKE '%Instagram%' THEN 'Facebook'
+			WHEN [PaymentType] = 'GiftCard' THEN 'GiftCard'
+			WHEN [PaymentType] = 'Adyen_GiftCard' THEN 'GiftCard'
+			WHEN [PaymentType] LIKE '%PayPal%' THEN 'PayPal'
+			WHEN [PaymentType] = 'Klarna' THEN 'Klarna'
+			WHEN [PaymentType] = 'Adyen_Klarna' THEN 'Klarna'
+			WHEN [PaymentType] = 'Globale' THEN 'Globale'
+			WHEN [PaymentType] = 'Amazon' THEN 'Amazon'
+			WHEN MAX(v.[OrderNumber]) LIKE 'C%' THEN 'Amazon'
+			WHEN [PaymentType] = 'Cash' THEN 'StoreCredit'
+			ELSE 'CreditCard'
+		   END AS 'PaymentMethod'
+		  ,[PaymentTransactionType]
+		  ,MAX([CurrencyMultiplier]) AS 'CurrencyMultiplier'
+          ,SUM([TransactionAmount]) AS 'PaymentAmount'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentAuthCode'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentNum'
+		  ,CASE
+			 WHEN [PaymentGeneric1] = 'Amex' THEN 'American Express'
+		     ELSE [PaymentGeneric1]
+		   END AS 'CardType'
+          ,CASE
+			WHEN [PaymentGeneric2] = 'null' THEN '0000'
+			ELSE [PaymentGeneric2]
+		  END AS 'CreditCardNumber'
+          ,LEFT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 2) AS 'ExpirationMonth'
+          ,RIGHT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 4) AS 'ExpirationYear'
+		  ,CASE
+		     --WHEN MAX(v.OrderNumber) LIKE 'C%' THEN MAX(o.EnterpriseSellingID)
+			 WHEN o.OrderType = 'CC' THEN MAX(o.EnterpriseSellingID)
+			 WHEN PaymentType = 'Amazon' THEN MAX(OrderCustom3)
+			 WHEN LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			 WHEN  TransactionGeneric1 = 'undefined' THEN '0000000000000000'
+			 WHEN LEN(TransactionGeneric1) = 4 THEN '000000000000' + CAST(MAX(TransactionGeneric1) AS VARCHAR)
+			 ELSE TransactionGeneric1
+		   END AS 'GiftCardNumber'
+		   ,CASE
+	         WHEN [Processor] LIKE 'Adyen%' THEN 'Cybersource'
+		     ELSE [Processor]
+	        END AS 'PaymentProcessor'
+	FROM [WebOrderProcessing].[WM].[vwTransactionDetailPayments_V2] td
+	INNER JOIN [WebOrderProcessing].[WM].[tmpOrderOrderTransactionIdentifier] v ON td.TransactionID = v.TransactionID AND td.OrderTransactionIdentifier = v.OrderTransactionIdentifier
+	INNER JOIN [WebOrderProcessing].[WM].[Orders] o ON td.TransactionID = o.TransactionID AND o.OrderId = v.OrderId
+	--WHERE OrderNum = 'U0628653'
+	WHERE PaymentType IN ('Adyen_GiftCard')
+	GROUP BY v.OrderNumber, td.TransactionID, v.[OrderTransactionIdentifier], PaymentTransactionType, TransactionGeneric1, [PaymentGeneric1], [PaymentGeneric2], [PaymentGeneric3], PaymentType, o.OrderType, Processor 
+	UNION
+	SELECT DISTINCT v.[OrderNumber] AS 'OrderNumber'
+	      ,td.TransactionID
+	      ,v.[OrderTransactionIdentifier] AS 'PaymentID'
+          ,CASE
+		    WHEN o.OrderType = 'CC' THEN 'Costco'
+			WHEN PaymentGeneric1 LIKE '%Facebook%' THEN 'Facebook'
+			WHEN PaymentGeneric1 LIKE '%Instagram%' THEN 'Facebook'
+			WHEN [PaymentType] = 'GiftCard' THEN 'GiftCard'
+			WHEN [PaymentType] LIKE '%PayPal%' THEN 'PayPal'
+			WHEN [PaymentType] = 'Klarna' THEN 'Klarna'
+			WHEN [PaymentType] = 'Globale' THEN 'Globale'
+			WHEN [PaymentType] = 'Amazon' THEN 'Amazon'
+			WHEN MAX(v.[OrderNumber]) LIKE 'C%' THEN 'Amazon'
+			WHEN [PaymentType] = 'Cash' THEN 'StoreCredit'
+			ELSE 'CreditCard'
+		   END AS 'PaymentMethod'
+		  ,[PaymentTransactionType]
+		  ,MAX([CurrencyMultiplier]) AS 'CurrencyMultiplier'
+          ,[TransactionAmount] AS 'PaymentAmount'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentAuthCode'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentNum'
+		  ,CASE
+			 WHEN [PaymentGeneric1] = 'Amex' THEN 'American Express'
+		     ELSE [PaymentGeneric1]
+		   END AS 'CardType'
+          ,[PaymentGeneric2] AS 'CreditCardNumber'
+          ,LEFT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 2) AS 'ExpirationMonth'
+          ,RIGHT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 4) AS 'ExpirationYear'
+		  ,CASE
+		     --WHEN MAX(v.OrderNumber) LIKE 'C%' THEN MAX(o.EnterpriseSellingID)
+			 WHEN o.OrderType = 'CC' THEN MAX(o.EnterpriseSellingID)
+			 WHEN PaymentType = 'Amazon' THEN MAX(OrderCustom3)
+			 ELSE TransactionGeneric1
+		   END AS 'GiftCardNumber'
+		   ,Processor AS 'PaymentProcessor'
+	FROM [WebOrderProcessing].[WM].[vwTransactionDetailPayments_V2] td
+	INNER JOIN [WebOrderProcessing].[WM].[tmpOrderOrderTransactionIdentifier] v ON td.TransactionID = v.TransactionID
+	INNER JOIN [WebOrderProcessing].[WM].[Orders] o ON td.TransactionID = o.TransactionID AND o.OrderId = v.OrderId
+	WHERE PaymentTransactionType = 'charge' AND v.OrderTransactionIdentifier = -1
+	--WHERE OrderNum = 'U0628653'
+	GROUP BY v.OrderNumber, td.TransactionID, v.[OrderTransactionIdentifier], PaymentTransactionType, [TransactionAmount], TransactionGeneric1, [PaymentGeneric1], [PaymentGeneric2], [PaymentGeneric3], PaymentType, o.OrderType, Processor 
+		UNION
+	SELECT DISTINCT v.[OrderNumber] AS 'OrderNumber'
+	      ,td.TransactionID
+	      ,v.[OrderTransactionIdentifier] AS 'PaymentID'
+          ,CASE
+		    WHEN o.OrderType = 'CC' THEN 'Costco'
+			WHEN PaymentGeneric1 LIKE '%Facebook%' THEN 'Facebook'
+			WHEN PaymentGeneric1 LIKE '%Instagram%' THEN 'Facebook'
+			WHEN [PaymentType] = 'GiftCard' THEN 'GiftCard'
+			WHEN [PaymentType] LIKE '%PayPal%' THEN 'PayPal'
+			WHEN [PaymentType] = 'Klarna' THEN 'Klarna'
+			WHEN [PaymentType] = 'Globale' THEN 'Globale'
+			WHEN [PaymentType] = 'Amazon' THEN 'Amazon'
+			WHEN MAX(v.[OrderNumber]) LIKE 'C%' THEN 'Amazon'
+			WHEN [PaymentType] = 'Cash' THEN 'StoreCredit'
+			ELSE 'CreditCard'
+		   END AS 'PaymentMethod'
+		  ,[PaymentTransactionType]
+		  ,MAX([CurrencyMultiplier]) AS 'CurrencyMultiplier'
+          ,[TransactionAmount] AS 'PaymentAmount'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentAuthCode'
+          ,CASE
+			WHEN [PaymentType] = 'Klarna' AND LEN(TransactionGeneric1) > 20 THEN LEFT(TransactionGeneric1, 17) + '...'
+			ELSE TransactionGeneric1 
+		   END AS 'PaymentNum'
+		  ,CASE
+			 WHEN [PaymentGeneric1] = 'Amex' THEN 'American Express'
+		     ELSE [PaymentGeneric1]
+		   END AS 'CardType'
+          ,[PaymentGeneric2] AS 'CreditCardNumber'
+          ,LEFT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 2) AS 'ExpirationMonth'
+          ,RIGHT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 4) AS 'ExpirationYear'
+		  ,CASE
+		     --WHEN MAX(v.OrderNumber) LIKE 'C%' THEN MAX(o.EnterpriseSellingID)
+			 WHEN o.OrderType = 'CC' THEN MAX(o.EnterpriseSellingID)
+			 WHEN PaymentType = 'Amazon' THEN MAX(OrderCustom3)
+			 ELSE TransactionGeneric1
+		   END AS 'GiftCardNumber'
+		   ,Processor AS 'PaymentProcessor'
+	FROM [WebOrderProcessing].[WM].[vwTransactionDetailPayments_V2] td
+	INNER JOIN [WebOrderProcessing].[WM].[tmpOrderOrderTransactionIdentifier] v ON td.TransactionID = v.TransactionID
+	INNER JOIN [WebOrderProcessing].[WM].[Orders] o ON td.TransactionID = o.TransactionID AND o.OrderId = v.OrderId
+	WHERE OmsTransactionType = 'ShippingManualCredit' AND v.OrderTransactionIdentifier = -1
+	--WHERE OrderNum = 'U0628653'
+	GROUP BY v.OrderNumber, td.TransactionID, v.[OrderTransactionIdentifier], PaymentTransactionType, [TransactionAmount], TransactionGeneric1, [PaymentGeneric1], [PaymentGeneric2], [PaymentGeneric3], PaymentType, o.OrderType, Processor 
+	)
+	SELECT OrderNumber
+	      ,TransactionID
+		  ,MAX(PaymentID) AS PaymentID
+		  ,PaymentMethod
+		  ,PaymentTransactionType
+		  ,CurrencyMultiplier
+		  ,SUM(PaymentAmount) AS PaymentAmount
+		  ,PaymentAuthCode
+		  ,PaymentNum
+		  ,CardType
+		  ,CreditCardNumber
+		  ,ExpirationMonth
+		  ,ExpirationYear
+		  ,GiftCardNumber
+		  ,PaymentProcessor
+	FROM distinctTransactions
+	GROUP BY OrderNumber, TransactionID, PaymentMethod, PaymentTransactionType,CurrencyMultiplier
+		  ,PaymentAuthCode
+		  ,PaymentNum
+		  ,CardType
+		  ,CreditCardNumber
+		  ,ExpirationMonth
+		  ,ExpirationYear
+		  ,GiftCardNumber
+		  ,PaymentProcessor
+
+	/*OLD LOGIN 20170913
+	SELECT [PaymentID]
+          ,[PaymentMethod]
+		  ,[PaymentTransactionType]
+		  ,[CurrencyMultiplier]
+          ,[PaymentAmount]
+          ,[PaymentAuthCode]
+          ,[PaymentNum]
+		  ,[PaymentGeneric1] AS 'CardType'
+          ,[PaymentGeneric2] AS 'CreditCardNumber'
+          ,LEFT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 2) AS 'ExpirationMonth'
+          ,RIGHT(RIGHT('0' + ISNULL([PaymentGeneric3], ''), 7), 4) AS 'ExpirationYear'
+		  ,TransactionGeneric1 AS 'GiftCardNumber'
+	      ,v.[TransactionNum]
+	FROM [WebOrderProcessing].[WM].[vwTransactionDetail] v
+	LEFT JOIN [WebOrderProcessing].[WM].[Payments] p ON v.TransactionID = p.TransactionID
+	*/
+
+	/*
+    SELECT [PaymentID]
+          ,[PaymentMethod]
+          ,[PaymentAmount]
+          ,[PaymentAuthCode]
+          ,[PaymentNum]
+          ,[CardType]
+          ,[CreditCardNumber]
+          ,[ExpirationMonth]
+          ,[ExpirationYear]
+	      ,svs.[TransactionNum]
+    FROM [WM].[Payments] p
+    LEFT JOIN [WebOrderProcessing].[WM].[vwTransactionsShipments_vs_Shipped] svs ON p.TransactionID = svs.TransactionID
+    WHERE svs.ShipmentsCount = svs.ShippedCount
+	*/
+END
+```
+

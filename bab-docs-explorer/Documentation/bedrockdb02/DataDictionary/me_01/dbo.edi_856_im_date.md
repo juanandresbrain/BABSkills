@@ -1,0 +1,13 @@
+﻿# dbo.edi_856_im_date
+
+**Database:** me_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| shipment_reference_number | varchar | 34 | 0 |  |  |  |
+| date_type | varchar | 3 | 0 |  |  |  |
+| im_date | smalldatetime | 4 | 0 |  |  |  |
+

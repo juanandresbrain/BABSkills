@@ -1,0 +1,100 @@
+﻿# dbo.attribute
+
+**Database:** me_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| attribute_id | decimal | 9 | 0 | YES |  |  |
+| attribute_code | nvarchar | 12 | 0 |  |  |  |
+| attribute_label | nvarchar | 60 | 0 |  |  |  |
+| parent_type | tinyint | 1 | 0 |  |  |  |
+| mandatory_flag | bit | 1 | 0 |  |  |  |
+| exclusive_flag | bit | 1 | 0 |  |  |  |
+| active_flag | bit | 1 | 0 |  |  |  |
+| updatestamp | int | 4 | 0 |  |  |  |
+| last_item_id | decimal | 9 | 1 |  |  |  |
+| send_to_planning_flag | bit | 1 | 0 |  |  |  |
+
+## Referenced By Stored Procedures
+
+- [me_01: dbo.import_pc_populate_temp_pc_$sp](../../StoredProcedures/me_01/dbo.import_pc_populate_temp_pc_$sp.md)
+- [me_01: dbo.import_pc_validate_$sp](../../StoredProcedures/me_01/dbo.import_pc_validate_$sp.md)
+- [me_01: dbo.imw_price_change_v1_$sp](../../StoredProcedures/me_01/dbo.imw_price_change_v1_$sp.md)
+- [me_01: dbo.plu_regen_queue_$sp](../../StoredProcedures/me_01/dbo.plu_regen_queue_$sp.md)
+- [me_01: dbo.plu_resend_queue_$sp](../../StoredProcedures/me_01/dbo.plu_resend_queue_$sp.md)
+- [me_01: dbo.plu_shared_attribute_$sp](../../StoredProcedures/me_01/dbo.plu_shared_attribute_$sp.md)
+- [me_01: dbo.retrieve_dist_$sp](../../StoredProcedures/me_01/dbo.retrieve_dist_$sp.md)
+- [me_01: dbo.rpt_get_po_attributes_$sp](../../StoredProcedures/me_01/dbo.rpt_get_po_attributes_$sp.md)
+- [me_01: dbo.spHearMeSalesConversion](../../StoredProcedures/me_01/dbo.spHearMeSalesConversion.md)
+- [me_01: dbo.spHearMeSalesConversion_03082016](../../StoredProcedures/me_01/dbo.spHearMeSalesConversion_03082016.md)
+- [me_01: dbo.spHearMeSalesConversion_bak_01282020LT](../../StoredProcedures/me_01/dbo.spHearMeSalesConversion_bak_01282020LT.md)
+- [me_01: dbo.spHearMeSalesConversion_BJB20190326](../../StoredProcedures/me_01/dbo.spHearMeSalesConversion_BJB20190326.md)
+- [me_01: dbo.spHearMeSalesConversionBACKUP20150818](../../StoredProcedures/me_01/dbo.spHearMeSalesConversionBACKUP20150818.md)
+- [me_01: dbo.spHearMeSalesConversionBACKUP20150818_TC_TEST](../../StoredProcedures/me_01/dbo.spHearMeSalesConversionBACKUP20150818_TC_TEST.md)
+- [me_01: dbo.spMerchandising_Report_StyleAttributes](../../StoredProcedures/me_01/dbo.spMerchandising_Report_StyleAttributes.md)
+- [me_01: dbo.spMerchandising_Select_StyleAttributes](../../StoredProcedures/me_01/dbo.spMerchandising_Select_StyleAttributes.md)
+- [me_01: dbo.spMerchandisingDistroImportValidation](../../StoredProcedures/me_01/dbo.spMerchandisingDistroImportValidation.md)
+- [me_01: dbo.spMerchandisingDistroTransfersValidation](../../StoredProcedures/me_01/dbo.spMerchandisingDistroTransfersValidation.md)
+- [me_01: dbo.spMerchandisingEmailNonUnivSoundStores](../../StoredProcedures/me_01/dbo.spMerchandisingEmailNonUnivSoundStores.md)
+- [me_01: dbo.spMerchandisingInactiveSkuPreWork](../../StoredProcedures/me_01/dbo.spMerchandisingInactiveSkuPreWork.md)
+- [me_01: dbo.spMerchandisingOutputACTIVEAttribute](../../StoredProcedures/me_01/dbo.spMerchandisingOutputACTIVEAttribute.md)
+- [me_01: dbo.spMerchandisingOutputCNStyleVendor](../../StoredProcedures/me_01/dbo.spMerchandisingOutputCNStyleVendor.md)
+- [me_01: dbo.spMerchandisingOutputCNStyleVendor_BAK_20180305](../../StoredProcedures/me_01/dbo.spMerchandisingOutputCNStyleVendor_BAK_20180305.md)
+- [me_01: dbo.spMerchandisingOutputCNStyleVendor_BAK_20180710](../../StoredProcedures/me_01/dbo.spMerchandisingOutputCNStyleVendor_BAK_20180710.md)
+- [me_01: dbo.spMerchandisingOutputFactoryChange](../../StoredProcedures/me_01/dbo.spMerchandisingOutputFactoryChange.md)
+- [me_01: dbo.spMerchandisingOutputFOBRoyalty](../../StoredProcedures/me_01/dbo.spMerchandisingOutputFOBRoyalty.md)
+- [me_01: dbo.spMerchandisingOutputMsoundAttribute](../../StoredProcedures/me_01/dbo.spMerchandisingOutputMsoundAttribute.md)
+- [me_01: dbo.spMerchandisingOutputStylesMissingUPC](../../StoredProcedures/me_01/dbo.spMerchandisingOutputStylesMissingUPC.md)
+- [me_01: dbo.spMerchandisingReportEOMUnitsOHbyLoc](../../StoredProcedures/me_01/dbo.spMerchandisingReportEOMUnitsOHbyLoc.md)
+- [me_01: dbo.spMerchandisingReportOwnershipCheck](../../StoredProcedures/me_01/dbo.spMerchandisingReportOwnershipCheck.md)
+- [me_01: dbo.spMerchandisingReportOwnershipCheck_Backup](../../StoredProcedures/me_01/dbo.spMerchandisingReportOwnershipCheck_Backup.md)
+- [me_01: dbo.spMerchandisingReportRoyaltyUpdates](../../StoredProcedures/me_01/dbo.spMerchandisingReportRoyaltyUpdates.md)
+- [me_01: dbo.spMerchandisingReportStoreSkinReview](../../StoredProcedures/me_01/dbo.spMerchandisingReportStoreSkinReview.md)
+- [me_01: dbo.spMerchandisingReportStyleList](../../StoredProcedures/me_01/dbo.spMerchandisingReportStyleList.md)
+- [me_01: dbo.spMerchandisingReportStyleList_BU20200513](../../StoredProcedures/me_01/dbo.spMerchandisingReportStyleList_BU20200513.md)
+- [me_01: dbo.spMerchandisingRoyaltyReports](../../StoredProcedures/me_01/dbo.spMerchandisingRoyaltyReports.md)
+- [me_01: dbo.spMerchandisingSelectDistroComplete](../../StoredProcedures/me_01/dbo.spMerchandisingSelectDistroComplete.md)
+- [me_01: dbo.spMerchandisingSelectPoolPointTransferReceipts](../../StoredProcedures/me_01/dbo.spMerchandisingSelectPoolPointTransferReceipts.md)
+- [me_01: dbo.spMerchandisingSelectRpacPO](../../StoredProcedures/me_01/dbo.spMerchandisingSelectRpacPO.md)
+- [me_01: dbo.spMerchandisingSelectRpacPO_BAK_02282018](../../StoredProcedures/me_01/dbo.spMerchandisingSelectRpacPO_BAK_02282018.md)
+- [me_01: dbo.spMerchandisingSelectStoreDistributions](../../StoredProcedures/me_01/dbo.spMerchandisingSelectStoreDistributions.md)
+- [me_01: dbo.spMerchandisingSelectStoreDistributionsBAK20220406](../../StoredProcedures/me_01/dbo.spMerchandisingSelectStoreDistributionsBAK20220406.md)
+- [me_01: dbo.spMerchandisingSelectStoreDistributionsWIP20220406](../../StoredProcedures/me_01/dbo.spMerchandisingSelectStoreDistributionsWIP20220406.md)
+- [me_01: dbo.spMerchandisingSelectUnreceivedTransfers](../../StoredProcedures/me_01/dbo.spMerchandisingSelectUnreceivedTransfers.md)
+- [me_01: dbo.spMerchandisingSplitReport_ALL_WHSE](../../StoredProcedures/me_01/dbo.spMerchandisingSplitReport_ALL_WHSE.md)
+- [me_01: dbo.spMerchandisingSplitReport_BHSE](../../StoredProcedures/me_01/dbo.spMerchandisingSplitReport_BHSE.md)
+- [me_01: dbo.spMerchandisingSplitReport_UK](../../StoredProcedures/me_01/dbo.spMerchandisingSplitReport_UK.md)
+- [me_01: dbo.spMerchandisingSplitReport_WC](../../StoredProcedures/me_01/dbo.spMerchandisingSplitReport_WC.md)
+- [me_01: dbo.spMerchandisingStageDistroSplit](../../StoredProcedures/me_01/dbo.spMerchandisingStageDistroSplit.md)
+- [me_01: dbo.spMerchandisingToCNDistroExportNotification](../../StoredProcedures/me_01/dbo.spMerchandisingToCNDistroExportNotification.md)
+- [me_01: dbo.spMerchandisingToUKDistroExportNotification](../../StoredProcedures/me_01/dbo.spMerchandisingToUKDistroExportNotification.md)
+- [me_01: dbo.spMerchandisingToWCDistroExportNotification](../../StoredProcedures/me_01/dbo.spMerchandisingToWCDistroExportNotification.md)
+- [me_01: dbo.spMerchandisingToWmDistroExportNotification](../../StoredProcedures/me_01/dbo.spMerchandisingToWmDistroExportNotification.md)
+- [me_01: dbo.spMerchandisingUpdateUKActivePickSkus](../../StoredProcedures/me_01/dbo.spMerchandisingUpdateUKActivePickSkus.md)
+- [me_01: dbo.spPBISelectProductCatalogMasterAttributes](../../StoredProcedures/me_01/dbo.spPBISelectProductCatalogMasterAttributes.md)
+- [me_01: dbo.spPOS_StageInfiniteInventoryItems](../../StoredProcedures/me_01/dbo.spPOS_StageInfiniteInventoryItems.md)
+- [me_01: dbo.spPOSSelectProductCatalogMasterAttributes](../../StoredProcedures/me_01/dbo.spPOSSelectProductCatalogMasterAttributes.md)
+- [me_01: dbo.spPOSSelectProductCatalogMasterAttributes_BACKUP20240313](../../StoredProcedures/me_01/dbo.spPOSSelectProductCatalogMasterAttributes_BACKUP20240313.md)
+- [me_01: dbo.spSelectStoreInventoryPrepData](../../StoredProcedures/me_01/dbo.spSelectStoreInventoryPrepData.md)
+- [me_01: dbo.spWEBSelectProductCatalogMasterAttributes](../../StoredProcedures/me_01/dbo.spWEBSelectProductCatalogMasterAttributes.md)
+- [me_01: dbo.spWEBSelectProductCatalogMasterAttributes_BackUp20221101](../../StoredProcedures/me_01/dbo.spWEBSelectProductCatalogMasterAttributes_BackUp20221101.md)
+- [me_01: dbo.spWEBSelectProductCatalogMasterAttributes_backup20221102](../../StoredProcedures/me_01/dbo.spWEBSelectProductCatalogMasterAttributes_backup20221102.md)
+- [me_01: dbo.spWEBSelectProductCatalogMasterAttributesBAK20171005](../../StoredProcedures/me_01/dbo.spWEBSelectProductCatalogMasterAttributesBAK20171005.md)
+- [me_01: dbo.update_phys_inv_table_$sp](../../StoredProcedures/me_01/dbo.update_phys_inv_table_$sp.md)
+- [esell: dbo.spSelectEnterpriseSellingInventory](../../StoredProcedures/esell/dbo.spSelectEnterpriseSellingInventory.md)
+- [esell: dbo.spSelectEnterpriseSellingStoreInventory](../../StoredProcedures/esell/dbo.spSelectEnterpriseSellingStoreInventory.md)
+- [esell: dbo.spSelectEnterpriseSellingStoreInventory_BACKUP20200805](../../StoredProcedures/esell/dbo.spSelectEnterpriseSellingStoreInventory_BACKUP20200805.md)
+- [esell: dbo.spSelectEnterpriseSellingStoreInventoryBAK20220711](../../StoredProcedures/esell/dbo.spSelectEnterpriseSellingStoreInventoryBAK20220711.md)
+- [esell: dbo.spUpdateDigitalSoundsInfiniteInventory](../../StoredProcedures/esell/dbo.spUpdateDigitalSoundsInfiniteInventory.md)
+- [esell: dbo.spUpdateDigitalSoundsInfiniteInventory_BACKUP20200805](../../StoredProcedures/esell/dbo.spUpdateDigitalSoundsInfiniteInventory_BACKUP20200805.md)
+- [esell: dbo.spUpdateDigitalSoundsInfiniteInventory_BACKUP20210719](../../StoredProcedures/esell/dbo.spUpdateDigitalSoundsInfiniteInventory_BACKUP20210719.md)
+- [master: dbo.c_stp_print_tickets_$sp](../../StoredProcedures/master/dbo.c_stp_print_tickets_$sp.md)
+- [DBAUtility: dbo.spMerchStyleValidation_GetProductForValidationByStyle](../../StoredProcedures/DBAUtility/dbo.spMerchStyleValidation_GetProductForValidationByStyle.md)
+- [DBAUtility: dbo.spMerchStyleValidation_GetProductForValidationByStyle_V1_1](../../StoredProcedures/DBAUtility/dbo.spMerchStyleValidation_GetProductForValidationByStyle_V1_1.md)
+- [DBAUtility: dbo.spMerchStyleValidation_GetProductForValidationByStyle_V1_2](../../StoredProcedures/DBAUtility/dbo.spMerchStyleValidation_GetProductForValidationByStyle_V1_2.md)
+- [ma_01: dbo.nsb_style_analysis_$sp](../../StoredProcedures/ma_01/dbo.nsb_style_analysis_$sp.md)
+- [ma_01: dbo.spDW_Inventory](../../StoredProcedures/ma_01/dbo.spDW_Inventory.md)
+

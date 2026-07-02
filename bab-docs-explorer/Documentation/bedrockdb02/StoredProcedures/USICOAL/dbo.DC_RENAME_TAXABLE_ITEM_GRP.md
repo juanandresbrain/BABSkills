@@ -1,0 +1,23 @@
+﻿# dbo.DC_RENAME_TAXABLE_ITEM_GRP
+
+**Database:** USICOAL  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.DC_RENAME_TAXABLE_ITEM_GRP"]
+    SP --> NoRefs(["No dependencies detected"])
+```
+
+## Table Dependencies
+
+_No table references detected._
+
+## Stored Procedure Code
+
+```sql
+
+```
+

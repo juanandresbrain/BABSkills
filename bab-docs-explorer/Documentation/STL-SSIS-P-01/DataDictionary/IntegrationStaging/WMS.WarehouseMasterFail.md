@@ -1,0 +1,108 @@
+﻿# WMS.WarehouseMasterFail
+
+**Database:** IntegrationStaging  
+**Server:** STL-SSIS-P-01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| AreAdvancedWarehouseManagementProcessesEnabled | nvarchar | 510 | 1 |  |  |  |
+| AreItemsCoveragePlannedManually | nvarchar | 510 | 1 |  |  |  |
+| AreLaborStandardsAllowed | nvarchar | 510 | 1 |  |  |  |
+| ArePickingListsDeliveryModeSpecific | nvarchar | 510 | 1 |  |  |  |
+| ArePickingListsShipmentSpecificOnly | nvarchar | 510 | 1 |  |  |  |
+| AreWarehouseLocationCheckDigitsUnique | nvarchar | 510 | 1 |  |  |  |
+| AssetMaintenanceFunctionalLocation | nvarchar | -1 | 1 |  |  |  |
+| AutoUpdateShipmentRule | nvarchar | 510 | 1 |  |  |  |
+| dataAreaId | nvarchar | 8000 | 1 |  |  |  |
+| DefaultContainerTypeId | nvarchar | 8000 | 1 |  |  |  |
+| DefaultPlannedTransferOrderItemCoverageSettings | nvarchar | -1 | 1 |  |  |  |
+| ExternallyLocatedWarehouseCustomerAccountNumber | nvarchar | 8000 | 1 |  |  |  |
+| ExternallyLocatedWarehouseVendorAccountNumber | nvarchar | 8000 | 1 |  |  |  |
+| FormattedPrimaryAddress | nvarchar | 8000 | 1 |  |  |  |
+| IdentificationGroup | nvarchar | 510 | 1 |  |  |  |
+| InventoryCountingReasonCodePolicyName | nvarchar | 8000 | 1 |  |  |  |
+| InventoryStatusChangeReservationRemovalLevel | nvarchar | 510 | 1 |  |  |  |
+| IsBillOfLadingPrintingBeforeShipmentConfirmationEnabled | nvarchar | 510 | 1 |  |  |  |
+| IsFallbackWarehouse | nvarchar | 510 | 1 |  |  |  |
+| IsFinancialNegativeRetailStoreInventoryAllowed | nvarchar | 510 | 1 |  |  |  |
+| IsPalletMovementDuringCycleCountingAllowed | nvarchar | 510 | 1 |  |  |  |
+| IsPhysicalNegativeRetailStoreInventoryAllowed | nvarchar | 510 | 1 |  |  |  |
+| IsPrimaryAddressAssigned | nvarchar | 510 | 1 |  |  |  |
+| IsRefilledFromMainWarehouse | nvarchar | 510 | 1 |  |  |  |
+| IsRetailStoreWarehouse | nvarchar | 510 | 1 |  |  |  |
+| ItemArrivalJournalHeadersV2 | nvarchar | -1 | 1 |  |  |  |
+| ItemArrivalJournalLinesV2 | nvarchar | -1 | 1 |  |  |  |
+| ItemCoverageSettings | nvarchar | -1 | 1 |  |  |  |
+| MainRefillingAssignedWarehouses | nvarchar | -1 | 1 |  |  |  |
+| MainRefillingWarehouseId | nvarchar | 8000 | 1 |  |  |  |
+| MasterPlanningWorkCalendardId | nvarchar | 8000 | 1 |  |  |  |
+| MaximumBatchPickingListQuantity | int | 4 | 1 |  |  |  |
+| MaximumPickingListLineQuantity | int | 4 | 1 |  |  |  |
+| OpenPurchaseLineDiscountJournalLine | nvarchar | -1 | 1 |  |  |  |
+| OpenPurchasePriceJournalLine | nvarchar | -1 | 1 |  |  |  |
+| OpenSalesLineDiscountJournalLine | nvarchar | -1 | 1 |  |  |  |
+| OpenSalesPostageDiscountJournalLine | nvarchar | -1 | 1 |  |  |  |
+| OpenSalesPriceJournalLine | nvarchar | -1 | 1 |  |  |  |
+| OperationalSiteId | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressBuildingCompliment | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressCity | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressCityInKana | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressCountryRegionId | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressCountyId | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressDescription | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressDistrictName | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressLatitude | float | 8 | 1 |  |  |  |
+| PrimaryAddressLocationRoles | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressLocationSalesTaxGroupCode | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressLongitude | float | 8 | 1 |  |  |  |
+| PrimaryAddressPostBox | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressStateId | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressStreet | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressStreetInKana | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressStreetNumber | nvarchar | 8000 | 1 |  |  |  |
+| PrimaryAddressTimeZone | nvarchar | 510 | 1 |  |  |  |
+| PrimaryAddressZipCode | nvarchar | 8000 | 1 |  |  |  |
+| ProductDefaultOrderSettings | nvarchar | -1 | 1 |  |  |  |
+| ProductSpecificOrderSettingsV2 | nvarchar | -1 | 1 |  |  |  |
+| PurchaseAgreementLine | nvarchar | -1 | 1 |  |  |  |
+| PurchaseAgreementLinesV2 | nvarchar | -1 | 1 |  |  |  |
+| QuarantineAssignedWarehouses | nvarchar | -1 | 1 |  |  |  |
+| QuarantineWarehouseId | nvarchar | 8000 | 1 |  |  |  |
+| RawMaterialPickingInventoryIssueStatus | nvarchar | 510 | 1 |  |  |  |
+| RetailCallCenter | nvarchar | -1 | 1 |  |  |  |
+| RetailServiceCategory | nvarchar | -1 | 1 |  |  |  |
+| RetailStore | nvarchar | -1 | 1 |  |  |  |
+| RetailStoreQuantityAllocationReplenismentRuleWeight | float | 8 | 1 |  |  |  |
+| SalesAgreementConfirmationLines | nvarchar | -1 | 1 |  |  |  |
+| SalesAgreementLines | nvarchar | -1 | 1 |  |  |  |
+| ServiceAgreementLines | nvarchar | -1 | 1 |  |  |  |
+| ShouldWarehouseLocationIdIncludeAisleId | nvarchar | 510 | 1 |  |  |  |
+| SupplyForecastEntries | nvarchar | -1 | 1 |  |  |  |
+| TransitAssignedWarehouses | nvarchar | -1 | 1 |  |  |  |
+| TransitWarehouseId | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseId | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseLocationIdBinIdFormat | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseLocationIdRackIdFormat | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseLocationIdShelfIdFormat | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseLocations | nvarchar | -1 | 1 |  |  |  |
+| WarehouseName | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseReleaseReservationRequirementRule | nvarchar | 510 | 1 |  |  |  |
+| WarehouseSpecificDefaultInventoryStatusId | nvarchar | 8000 | 1 |  |  |  |
+| WarehouseType | nvarchar | 510 | 1 |  |  |  |
+| WarehouseWorkProcessingPolicyName | nvarchar | 8000 | 1 |  |  |  |
+| WillAutomaticLoadReleaseReserveInventory | nvarchar | 510 | 1 |  |  |  |
+| WillInventoryStatusChangeRemoveBlocking | nvarchar | 510 | 1 |  |  |  |
+| WillManualLoadReleaseReserveInventory | nvarchar | 510 | 1 |  |  |  |
+| WillOrderReleasingConsolidateShipments | nvarchar | 510 | 1 |  |  |  |
+| WillProductionBOMsReserveWarehouseLevelOnly | nvarchar | 510 | 1 |  |  |  |
+| WillShippingCancellationDecrementLoadQuanity | nvarchar | 510 | 1 |  |  |  |
+| WillWarehouseLocationIdIncludeBinIdByDefault | nvarchar | 510 | 1 |  |  |  |
+| WillWarehouseLocationIdIncludeRackIdByDefault | nvarchar | 510 | 1 |  |  |  |
+| WillWarehouseLocationIdIncludeShelfIdByDefault | nvarchar | 510 | 1 |  |  |  |
+| WMSlocationIdDefaultIssue | nvarchar | 8000 | 1 |  |  |  |
+| WMSLocationIdDefaultReceipt | nvarchar | 8000 | 1 |  |  |  |
+| ErrorCode | int | 4 | 1 |  |  |  |
+| ErrorColumn | int | 4 | 1 |  |  |  |
+

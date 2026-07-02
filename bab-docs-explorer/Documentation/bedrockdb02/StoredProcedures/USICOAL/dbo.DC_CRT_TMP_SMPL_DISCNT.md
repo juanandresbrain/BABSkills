@@ -1,0 +1,23 @@
+﻿# dbo.DC_CRT_TMP_SMPL_DISCNT
+
+**Database:** USICOAL  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.DC_CRT_TMP_SMPL_DISCNT"]
+    SP --> NoRefs(["No dependencies detected"])
+```
+
+## Table Dependencies
+
+_No table references detected._
+
+## Stored Procedure Code
+
+```sql
+
+```
+

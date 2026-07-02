@@ -1,0 +1,15 @@
+﻿# dbo.tmpFranchiseeCBR
+
+**Database:** me_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| BC | varchar | 2 | 0 |  |  |  |
+| A | varchar | 1 | 0 |  |  |  |
+| carton_no | nvarchar | 40 | 1 |  |  |  |
+| location_code | nvarchar | 40 | 0 |  |  |  |
+| LocCBRcode | nvarchar | 18 | 1 |  |  |  |
+

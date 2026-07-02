@@ -1,0 +1,14 @@
+﻿# dbo.Md_DimensionExp
+
+**Database:** smartlook_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| dim_id | int | 4 | 0 |  |  |  |
+| other_dim_id | int | 4 | 0 |  |  |  |
+| key_field_id | int | 4 | 1 |  |  |  |
+| view_key_field_id | int | 4 | 1 |  |  |  |
+

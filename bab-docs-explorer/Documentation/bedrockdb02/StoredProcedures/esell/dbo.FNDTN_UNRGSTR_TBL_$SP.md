@@ -1,0 +1,25 @@
+﻿# dbo.FNDTN_UNRGSTR_TBL_$SP
+
+**Database:** esell  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.FNDTN_UNRGSTR_TBL_$SP"]
+    dbo_FNDTN_TBL_LIST(["dbo.FNDTN_TBL_LIST"]) --> SP
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.FNDTN_TBL_LIST |
+
+## Stored Procedure Code
+
+```sql
+create proc [dbo].[FNDTN_UNRGSTR_TBL_$SP]
+```
+

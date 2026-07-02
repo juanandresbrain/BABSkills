@@ -1,25 +1,35 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation. Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all three servers (bearcluster01, bedrockdb02, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It is designed to trace data lineage across 6 databases, 931 tables, 547 stored procedures, 308 views, 239 SSIS projects, and 290 SQL Agent jobs. Use this skill to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **3 servers, 37 databases, ~6,574 tables, ~8,344 stored procedures, ~1,358 views, 239 SSIS projects, and 480 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+
+The documentation is **bundled inside this skill** at `Documentation/`, organized by server, so no external paths are needed:
+
+| Server | Tables | Stored Procedures | Views | SSIS | Jobs |
+|---|---|---|---|---|---|
+| bearcluster01 | ~599 | ~762 | ~169 | 0 | ~20 |
+| bedrockdb02 | ~4,976 | ~4,408 | ~870 | 0 | ~170 |
+| STL-SSIS-P-01 | ~931 | ~547 | ~305 | ~265 | ~289 |
+
+> Because names repeat across servers (e.g. `dbo.CommandLog` exists on all three), most queries return **one result per server**. Use `--server` to narrow to a single server. Run `list-servers` to see the current breakdown.
 
 ## Dependencies
-None.
+Python 3 only. On Windows, if `python` is not found, use the `py` launcher instead (e.g. `py scripts/explore_docs.py ...`).
 
 ## Quick Start
-To trace the data flow lineage for any table (e.g. `CustomerLeadGenStage` or `BlitzCache`), execute the following command in the workspace root:
+To trace the data flow lineage for any table (e.g. `CustomerLeadGenStage`), run from the skill directory:
 
 ```bash
-python .agents/skills/bab-docs-explorer/scripts/explore_docs.py trace-lineage CustomerLeadGenStage
+python scripts/explore_docs.py trace-lineage CustomerLeadGenStage
 ```
 
-This will analyze all documentation markdown files and output a tree representation of the upstream loading path to `explorer_output.md`.
+This analyzes all documentation and writes a tree of the upstream loading path to `explorer_output.md`. The docs path defaults to the bundled `Documentation/` folder automatically — no `--docs-dir` needed.
 
 ## Utility Scripts
 
@@ -29,67 +39,76 @@ The `explore_docs.py` utility supports the following subcommands. By default, it
 Generates a structured, tree-like lineage map tracing who populates the table.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py trace-lineage CustomerLeadGenStage
+  python scripts/explore_docs.py trace-lineage CustomerLeadGenStage
   ```
 - **Output**: Writes the visual tree and description to `explorer_output.md` showing:
   `Table` 🡨 `View` / `SSIS Package` / `Stored Procedure` 🡨 `SQL Agent Job(s)` 🡨 `Parent Job(s)`
 
 ### 2. `trace-table <table_name>`
-Finds all Stored Procedures, Views, SSIS Packages, and SQL Agent Jobs referencing the table.
+Finds all Stored Procedures, Views, SSIS Packages, and SQL Agent Jobs referencing the table (each result tagged with its server).
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py trace-table CustomerLeadGenStage
+  python scripts/explore_docs.py trace-table CustomerLeadGenStage
   ```
 
 ### 3. `find-table <table_name>`
 Finds a table schema (columns, types, keys, and descriptions) in the data dictionary.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py find-table CustomerLeadGenStage
+  python scripts/explore_docs.py find-table CustomerLeadGenStage
   ```
 
 ### 4. `describe-sp <sp_name>`
 Inspects stored procedure parameters, table dependencies, and displays the source SQL code snippet.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-sp sp_BlitzCache
+  python scripts/explore_docs.py describe-sp sp_BlitzCache
   ```
 
 ### 5. `describe-view <view_name>`
 Inspects a view's table dependencies and displays its source SQL code snippet.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-view vw_BAB_POS_Pricebook
+  python scripts/explore_docs.py describe-view vw_BAB_POS_Pricebook
   ```
 
 ### 6. `describe-package <package_name>`
 Inspects SSIS connection managers, control flow tasks, sources, and destinations.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-package ExactTargetLeadGen
+  python scripts/explore_docs.py describe-package ExactTargetLeadGen
   ```
 
 ### 7. `describe-job <job_name>`
 Shows step-by-step instructions, subsystems (TSQL, SSIS, CmdExec), and source code commands for a SQL Agent Job.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py describe-job CustomerTransactionETL
+  python scripts/explore_docs.py describe-job CustomerTransactionETL
   ```
 
 ### 8. `search-all <keyword>`
-Searches for text references in names, column descriptions, and code blocks across all components — including Views.
+Searches for text references in names, column descriptions, and code blocks across all components (Tables, SPs, Views, SSIS, Jobs) on every server. Results include the server column.
 - **Example**:
   ```bash
-  python .agents/skills/bab-docs-explorer/scripts/explore_docs.py search-all "FirstData"
+  python scripts/explore_docs.py search-all "FirstData"
+  ```
+
+### 9. `list-servers`
+Lists the servers found in the documentation set and per-server object counts. Useful to confirm coverage before filtering with `--server`.
+- **Example**:
+  ```bash
+  python scripts/explore_docs.py list-servers
   ```
 
 ## Key Flags
+- `--server <name>`: Restrict results to a single server (loose/substring match), e.g. `--server bedrockdb02`, `--server bearcluster01`, `--server STL`. Applies to every command above.
 - `--json`: Outputs JSON data instead of markdown (defaults to markdown).
 - `--output <path>`: Specifies a custom output file path instead of `explorer_output.md`.
-- `--docs-dir <path>`: Explicitly points to the documentation directory (defaults to current directory `.`).
+- `--docs-dir <path>`: Overrides the documentation directory. Defaults to the `Documentation/` folder bundled with the skill; only needed if pointing at an external docs set.
 
 ## Common Mistakes
-1. **Wrong Schema Context**: Forgetting that tables are matched loosely (e.g. typing `CustomerLeadGenStage` matches `dbo.CustomerLeadGenStage` automatically). Do not type unnecessary brackets or quotes.
-2. **Missing Out-of-Doc references**: Tracing will highlight if a Stored Procedure, View, or Job command references an object that has no dedicated documentation file (it will note it as a reference, but won't be able to fetch its columns).
-3. **Checking stdout instead of output files**: The script writes details to `explorer_output.md` to prevent terminal output truncation. Always view the generated file to read the full report.
-
+1. **Ignoring cross-server duplicates**: The same object name often exists on multiple servers, so a query can return several results. Read the `**Server:**` line on each result, and pass `--server` when you only care about one server.
+2. **Wrong Schema Context**: Tables are matched loosely (e.g. typing `CustomerLeadGenStage` matches `dbo.CustomerLeadGenStage` automatically). Do not type unnecessary brackets or quotes.
+3. **Missing Out-of-Doc references**: Tracing highlights when a Stored Procedure, View, or Job command references an object that has no dedicated documentation file (noted as a reference, but its columns can't be fetched).
+4. **Checking stdout instead of output files**: The script writes details to `explorer_output.md` to prevent terminal output truncation. Always view the generated file to read the full report.
+5. **`python` not found on Windows**: Use the `py` launcher instead (`py scripts/explore_docs.py ...`).

@@ -1,0 +1,12 @@
+﻿# POS.ProductImageURLStage
+
+**Database:** IntegrationStaging  
+**Server:** STL-SSIS-P-01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| ItemNumber | varchar | 500 | 1 |  |  |  |
+| ImageURL | varchar | 4000 | 1 |  |  |  |
+

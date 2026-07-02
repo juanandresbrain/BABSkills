@@ -1,0 +1,37 @@
+﻿# dbo.sysmail_drop_user_credential_sp
+
+**Database:** msdb  
+**Server:** bedrockdb02  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.sysmail_drop_user_credential_sp"]
+    SP --> NoRefs(["No dependencies detected"])
+```
+
+## Table Dependencies
+
+_No table references detected._
+
+## Stored Procedure Code
+
+```sql
+CREATE PROCEDURE dbo.sysmail_drop_user_credential_sp
+   @credential_name sysname
+AS
+   SET NOCOUNT ON
+   DECLARE @rc int
+   DECLARE @sql NVARCHAR(max)
+
+   -- Drop credential DDL
+   SET @sql = N'DROP CREDENTIAL ' + QUOTENAME(@credential_name)
+
+   EXEC @rc = sp_executesql @statement = @sql
+   IF(@rc <> 0)
+      RETURN @rc
+
+   RETURN(0)
+```
+

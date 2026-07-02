@@ -1,0 +1,28 @@
+﻿# dbo.hist_cmp_group_chn_wk
+
+**Database:** ma_01  
+**Server:** bedrockdb02  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| hierarchy_group_id | int | 4 | 0 | YES |  |  |
+| merch_year_wk | int | 4 | 0 | YES |  |  |
+| component_type_code | smallint | 2 | 0 | YES |  |  |
+| history_component_id | smallint | 2 | 0 | YES |  |  |
+| component_units | int | 4 | 0 |  |  |  |
+| component_retail | decimal | 9 | 0 |  |  |  |
+| component_cost | decimal | 9 | 0 |  |  |  |
+| component_retail_te | decimal | 9 | 0 |  |  |  |
+
+## Referenced By Stored Procedures
+
+- [ma_01: dbo.nsb_mar_chain_md_$sp](../../StoredProcedures/ma_01/dbo.nsb_mar_chain_md_$sp.md)
+- [ma_01: dbo.post_cmp_group_$sp](../../StoredProcedures/ma_01/dbo.post_cmp_group_$sp.md)
+- [ma_01: dbo.post_hist_cmp_group_$sp](../../StoredProcedures/ma_01/dbo.post_hist_cmp_group_$sp.md)
+- [ma_01: dbo.reclass_hist_cmp_$sp](../../StoredProcedures/ma_01/dbo.reclass_hist_cmp_$sp.md)
+- [ma_01: dbo.reclass_oh_post_adjust_cmp_$sp](../../StoredProcedures/ma_01/dbo.reclass_oh_post_adjust_cmp_$sp.md)
+- [ma_01: dbo.rpt_mar_chain_md_$sp](../../StoredProcedures/ma_01/dbo.rpt_mar_chain_md_$sp.md)
+- [ma_01: dbo.summarize_hist_cmp_group_$sp](../../StoredProcedures/ma_01/dbo.summarize_hist_cmp_group_$sp.md)
+
