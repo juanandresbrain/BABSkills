@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 
 # Object-type folders that live under each server root.
-OBJECT_FOLDERS = ["DataDictionary", "StoredProcedures", "Views", "SSIS", "Jobs"]
+OBJECT_FOLDERS = ["DataDictionary", "StoredProcedures", "Functions", "Views", "SSIS", "Jobs"]
 
 # Normalization helper
 def normalize_name(name):
@@ -158,6 +158,48 @@ def parse_view_file(file_path, server_fallback):
         "code": code
     }
 
+def parse_function_file(file_path, server_fallback):
+    try:
+        content = file_path.read_text(encoding='utf-8-sig', errors='ignore')
+    except Exception:
+        return None
+
+    h1_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+    func_name = h1_match.group(1).strip() if h1_match else file_path.stem
+
+    db_match = re.search(r'\*\*Database:\*\*\s*(.+)$', content, re.MULTILINE)
+    database = db_match.group(1).strip() if db_match else "Unknown"
+
+    type_match = re.search(r'\*\*Function Type:\*\*\s*(.+)$', content, re.MULTILINE)
+    func_type = type_match.group(1).strip() if type_match else "Unknown"
+
+    returns_match = re.search(r'\*\*Returns:\*\*\s*(.+)$', content, re.MULTILINE)
+    returns = returns_match.group(1).strip() if returns_match else ""
+
+    dependencies = []
+    dep_sec = re.search(r'## Table Dependencies\s*\n\s*\n(.*?)(?=\n\n|\Z)', content, re.DOTALL)
+    if dep_sec:
+        table_lines = dep_sec.group(1).strip().split('\n')
+        if len(table_lines) > 2:
+            for line in table_lines[2:]:
+                parts = [p.strip() for p in line.split('|')[1:-1]]
+                if parts and parts[0]:
+                    dependencies.append(parts[0])
+
+    code_match = re.search(r'## Function Code\s*\n\s*\n```sql\s*\n(.*?)\n```', content, re.DOTALL | re.IGNORECASE)
+    code = code_match.group(1).strip() if code_match else ""
+
+    return {
+        "file_path": str(file_path),
+        "function_name": func_name,
+        "database": database,
+        "server": _extract_server(content, server_fallback),
+        "func_type": func_type,
+        "returns": returns,
+        "dependencies": dependencies,
+        "code": code
+    }
+
 def parse_package_file(file_path, server_fallback):
     try:
         content = file_path.read_text(encoding='utf-8-sig', errors='ignore')
@@ -296,6 +338,7 @@ class DocExplorer:
         # Stored as lists (names collide across servers, so a name->obj dict is unsafe).
         self.tables = []
         self.sps = []
+        self.functions = []
         self.views = []
         self.packages = []
         self.jobs = []
@@ -342,6 +385,14 @@ class DocExplorer:
                         if sp:
                             self.sps.append(sp)
 
+            func_dir = root / "Functions"
+            if func_dir.exists():
+                for f in func_dir.rglob("*.md"):
+                    if f.name != "_index.md":
+                        fn = parse_function_file(f, server_name)
+                        if fn:
+                            self.functions.append(fn)
+
             view_dir = root / "Views"
             if view_dir.exists():
                 for f in view_dir.rglob("*.md"):
@@ -379,6 +430,10 @@ class DocExplorer:
         self.load_all()
         return [s for s in self.sps if self._server_ok(s) and name_matches(s["sp_name"], query)]
 
+    def find_function(self, query):
+        self.load_all()
+        return [f for f in self.functions if self._server_ok(f) and name_matches(f["function_name"], query)]
+
     def find_view(self, query):
         self.load_all()
         return [v for v in self.views if self._server_ok(v) and name_matches(v["view_name"], query)]
@@ -405,6 +460,7 @@ class DocExplorer:
             "query": query,
             "matched_tables": matching_tables,
             "stored_procedures": [],
+            "functions": [],
             "views": [],
             "ssis_packages": [],
             "sql_agent_jobs": []
@@ -428,6 +484,26 @@ class DocExplorer:
                         "file_path": sp["file_path"],
                         "server": sp["server"],
                         "database": sp["database"],
+                        "type": "dependency_table" if is_dep else "referenced_in_code"
+                    })
+
+            # 2a. Check Functions
+            for fn in self.functions:
+                if not self._server_ok(fn):
+                    continue
+                is_dep = any(name_matches(dep, table) for dep in fn["dependencies"])
+                in_code = False
+                if not is_dep:
+                    norm_table = normalize_name(table)
+                    norm_code = normalize_name(fn["code"])
+                    if norm_table in norm_code:
+                        in_code = True
+                if is_dep or in_code:
+                    trace_results["functions"].append({
+                        "name": fn["function_name"],
+                        "file_path": fn["file_path"],
+                        "server": fn["server"],
+                        "database": fn["database"],
                         "type": "dependency_table" if is_dep else "referenced_in_code"
                     })
 
@@ -687,6 +763,12 @@ class DocExplorer:
             if kw_lower in sp["sp_name"].lower() or kw_lower in sp["code"].lower():
                 results.append({"type": "Stored Procedure", "name": sp["sp_name"], "server": sp["server"], "file": sp["file_path"]})
 
+        for fn in self.functions:
+            if not self._server_ok(fn):
+                continue
+            if kw_lower in fn["function_name"].lower() or kw_lower in fn["code"].lower():
+                results.append({"type": "Function", "name": fn["function_name"], "server": fn["server"], "file": fn["file_path"]})
+
         for view in self.views:
             if not self._server_ok(view):
                 continue
@@ -762,6 +844,29 @@ def format_view_markdown(view):
     md.append(f"```sql\n{snippet}\n```")
     return "\n".join(md)
 
+def format_function_markdown(fn):
+    md = []
+    md.append(f"# Function: {fn['function_name']}")
+    md.append(f"**Server:** {fn.get('server', 'Unknown')}  ")
+    md.append(f"**Database:** {fn['database']}  ")
+    md.append(f"**Function Type:** {fn.get('func_type', 'Unknown')}  ")
+    if fn.get("returns"):
+        md.append(f"**Returns:** {fn['returns']}  ")
+    md.append(f"**Documentation File:** [{Path(fn['file_path']).name}](file:///{fn['file_path'].replace(os.sep, '/')})  \n")
+    md.append("## Table Dependencies\n")
+    if fn["dependencies"]:
+        for dep in fn["dependencies"]:
+            md.append(f"- {dep}")
+    else:
+        md.append("_No documented table dependencies._")
+    md.append("\n## Function Code Snippet (first 100 lines)\n")
+    code_lines = fn["code"].split('\n')
+    snippet = "\n".join(code_lines[:100])
+    if len(code_lines) > 100:
+        snippet += "\n\n... (truncated)"
+    md.append(f"```sql\n{snippet}\n```")
+    return "\n".join(md)
+
 def format_package_markdown(pkg):
     md = []
     md.append(f"# SSIS Package: {pkg['package_name']}")
@@ -824,6 +929,13 @@ def format_trace_markdown(trace):
     if trace["stored_procedures"]:
         for sp in trace["stored_procedures"]:
             md.append(f"- **{sp['name']}** (Server: {sp.get('server', '?')}, DB: {sp['database']}, Match: {sp['type']}) - [File]({sp['file_path']})")
+    else:
+        md.append("_None found._")
+
+    md.append("\n## Functions referencing table")
+    if trace.get("functions"):
+        for fn in trace["functions"]:
+            md.append(f"- **{fn['name']}** (Server: {fn.get('server', '?')}, DB: {fn['database']}, Match: {fn['type']}) - [File]({fn['file_path']})")
     else:
         md.append("_None found._")
 
@@ -948,6 +1060,9 @@ def main():
     p_desc_sp = subparsers.add_parser("describe-sp", help="Inspect a stored procedure by name")
     p_desc_sp.add_argument("sp_name", help="Name of the stored procedure")
 
+    p_desc_fn = subparsers.add_parser("describe-function", help="Inspect a scalar/table function by name")
+    p_desc_fn.add_argument("function_name", help="Name of the function")
+
     p_desc_view = subparsers.add_parser("describe-view", help="Inspect a view by name")
     p_desc_view.add_argument("view_name", help="Name of the view")
 
@@ -998,17 +1113,18 @@ def main():
                 counts[s] = {
                     "tables": sum(1 for t in explorer.tables if t["server"] == s),
                     "stored_procedures": sum(1 for x in explorer.sps if x["server"] == s),
+                    "functions": sum(1 for x in explorer.functions if x["server"] == s),
                     "views": sum(1 for x in explorer.views if x["server"] == s),
                     "ssis_packages": sum(1 for x in explorer.packages if x["server"] == s),
                     "jobs": sum(1 for x in explorer.jobs if x["server"] == s),
                 }
             result_data = {"servers": explorer.servers, "counts": counts}
             md = ["# Servers in Documentation Set\n"]
-            md.append("| Server | Tables | Stored Procedures | Views | SSIS | Jobs |")
-            md.append("|---|---|---|---|---|---|")
+            md.append("| Server | Tables | Stored Procedures | Functions | Views | SSIS | Jobs |")
+            md.append("|---|---|---|---|---|---|---|")
             for s in explorer.servers:
                 c = counts[s]
-                md.append(f"| {s} | {c['tables']} | {c['stored_procedures']} | {c['views']} | {c['ssis_packages']} | {c['jobs']} |")
+                md.append(f"| {s} | {c['tables']} | {c['stored_procedures']} | {c['functions']} | {c['views']} | {c['ssis_packages']} | {c['jobs']} |")
             output_text = "\n".join(md)
 
         elif args.command == "find-table":
@@ -1035,6 +1151,16 @@ def main():
             else:
                 result_data = sps[0] if len(sps) == 1 else sps
                 output_text = "\n\n---\n\n".join(format_sp_markdown(s) for s in sps)
+
+        elif args.command == "describe-function":
+            fns = explorer.find_function(args.function_name)
+            if not fns:
+                print(f"[WARNING] No function matched query '{args.function_name}'", file=sys.stderr)
+                result_data = {"error": f"No function matched query '{args.function_name}'"}
+                output_text = f"# Function Search: {args.function_name}\n\nNo matching function found."
+            else:
+                result_data = fns[0] if len(fns) == 1 else fns
+                output_text = "\n\n---\n\n".join(format_function_markdown(f) for f in fns)
 
         elif args.command == "describe-view":
             views = explorer.find_view(args.view_name)

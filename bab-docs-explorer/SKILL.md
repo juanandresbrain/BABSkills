@@ -1,21 +1,21 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all three servers (bearcluster01, bedrockdb02, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all three servers (bearcluster01, bedrockdb02, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **3 servers, 37 databases, ~6,574 tables, ~8,344 stored procedures, ~1,358 views, 239 SSIS projects, and 480 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **3 servers, 37 databases, ~6,496 tables, ~8,344 stored procedures, ~78 functions, ~1,344 views, 265 SSIS packages, and 479 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
 
 The documentation is **bundled inside this skill** at `Documentation/`, organized by server, so no external paths are needed:
 
-| Server | Tables | Stored Procedures | Views | SSIS | Jobs |
-|---|---|---|---|---|---|
-| bearcluster01 | ~599 | ~762 | ~169 | 0 | ~20 |
-| bedrockdb02 | ~4,976 | ~4,408 | ~870 | 0 | ~170 |
-| STL-SSIS-P-01 | ~931 | ~547 | ~305 | ~265 | ~289 |
+| Server | Tables | Stored Procedures | Functions | Views | SSIS | Jobs |
+|---|---|---|---|---|---|---|
+| bearcluster01 | ~594 | ~762 | ~22 | ~169 | 0 | ~20 |
+| bedrockdb02 | ~4,971 | ~4,408 | ~35 | ~870 | 0 | ~170 |
+| STL-SSIS-P-01 | ~931 | ~547 | ~21 | ~305 | ~265 | ~289 |
 
 > Because names repeat across servers (e.g. `dbo.CommandLog` exists on all three), most queries return **one result per server**. Use `--server` to narrow to a single server. Run `list-servers` to see the current breakdown.
 
@@ -45,7 +45,7 @@ Generates a structured, tree-like lineage map tracing who populates the table.
   `Table` 🡨 `View` / `SSIS Package` / `Stored Procedure` 🡨 `SQL Agent Job(s)` 🡨 `Parent Job(s)`
 
 ### 2. `trace-table <table_name>`
-Finds all Stored Procedures, Views, SSIS Packages, and SQL Agent Jobs referencing the table (each result tagged with its server).
+Finds all Stored Procedures, Functions, Views, SSIS Packages, and SQL Agent Jobs referencing the table (each result tagged with its server).
 - **Example**:
   ```bash
   python scripts/explore_docs.py trace-table CustomerLeadGenStage
@@ -65,35 +65,42 @@ Inspects stored procedure parameters, table dependencies, and displays the sourc
   python scripts/explore_docs.py describe-sp sp_BlitzCache
   ```
 
-### 5. `describe-view <view_name>`
+### 5. `describe-function <function_name>`
+Inspects a scalar/table function's type, return type, table dependencies, and displays its source SQL code snippet.
+- **Example**:
+  ```bash
+  python scripts/explore_docs.py describe-function udf_StripHTML
+  ```
+
+### 6. `describe-view <view_name>`
 Inspects a view's table dependencies and displays its source SQL code snippet.
 - **Example**:
   ```bash
   python scripts/explore_docs.py describe-view vw_BAB_POS_Pricebook
   ```
 
-### 6. `describe-package <package_name>`
+### 7. `describe-package <package_name>`
 Inspects SSIS connection managers, control flow tasks, sources, and destinations.
 - **Example**:
   ```bash
   python scripts/explore_docs.py describe-package ExactTargetLeadGen
   ```
 
-### 7. `describe-job <job_name>`
+### 8. `describe-job <job_name>`
 Shows step-by-step instructions, subsystems (TSQL, SSIS, CmdExec), and source code commands for a SQL Agent Job.
 - **Example**:
   ```bash
   python scripts/explore_docs.py describe-job CustomerTransactionETL
   ```
 
-### 8. `search-all <keyword>`
-Searches for text references in names, column descriptions, and code blocks across all components (Tables, SPs, Views, SSIS, Jobs) on every server. Results include the server column.
+### 9. `search-all <keyword>`
+Searches for text references in names, column descriptions, and code blocks across all components (Tables, SPs, Functions, Views, SSIS, Jobs) on every server. Results include the server column.
 - **Example**:
   ```bash
   python scripts/explore_docs.py search-all "FirstData"
   ```
 
-### 9. `list-servers`
+### 10. `list-servers`
 Lists the servers found in the documentation set and per-server object counts. Useful to confirm coverage before filtering with `--server`.
 - **Example**:
   ```bash

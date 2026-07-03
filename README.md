@@ -18,15 +18,18 @@ Run `python bab-docs-explorer/scripts/explore_docs.py list-servers` for the live
 |---|---|
 | Data Dictionary | All tables and columns with types, keys, cross-references to SPs |
 | Stored Procedures | SP code, parameters, table dependencies with architecture diagrams |
+| Functions | Scalar/table function code, parameters, return type, table dependencies |
 | Views | View code and table dependencies |
 | SSIS Packages | Package architecture, connections, control flow, data flow sources/destinations |
 | SQL Agent Jobs | Job schedules, steps, and commands with architecture diagrams |
 
 ## System Stats
 
-| Server | Databases | Tables | SPs | Views | SSIS | Jobs |
+(Object counts as loaded by the skill; run `list-servers` for the live breakdown.)
+
+| Server | Tables | SPs | Functions | Views | SSIS | Jobs |
 |---|---|---|---|---|---|---|
-| bearcluster01 | 14 | 635 | 761 | 169 | 0 | 20 |
-| bedrockdb02 | 17 | 5008 | 7036 | 880 | 0 | 170 |
-| STL-SSIS-P-01 | 6 | 931 | 547 | 309 | 239 | 290 |
-| **Grand Total** | **37** | **6574** | **8344** | **1358** | **239** | **480** |
+| bearcluster01 | 594 | 762 | 22 | 169 | 0 | 20 |
+| bedrockdb02 | 4971 | 4408 | 35 | 870 | 0 | 170 |
+| STL-SSIS-P-01 | 931 | 547 | 21 | 305 | 265 | 289 |
+| **Grand Total** | **6496** | **5717** | **78** | **1344** | **265** | **479** |
