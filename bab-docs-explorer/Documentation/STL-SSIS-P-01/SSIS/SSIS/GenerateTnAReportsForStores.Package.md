@@ -1,69 +1,146 @@
-﻿# SSIS Package: Package
+# SSIS Package: Package
 
 **Project:** GenerateTnAReportsForStores  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        KODIAK_BABWTimeAndAttendance_conn(["KODIAK.BABWTimeAndAttendance [OLEDB]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-        SQL_LOG_conn(["SQL_LOG [OLEDB]"])
-        STL_SSIS_P_01_IntegrationStaging_conn(["STL-SSIS-P-01.IntegrationStaging [OLEDB]"])
-        StoreDataFile_conn(["StoreDataFile [FLATFILE]"])
-    end
-    subgraph ControlFlow
-        Package_task["Package"]
-        Foreach_Loop_Container_task["Foreach Loop Container"]
-        Package_task --> Foreach_Loop_Container_task
-        Export_Data_File_For_Store_task["Export Data File For Store"]
-        Foreach_Loop_Container_task --> Export_Data_File_For_Store_task
-        Get_list_of_distinct_stores_task["Get list of distinct stores"]
-        Export_Data_File_For_Store_task --> Get_list_of_distinct_stores_task
-        Move_the_yesterdays_data_to_staging_task["Move the yesterdays data to staging"]
-        Get_list_of_distinct_stores_task --> Move_the_yesterdays_data_to_staging_task
-        Truncate_Staging_Tables_task["Truncate Staging Tables"]
-        Move_the_yesterdays_data_to_staging_task --> Truncate_Staging_Tables_task
-        Send_Email_onError_task["Send Email onError"]
-        Truncate_Staging_Tables_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| KODIAK.BABWTimeAndAttendance | OLEDB |
-| SMTP_EMAIL | SMTP |
-| SQL_LOG | OLEDB |
-| STL-SSIS-P-01.IntegrationStaging | OLEDB |
-| StoreDataFile | FLATFILE |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| KODIAK.BABWTimeAndAttendance | OLEDB | KODIAK | BABWTimeAndAttendance | Data Source=KODIAK; Initial Catalog=BABWTimeAndAttendance; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP_EMAIL | SMTP |  |  |  |
+| SQL_LOG | OLEDB | stl-ssis-p-01 | msdb | Data Source=stl-ssis-p-01; Initial Catalog=msdb; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| STL-SSIS-P-01.IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| StoreDataFile | FLATFILE |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| Package | Microsoft.Package |
-| Foreach Loop Container | STOCK:FOREACHLOOP |
-| Export Data File For Store | Microsoft.Pipeline |
-| Get list of distinct stores | Microsoft.ExecuteSQLTask |
-| Move the yesterdays data to staging | Microsoft.Pipeline |
-| Truncate Staging Tables | Microsoft.ExecuteSQLTask |
-| Send Email onError | Microsoft.SendMailTask |
+| Package | Package |
+| Foreach Loop Container | FOREACHLOOP |
+| Export Data File For Store | Pipeline |
+| Get list of distinct stores | ExecuteSQLTask |
+| Move the yesterdays data to staging | Pipeline |
+| Truncate Staging Tables | ExecuteSQLTask |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- Foreach Loop Container [FOREACHLOOP]
+  - Export Data File For Store [Pipeline]
+- Get list of distinct stores [ExecuteSQLTask]
+- Move the yesterdays data to staging [Pipeline]
+- Truncate Staging Tables [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Foreach_Loop_Container["Foreach Loop Container"]
+    n_Package_Foreach_Loop_Container_Export_Data_File_For_Store["Export Data File For Store"]
+    n_Package_Get_list_of_distinct_stores["Get list of distinct stores"]
+    n_Package_Move_the_yesterdays_data_to_staging["Move the yesterdays data to staging"]
+    n_Package_Truncate_Staging_Tables["Truncate Staging Tables"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_Truncate_Staging_Tables --> n_Package_Move_the_yesterdays_data_to_staging
+    n_Package_Move_the_yesterdays_data_to_staging --> n_Package_Get_list_of_distinct_stores
+    n_Package_Get_list_of_distinct_stores --> n_Package_Foreach_Loop_Container
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | CurrentStore | No |
+| User | ListOfStores | No |
+| User | StoreDataFileName | Yes |
+| User | StoreDataFilePath | No |
+| User | TestDate | No |
+| User | YesterdaysDate | Yes |
+
+### Expression-bound variable values
+
+#### User::StoreDataFileName
+
+**Expression:**
+
+```sql
+(DT_STR, 6, 1252)@[User::CurrentStore]+"Labor"+(DT_STR, 4, 1252)DATEPART("yyyy", @[System::ContainerStartTime]) + 
+RIGHT("0" + (DT_STR, 2, 1252)DATEPART("mm", @[System::ContainerStartTime]), 2) + 
+RIGHT("0" + (DT_STR, 2, 1252)DATEPART("dd", @[System::ContainerStartTime]), 2) + "010000.txt"
+```
+
+**Evaluated value:**
+
+```sql
+555Labor20170605010000.txt
+```
+
+#### User::YesterdaysDate
+
+**Expression:**
+
+```sql
+(DT_WSTR,4) DATEPART("yyyy", DATEADD( "d", -1, getdate() ))+"-"+ (DT_WSTR,2) DATEPART("mm", DATEADD( "d", -1, getdate() )) +"-"+ (DT_WSTR,2)DATEPART("dd", DATEADD( "d", -1, getdate() ))
+```
+
+**Evaluated value:**
+
+```sql
+2017-6-4
+```
+
+## Execute SQL Tasks
+
+### Get list of distinct stores
+
+**Path:** `Package\Get list of distinct stores`  
+**Connection:** STL-SSIS-P-01.IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+SELECT DISTINCT StoreId
+FROM            BABW_TnA_Staging
+```
+
+### Truncate Staging Tables
+
+**Path:** `Package\Truncate Staging Tables`  
+**Connection:** STL-SSIS-P-01.IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+EXEC	[dbo].[spTruncateTnAStaging]
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | SELECT        StoreId, POSCode, PunchInTime, PunchOutTime, JobCodeName, Status FROM            BABW_TnA_Staging WHERE        (StoreId = ?) |
-|  | EXEC [dbo].[sp_GenerateDailyTimeAndAttendanceReport] @ReportStartDate = ?, @ReportEndDate = ? |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Staging Table |  | OLEDBSource | Export Data File For Store | STL-SSIS-P-01.IntegrationStaging | SqlCommand |
+| sp_GenerateDailyTimeAndAttendanceReport |  | OLEDBSource | Move the yesterdays data to staging | KODIAK.BABWTimeAndAttendance | SqlCommand |
+
+#### Staging Table — SqlCommand
+
+```sql
+SELECT        StoreId, POSCode, PunchInTime, PunchOutTime, JobCodeName, Status
+FROM            BABW_TnA_Staging
+WHERE        (StoreId = ?)
+```
+
+#### sp_GenerateDailyTimeAndAttendanceReport — SqlCommand
+
+```sql
+EXEC [dbo].[sp_GenerateDailyTimeAndAttendanceReport] @ReportStartDate = ?, @ReportEndDate = ?
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [BABW_TnA_Staging] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Store Data Filename |  | FlatFileDestination | Export Data File For Store | StoreDataFile |  |
+| BABW_TnAStaging |  | OLEDBDestination | Move the yesterdays data to staging | STL-SSIS-P-01.IntegrationStaging |  |

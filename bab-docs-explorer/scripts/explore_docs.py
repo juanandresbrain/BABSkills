@@ -34,6 +34,12 @@ def name_matches(target, query):
             return True
     return False
 
+def extract_section(content, header):
+    """Return the body of a '## Header' section up to the next '## ' or EOF."""
+    pat = re.compile(r'(?m)^' + re.escape(header) + r'[ \t]*\n(.*?)(?=^## |\Z)', re.DOTALL)
+    m = pat.search(content)
+    return m.group(1).strip() if m else ""
+
 def server_matches(obj_server, server_filter):
     """A server filter matches loosely (case-insensitive substring)."""
     if not server_filter:
@@ -278,6 +284,9 @@ def parse_package_file(file_path, server_fallback):
         "sources": sources,
         "destinations": destinations,
         "tasks": tasks,
+        "variables_section": extract_section(content, "## Variables"),
+        "exec_sql_section": extract_section(content, "## Execute SQL Tasks"),
+        "outline_section": extract_section(content, "## Control Flow Outline"),
         "raw_content": content
     }
 
@@ -901,6 +910,17 @@ def format_package_markdown(pkg):
             md.append(f"| {src['component']} | {src['source_table']} |")
     else:
         md.append("_None detected._")
+
+    # Business-logic sections captured from the .dtsx (variables, execute SQL tasks).
+    if pkg.get("outline_section"):
+        md.append("\n## Control Flow Outline\n")
+        md.append(pkg["outline_section"])
+    if pkg.get("variables_section"):
+        md.append("\n## Variables\n")
+        md.append(pkg["variables_section"])
+    if pkg.get("exec_sql_section"):
+        md.append("\n## Execute SQL Tasks\n")
+        md.append(pkg["exec_sql_section"])
 
     return "\n".join(md)
 

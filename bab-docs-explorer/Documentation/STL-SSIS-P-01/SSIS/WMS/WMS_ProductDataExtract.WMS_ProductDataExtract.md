@@ -1,129 +1,281 @@
-﻿# SSIS Package: WMS_ProductDataExtract
+# SSIS Package: WMS_ProductDataExtract
 
 **Project:** WMS_ProductDataExtract  
 **Folder:** WMS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        Dynamics_AX_Connection_Manager_1_conn(["Dynamics AX Connection Manager 1 [DynamicsAX]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        WMS_ProductDataExtract_task["WMS_ProductDataExtract"]
-        SEQ___Product_Extracts_task["SEQ - Product Extracts"]
-        WMS_ProductDataExtract_task --> SEQ___Product_Extracts_task
-        SEQ___ItemMaster_task["SEQ - ItemMaster"]
-        SEQ___Product_Extracts_task --> SEQ___ItemMaster_task
-        ItemMaster_task["ItemMaster"]
-        SEQ___ItemMaster_task --> ItemMaster_task
-        Merge_ItemMaster_task["Merge ItemMaster"]
-        ItemMaster_task --> Merge_ItemMaster_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_ItemMaster_task --> Truncate_Stage_task
-        SEQ___ItemMasterProducts_task["SEQ - ItemMasterProducts"]
-        Truncate_Stage_task --> SEQ___ItemMasterProducts_task
-        Merge_ItemMasterProducts_task["Merge ItemMasterProducts"]
-        SEQ___ItemMasterProducts_task --> Merge_ItemMasterProducts_task
-        Products_task["Products"]
-        Merge_ItemMasterProducts_task --> Products_task
-        Truncate_Stage_task["Truncate Stage"]
-        Products_task --> Truncate_Stage_task
-        SEQ___ItemsUOM_task["SEQ - ItemsUOM"]
-        Truncate_Stage_task --> SEQ___ItemsUOM_task
-        ItemsUOM_task["ItemsUOM"]
-        SEQ___ItemsUOM_task --> ItemsUOM_task
-        Merge_ItemsUOM_task["Merge ItemsUOM"]
-        ItemsUOM_task --> Merge_ItemsUOM_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_ItemsUOM_task --> Truncate_Stage_task
-        SEQ___Product_Xtra_Extracts_task["SEQ - Product Xtra Extracts"]
-        Truncate_Stage_task --> SEQ___Product_Xtra_Extracts_task
-        SEQ___ItemMaster_task["SEQ - ItemMaster"]
-        SEQ___Product_Xtra_Extracts_task --> SEQ___ItemMaster_task
-        ItemMaster_task["ItemMaster"]
-        SEQ___ItemMaster_task --> ItemMaster_task
-        Merge_ItemMaster_task["Merge ItemMaster"]
-        ItemMaster_task --> Merge_ItemMaster_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_ItemMaster_task --> Truncate_Stage_task
-        SEQ___ItemMasterProducts_task["SEQ - ItemMasterProducts"]
-        Truncate_Stage_task --> SEQ___ItemMasterProducts_task
-        Merge_ItemMasterProducts_task["Merge ItemMasterProducts"]
-        SEQ___ItemMasterProducts_task --> Merge_ItemMasterProducts_task
-        Products_task["Products"]
-        Merge_ItemMasterProducts_task --> Products_task
-        Truncate_Stage_task["Truncate Stage"]
-        Products_task --> Truncate_Stage_task
-        SEQ___ItemsUOM_task["SEQ - ItemsUOM"]
-        Truncate_Stage_task --> SEQ___ItemsUOM_task
-        ItemsUOM_task["ItemsUOM"]
-        SEQ___ItemsUOM_task --> ItemsUOM_task
-        Merge_ItemsUOM_task["Merge ItemsUOM"]
-        ItemsUOM_task --> Merge_ItemsUOM_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_ItemsUOM_task --> Truncate_Stage_task
-        SeqCont___ReleasedProductsV2_task["SeqCont - ReleasedProductsV2"]
-        Truncate_Stage_task --> SeqCont___ReleasedProductsV2_task
-        Data_Flow_Task_task["Data Flow Task"]
-        SeqCont___ReleasedProductsV2_task --> Data_Flow_Task_task
-        Merge___spMergeReleasedProducts_task["Merge - spMergeReleasedProducts"]
-        Data_Flow_Task_task --> Merge___spMergeReleasedProducts_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge___spMergeReleasedProducts_task --> Truncate_Stage_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Truncate_Stage_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| Dynamics AX Connection Manager 1 | DynamicsAX |
-| IntegrationStaging | OLEDB |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| Dynamics AX Connection Manager 1 | DynamicsAX |  |  |  |
+| IntegrationStaging | OLEDB | stl-ssis-t-01 | IntegrationStaging | Data Source=stl-ssis-t-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP | SMTP |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WMS_ProductDataExtract | Microsoft.Package |
-| SEQ - Product Extracts | STOCK:SEQUENCE |
-| SEQ - ItemMaster | STOCK:SEQUENCE |
-| ItemMaster | Microsoft.Pipeline |
-| Merge ItemMaster | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| SEQ - ItemMasterProducts | STOCK:SEQUENCE |
-| Merge ItemMasterProducts | Microsoft.ExecuteSQLTask |
-| Products | Microsoft.Pipeline |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| SEQ - ItemsUOM | STOCK:SEQUENCE |
-| ItemsUOM | Microsoft.Pipeline |
-| Merge ItemsUOM | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| SEQ - Product Xtra Extracts | STOCK:SEQUENCE |
-| SEQ - ItemMaster | STOCK:SEQUENCE |
-| ItemMaster | Microsoft.Pipeline |
-| Merge ItemMaster | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| SEQ - ItemMasterProducts | STOCK:SEQUENCE |
-| Merge ItemMasterProducts | Microsoft.ExecuteSQLTask |
-| Products | Microsoft.Pipeline |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| SEQ - ItemsUOM | STOCK:SEQUENCE |
-| ItemsUOM | Microsoft.Pipeline |
-| Merge ItemsUOM | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| SeqCont - ReleasedProductsV2 | STOCK:SEQUENCE |
-| Data Flow Task | Microsoft.Pipeline |
-| Merge - spMergeReleasedProducts | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| WMS_ProductDataExtract | Package |
+| SEQ - Product Extracts | SEQUENCE |
+| SEQ - ItemMaster | SEQUENCE |
+| ItemMaster | Pipeline |
+| Merge ItemMaster | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| SEQ - ItemMasterProducts | SEQUENCE |
+| Merge ItemMasterProducts | ExecuteSQLTask |
+| Products | Pipeline |
+| Truncate Stage | ExecuteSQLTask |
+| SEQ - ItemsUOM | SEQUENCE |
+| ItemsUOM | Pipeline |
+| Merge ItemsUOM | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| SEQ - Product Xtra Extracts | SEQUENCE |
+| SEQ - ItemMaster | SEQUENCE |
+| ItemMaster | Pipeline |
+| Merge ItemMaster | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| SEQ - ItemMasterProducts | SEQUENCE |
+| Merge ItemMasterProducts | ExecuteSQLTask |
+| Products | Pipeline |
+| Truncate Stage | ExecuteSQLTask |
+| SEQ - ItemsUOM | SEQUENCE |
+| ItemsUOM | Pipeline |
+| Merge ItemsUOM | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| SeqCont - ReleasedProductsV2 | SEQUENCE |
+| Data Flow Task | Pipeline |
+| Merge - spMergeReleasedProducts | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- SEQ - Product Extracts [SEQUENCE]
+  - SEQ - ItemMaster [SEQUENCE]
+  - SEQ - ItemMasterProducts [SEQUENCE]
+    - Merge ItemMasterProducts [ExecuteSQLTask]
+    - Products [Pipeline]
+    - Truncate Stage [ExecuteSQLTask]
+    - ItemMaster [Pipeline]
+    - Merge ItemMaster [ExecuteSQLTask]
+    - Truncate Stage [ExecuteSQLTask]
+  - SEQ - ItemsUOM [SEQUENCE]
+    - ItemsUOM [Pipeline]
+    - Merge ItemsUOM [ExecuteSQLTask]
+    - Truncate Stage [ExecuteSQLTask]
+- SEQ - Product Xtra Extracts [SEQUENCE]
+  - SEQ - ItemMaster [SEQUENCE]
+  - SEQ - ItemMasterProducts [SEQUENCE]
+    - Merge ItemMasterProducts [ExecuteSQLTask]
+    - Products [Pipeline]
+    - Truncate Stage [ExecuteSQLTask]
+    - ItemMaster [Pipeline]
+    - Merge ItemMaster [ExecuteSQLTask]
+    - Truncate Stage [ExecuteSQLTask]
+  - SEQ - ItemsUOM [SEQUENCE]
+    - ItemsUOM [Pipeline]
+    - Merge ItemsUOM [ExecuteSQLTask]
+    - Truncate Stage [ExecuteSQLTask]
+- SeqCont - ReleasedProductsV2 [SEQUENCE]
+  - Data Flow Task [Pipeline]
+  - Merge - spMergeReleasedProducts [ExecuteSQLTask]
+  - Truncate Stage [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_SEQ___Product_Extracts["SEQ - Product Extracts"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster["SEQ - ItemMaster"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_ItemMaster["ItemMaster"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_Merge_ItemMaster["Merge ItemMaster"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_Truncate_Stage["Truncate Stage"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts["SEQ - ItemMasterProducts"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Merge_ItemMasterProducts["Merge ItemMasterProducts"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Products["Products"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Truncate_Stage["Truncate Stage"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM["SEQ - ItemsUOM"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_ItemsUOM["ItemsUOM"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_Merge_ItemsUOM["Merge ItemsUOM"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_Truncate_Stage["Truncate Stage"]
+    n_Package_SEQ___Product_Xtra_Extracts["SEQ - Product Xtra Extracts"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster["SEQ - ItemMaster"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_ItemMaster["ItemMaster"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_Merge_ItemMaster["Merge ItemMaster"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_Truncate_Stage["Truncate Stage"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts["SEQ - ItemMasterProducts"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Merge_ItemMasterProducts["Merge ItemMasterProducts"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Products["Products"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Truncate_Stage["Truncate Stage"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM["SEQ - ItemsUOM"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_ItemsUOM["ItemsUOM"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_Merge_ItemsUOM["Merge ItemsUOM"]
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_Truncate_Stage["Truncate Stage"]
+    n_Package_SeqCont___ReleasedProductsV2["SeqCont - ReleasedProductsV2"]
+    n_Package_SeqCont___ReleasedProductsV2_Data_Flow_Task["Data Flow Task"]
+    n_Package_SeqCont___ReleasedProductsV2_Merge___spMergeReleasedProducts["Merge - spMergeReleasedProducts"]
+    n_Package_SeqCont___ReleasedProductsV2_Truncate_Stage["Truncate Stage"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_Truncate_Stage --> n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_ItemMaster
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_ItemMaster --> n_Package_SEQ___Product_Extracts_SEQ___ItemMaster_Merge_ItemMaster
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Truncate_Stage --> n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Products
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Products --> n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts_Merge_ItemMasterProducts
+    n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_Truncate_Stage --> n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_ItemsUOM
+    n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_ItemsUOM --> n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM_Merge_ItemsUOM
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMaster --> n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts
+    n_Package_SEQ___Product_Extracts_SEQ___ItemMasterProducts --> n_Package_SEQ___Product_Extracts_SEQ___ItemsUOM
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_Truncate_Stage --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_ItemMaster
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_ItemMaster --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster_Merge_ItemMaster
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Truncate_Stage --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Products
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Products --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts_Merge_ItemMasterProducts
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_Truncate_Stage --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_ItemsUOM
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_ItemsUOM --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM_Merge_ItemsUOM
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMaster --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts
+    n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemMasterProducts --> n_Package_SEQ___Product_Xtra_Extracts_SEQ___ItemsUOM
+    n_Package_SeqCont___ReleasedProductsV2_Truncate_Stage --> n_Package_SeqCont___ReleasedProductsV2_Data_Flow_Task
+    n_Package_SeqCont___ReleasedProductsV2_Data_Flow_Task --> n_Package_SeqCont___ReleasedProductsV2_Merge___spMergeReleasedProducts
+    n_Package_SEQ___Product_Extracts --> n_Package_SEQ___Product_Xtra_Extracts
+    n_Package_SEQ___Product_Extracts --> n_Package_SeqCont___ReleasedProductsV2
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+
+## Execute SQL Tasks
+
+### Merge ItemMasterProducts
+
+**Path:** `Package\SEQ - Product Extracts\SEQ - ItemMasterProducts\Merge ItemMasterProducts`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeItemMasterProducts
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - Product Extracts\SEQ - ItemMasterProducts\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.ItemMasterProductsStage
+```
+
+### Merge ItemMaster
+
+**Path:** `Package\SEQ - Product Extracts\SEQ - ItemMaster\Merge ItemMaster`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeItemMaster
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - Product Extracts\SEQ - ItemMaster\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.ItemMasterStage
+```
+
+### Merge ItemsUOM
+
+**Path:** `Package\SEQ - Product Extracts\SEQ - ItemsUOM\Merge ItemsUOM`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeItemsUOM
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - Product Extracts\SEQ - ItemsUOM\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.ItemsUOMStage
+```
+
+### Merge ItemMasterProducts
+
+**Path:** `Package\SEQ - Product Xtra Extracts\SEQ - ItemMasterProducts\Merge ItemMasterProducts`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeItemMasterProductsXtra
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - Product Xtra Extracts\SEQ - ItemMasterProducts\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.ItemMasterProductsXtraStage
+```
+
+### Merge ItemMaster
+
+**Path:** `Package\SEQ - Product Xtra Extracts\SEQ - ItemMaster\Merge ItemMaster`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeItemMasterXtra
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - Product Xtra Extracts\SEQ - ItemMaster\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.ItemMasterXtraStage
+```
+
+### Merge ItemsUOM
+
+**Path:** `Package\SEQ - Product Xtra Extracts\SEQ - ItemsUOM\Merge ItemsUOM`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeItemsUOMXtra
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - Product Xtra Extracts\SEQ - ItemsUOM\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.ItemsUOMXtraStage
+```
+
+### Merge - spMergeReleasedProducts
+
+**Path:** `Package\SeqCont - ReleasedProductsV2\Merge - spMergeReleasedProducts`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+exec [WMS].[spMergeReleasedProducts]
+```
+
+### Truncate Stage
+
+**Path:** `Package\SeqCont - ReleasedProductsV2\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-t-01/IntegrationStaging)  
+
+```sql
+truncate table WMS.ReleasedProductsStage 
+
+```
 
 ## Data Flow: Sources
 
@@ -131,23 +283,22 @@ _None detected._
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WMS].[ItemMasterStage] |
-|  | [WMS].[ItemMasterStage] |
-|  | [WMS].[ItemMasterStage] |
-|  | [WMS].[ItemMasterStage] |
-|  | [WMS].[ItemMasterStage] |
-|  | [WMS].[ItemMasterStage] |
-|  | [WMS].[ItemMasterProductsStage] |
-|  | [WMS].[ItemsUOMStage] |
-|  | [WMS].[ItemMasterXtraStage] |
-|  | [WMS].[ItemMasterXtraStage] |
-|  | [WMS].[ItemMasterXtraStage] |
-|  | [WMS].[ItemMasterXtraStage] |
-|  | [WMS].[ItemMasterXtraStage] |
-|  | [WMS].[ItemMasterXtraStage] |
-|  | [WMS].[ItemMasterProductsXtraStage] |
-|  | [WMS].[ItemsUOMXtraStage] |
-|  | [WMS].[ReleasedProductsStage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| ItemMasterStage |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 1 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 2 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 3 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 4 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterProductsStage |  | OLEDBDestination | Products | IntegrationStaging |  |
+| ItemsUOMStage |  | OLEDBDestination | ItemsUOM | IntegrationStaging |  |
+| ItemMasterStage |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 1 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 2 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 3 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterStage 1 4 |  | OLEDBDestination | ItemMaster | IntegrationStaging |  |
+| ItemMasterProductsXtraStage |  | OLEDBDestination | Products | IntegrationStaging |  |
+| ItemsUOMStage |  | OLEDBDestination | ItemsUOM | IntegrationStaging |  |
+| OLE DB Destination - IntStaging - WmsReleasedProductsStage |  | OLEDBDestination | Data Flow Task | IntegrationStaging |  |

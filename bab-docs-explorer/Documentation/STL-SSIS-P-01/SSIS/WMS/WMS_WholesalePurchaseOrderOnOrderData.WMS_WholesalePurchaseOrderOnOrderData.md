@@ -1,51 +1,76 @@
-﻿# SSIS Package: WMS_WholesalePurchaseOrderOnOrderData
+# SSIS Package: WMS_WholesalePurchaseOrderOnOrderData
 
 **Project:** WMS_WholesalePurchaseOrderOnOrderData  
 **Folder:** WMS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        Dynamics_AX_Connection_Manager_conn(["Dynamics AX Connection Manager [DynamicsAX]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        WMS_WholesalePurchaseOrderOnOrderData_task["WMS_WholesalePurchaseOrderOnOrderData"]
-        Sequence_Container_task["Sequence Container"]
-        WMS_WholesalePurchaseOrderOnOrderData_task --> Sequence_Container_task
-        DataFlow___Download_PO_Lines_task["DataFlow - Download PO Lines"]
-        Sequence_Container_task --> DataFlow___Download_PO_Lines_task
-        Merge_PO_Lines_task["Merge PO Lines"]
-        DataFlow___Download_PO_Lines_task --> Merge_PO_Lines_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_PO_Lines_task --> Truncate_Stage_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Truncate_Stage_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| Dynamics AX Connection Manager | DynamicsAX |
-| IntegrationStaging | OLEDB |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| Dynamics AX Connection Manager | DynamicsAX |  |  |  |
+| IntegrationStaging | OLEDB | stl-ssis-P-01 | IntegrationStaging | Data Source=stl-ssis-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP | SMTP |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WMS_WholesalePurchaseOrderOnOrderData | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| DataFlow - Download PO Lines | Microsoft.Pipeline |
-| Merge PO Lines | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| WMS_WholesalePurchaseOrderOnOrderData | Package |
+| Sequence Container | SEQUENCE |
+| DataFlow - Download PO Lines | Pipeline |
+| Merge PO Lines | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- Sequence Container [SEQUENCE]
+  - DataFlow - Download PO Lines [Pipeline]
+  - Merge PO Lines [ExecuteSQLTask]
+  - Truncate Stage [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_DataFlow___Download_PO_Lines["DataFlow - Download PO Lines"]
+    n_Package_Sequence_Container_Merge_PO_Lines["Merge PO Lines"]
+    n_Package_Sequence_Container_Truncate_Stage["Truncate Stage"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_Sequence_Container_Truncate_Stage --> n_Package_Sequence_Container_DataFlow___Download_PO_Lines
+    n_Package_Sequence_Container_DataFlow___Download_PO_Lines --> n_Package_Sequence_Container_Merge_PO_Lines
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+
+## Execute SQL Tasks
+
+### Merge PO Lines
+
+**Path:** `Package\Sequence Container\Merge PO Lines`  
+**Connection:** IntegrationStaging (stl-ssis-P-01/IntegrationStaging)  
+
+```sql
+exec WMS.spMergeWholesaleOnOrder 
+```
+
+### Truncate Stage
+
+**Path:** `Package\Sequence Container\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-P-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WMS.WholesaleOnOrderStage
+```
 
 ## Data Flow: Sources
 
@@ -53,7 +78,6 @@ _None detected._
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WMS].[WholesaleOnOrderStage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| WholesaleOnOrderStage |  | OLEDBDestination | DataFlow - Download PO Lines | IntegrationStaging |  |

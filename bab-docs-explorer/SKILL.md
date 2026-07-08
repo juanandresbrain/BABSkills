@@ -80,11 +80,12 @@ Inspects a view's table dependencies and displays its source SQL code snippet.
   ```
 
 ### 7. `describe-package <package_name>`
-Inspects SSIS connection managers, control flow tasks, sources, and destinations.
+Inspects an SSIS package: connection managers (with server/catalog, credentials stripped), control-flow outline (indented, preserves loop nesting), data-flow sources/destinations with component names, and — importantly — the package's **business logic**: the `## Variables` section (full expression-bound SQL) and the `## Execute SQL Tasks` section (full `SqlStatementSource`, with runtime property-expression overrides flagged). This is where per-store computations and staging SQL usually live.
 - **Example**:
   ```bash
-  python scripts/explore_docs.py describe-package ExactTargetLeadGen
+  python scripts/explore_docs.py describe-package HR_StoreForcePosSalesExtract
   ```
+- **Note:** SSIS package docs are re-extracted from the raw `.ispac`/`.dtsx` by `GenerateSsisDocs.py` (repo root). Logic stored in package Variables and Execute SQL Task bodies is now indexed by `search-all` — see `KNOWN_LIMITATIONS.md` for the history (ticket 104344).
 
 ### 8. `describe-job <job_name>`
 Shows step-by-step instructions, subsystems (TSQL, SSIS, CmdExec), and source code commands for a SQL Agent Job.

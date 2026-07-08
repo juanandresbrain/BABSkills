@@ -1,172 +1,420 @@
-﻿# SSIS Package: WebCatalogStoreFront
+# SSIS Package: WebCatalogStoreFront
 
 **Project:** WebProductCatalogStorefront  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        ArchiveFolder_conn(["ArchiveFolder [FILE]"])
-        AttributeNullExceptionsStage_csv_conn(["AttributeNullExceptionsStage.csv [FLATFILE]"])
-        CategoryExceptions_conn(["CategoryExceptions [FLATFILE]"])
-        CategoryXREF_csv_conn(["CategoryXREF.csv [FLATFILE]"])
-        DW_conn(["DW [OLEDB]"])
-        EMAIL_conn(["EMAIL [SMTP]"])
-        FTP_Connection_Manager_conn(["FTP Connection Manager [FTP]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        ME_01_conn(["ME_01 [OLEDB]"])
-        SiteCatalystClassification_conn(["SiteCatalystClassification [FLATFILE]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-        SQL_LOG_conn(["SQL_LOG [OLEDB]"])
-        XML_Files_conn(["XML Files [FLATFILE]"])
-    end
-    subgraph ControlFlow
-        WebCatalogStoreFront_task["WebCatalogStoreFront"]
-        File_Generation_and_Move_task["File Generation and Move"]
-        WebCatalogStoreFront_task --> File_Generation_and_Move_task
-        Delete_Old_Files_task["Delete Old Files"]
-        File_Generation_and_Move_task --> Delete_Old_Files_task
-        Foreach_Loop_Container_task["Foreach Loop Container"]
-        Delete_Old_Files_task --> Foreach_Loop_Container_task
-        Archive_Files_task["Archive Files"]
-        Foreach_Loop_Container_task --> Archive_Files_task
-        Copy_Files_to_FTP_Server_task["Copy Files to FTP Server"]
-        Archive_Files_task --> Copy_Files_to_FTP_Server_task
-        spOutputStorefrontCatalogs_task["spOutputStorefrontCatalogs"]
-        Copy_Files_to_FTP_Server_task --> spOutputStorefrontCatalogs_task
-        Foreach_Loop_Log_File_Size_task["Foreach Loop Log File Size"]
-        spOutputStorefrontCatalogs_task --> Foreach_Loop_Log_File_Size_task
-        Get_File_and_Size_task["Get File and Size"]
-        Foreach_Loop_Log_File_Size_task --> Get_File_and_Size_task
-        Load_File_and_Size_task["Load File and Size"]
-        Get_File_and_Size_task --> Load_File_and_Size_task
-        Send_File_Stage_Summary_Email_task["Send File Stage Summary Email"]
-        Load_File_and_Size_task --> Send_File_Stage_Summary_Email_task
-        Stage_Data_task["Stage Data"]
-        Send_File_Stage_Summary_Email_task --> Stage_Data_task
-        Categories_task["Categories"]
-        Stage_Data_task --> Categories_task
-        Merge_Categories_task["Merge Categories"]
-        Categories_task --> Merge_Categories_task
-        Stage_Categories_task["Stage Categories"]
-        Merge_Categories_task --> Stage_Categories_task
-        Omniture_Sequence_task["Omniture Sequence"]
-        Stage_Categories_task --> Omniture_Sequence_task
-        Append_Data_to_Template_File_task["Append Data to Template File"]
-        Omniture_Sequence_task --> Append_Data_to_Template_File_task
-        For_Each_FTP_task["For Each FTP"]
-        Append_Data_to_Template_File_task --> For_Each_FTP_task
-        FTP_Task_task["FTP Task"]
-        For_Each_FTP_task --> FTP_Task_task
-        Foreach_Loop_Container_task["Foreach Loop Container"]
-        FTP_Task_task --> Foreach_Loop_Container_task
-        Copy_Omniture_Template_File_to_Stage_task["Copy Omniture Template File to Stage"]
-        Foreach_Loop_Container_task --> Copy_Omniture_Template_File_to_Stage_task
-        ProductCategoryMap_task["ProductCategoryMap"]
-        Copy_Omniture_Template_File_to_Stage_task --> ProductCategoryMap_task
-        Merge_ProductStorefrontCategoryMap_task["Merge ProductStorefrontCategoryMap"]
-        ProductCategoryMap_task --> Merge_ProductStorefrontCategoryMap_task
-        Stage_ProductCategoryMap_task["Stage ProductCategoryMap"]
-        Merge_ProductStorefrontCategoryMap_task --> Stage_ProductCategoryMap_task
-        Sequence_Load_Product_Category_Map_to_DW_task["Sequence Load Product Category Map to DW"]
-        Stage_ProductCategoryMap_task --> Sequence_Load_Product_Category_Map_to_DW_task
-        Load_Product_Category_Map_to_DW_task["Load Product Category Map to DW"]
-        Sequence_Load_Product_Category_Map_to_DW_task --> Load_Product_Category_Map_to_DW_task
-        Truncate_Stage_task["Truncate Stage"]
-        Load_Product_Category_Map_to_DW_task --> Truncate_Stage_task
-        Truncate_Staging_task["Truncate Staging"]
-        Truncate_Stage_task --> Truncate_Staging_task
-        XREF_CSVs_task["XREF CSVs"]
-        Truncate_Staging_task --> XREF_CSVs_task
-        Import_Category_Lookups_task["Import Category Lookups"]
-        XREF_CSVs_task --> Import_Category_Lookups_task
-        Merge_CategoryXREF_task["Merge CategoryXREF"]
-        Import_Category_Lookups_task --> Merge_CategoryXREF_task
-        Send_Email_onError_task["Send Email onError"]
-        Merge_CategoryXREF_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| ArchiveFolder | FILE |
-| AttributeNullExceptionsStage.csv | FLATFILE |
-| CategoryExceptions | FLATFILE |
-| CategoryXREF.csv | FLATFILE |
-| DW | OLEDB |
-| EMAIL | SMTP |
-| FTP Connection Manager | FTP |
-| IntegrationStaging | OLEDB |
-| ME_01 | OLEDB |
-| SiteCatalystClassification | FLATFILE |
-| SMTP_EMAIL | SMTP |
-| SQL_LOG | OLEDB |
-| XML Files | FLATFILE |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| ArchiveFolder | FILE |  |  |  |
+| AttributeNullExceptionsStage.csv | FLATFILE |  |  |  |
+| CategoryExceptions | FLATFILE |  |  |  |
+| CategoryXREF.csv | FLATFILE |  |  |  |
+| DW | OLEDB | papamart | dw | Data Source=papamart; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| EMAIL | SMTP |  |  |  |
+| FTP Connection Manager | FTP |  |  |  |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| ME_01 | OLEDB | bedrockdb02 | me_01 | Data Source=bedrockdb02; Initial Catalog=me_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP_EMAIL | SMTP |  |  |  |
+| SQL_LOG | OLEDB | stl-ssis-p-01 | msdb | Data Source=stl-ssis-p-01; Initial Catalog=msdb; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SiteCatalystClassification | FLATFILE |  |  |  |
+| XML Files | FLATFILE |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WebCatalogStoreFront | Microsoft.Package |
-| File Generation and Move | STOCK:SEQUENCE |
-| Delete Old Files | Microsoft.ExecuteSQLTask |
-| Foreach Loop Container | STOCK:FOREACHLOOP |
-| Archive Files | Microsoft.FileSystemTask |
-| Copy Files to FTP Server | Microsoft.FileSystemTask |
-| spOutputStorefrontCatalogs | Microsoft.ExecuteSQLTask |
-| Foreach Loop Log File Size | STOCK:FOREACHLOOP |
-| Get File and Size | Microsoft.ExecuteProcess |
-| Load File and Size | Microsoft.Pipeline |
-| Send File Stage Summary Email | Microsoft.ExecuteSQLTask |
-| Stage Data | STOCK:SEQUENCE |
-| Categories | STOCK:SEQUENCE |
-| Merge Categories | Microsoft.ExecuteSQLTask |
-| Stage Categories | Microsoft.Pipeline |
-| Omniture Sequence | STOCK:SEQUENCE |
-| Append Data to Template File | Microsoft.Pipeline |
-| For Each FTP | STOCK:FOREACHLOOP |
-| FTP Task | Microsoft.FtpTask |
-| Foreach Loop Container | STOCK:FOREACHLOOP |
-| Copy Omniture Template File to Stage | Microsoft.FileSystemTask |
-| ProductCategoryMap | STOCK:SEQUENCE |
-| Merge ProductStorefrontCategoryMap | Microsoft.ExecuteSQLTask |
-| Stage ProductCategoryMap | Microsoft.Pipeline |
-| Sequence Load Product Category Map to DW | STOCK:SEQUENCE |
-| Load Product Category Map to DW | Microsoft.Pipeline |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Truncate Staging | Microsoft.ExecuteSQLTask |
-| XREF CSVs | STOCK:SEQUENCE |
-| Import Category Lookups | Microsoft.Pipeline |
-| Merge CategoryXREF | Microsoft.ExecuteSQLTask |
-| Send Email onError | Microsoft.SendMailTask |
+| WebCatalogStoreFront | Package |
+| File Generation and Move | SEQUENCE |
+| Delete Old Files | ExecuteSQLTask |
+| Foreach Loop Container | FOREACHLOOP |
+| Archive Files | FileSystemTask |
+| Copy Files to FTP Server | FileSystemTask |
+| spOutputStorefrontCatalogs | ExecuteSQLTask |
+| Foreach Loop Log File Size | FOREACHLOOP |
+| Get File and Size | ExecuteProcess |
+| Load File and Size | Pipeline |
+| Send File Stage Summary Email | ExecuteSQLTask |
+| Stage Data | SEQUENCE |
+| Categories | SEQUENCE |
+| Merge Categories | ExecuteSQLTask |
+| Stage Categories | Pipeline |
+| Omniture Sequence | SEQUENCE |
+| Append Data to Template File | Pipeline |
+| For Each FTP | FOREACHLOOP |
+| FTP Task | FtpTask |
+| Foreach Loop Container | FOREACHLOOP |
+| Copy Omniture Template File to Stage | FileSystemTask |
+| ProductCategoryMap | SEQUENCE |
+| Merge ProductStorefrontCategoryMap | ExecuteSQLTask |
+| Stage ProductCategoryMap | Pipeline |
+| Sequence Load Product Category Map to DW | SEQUENCE |
+| Load Product Category Map to DW | Pipeline |
+| Truncate Stage | ExecuteSQLTask |
+| Truncate Staging | ExecuteSQLTask |
+| XREF CSVs | SEQUENCE |
+| Import Category Lookups | Pipeline |
+| Merge CategoryXREF | ExecuteSQLTask |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- File Generation and Move [SEQUENCE]
+  - Delete Old Files [ExecuteSQLTask]
+  - Foreach Loop Container [FOREACHLOOP]
+    - Archive Files [FileSystemTask]
+    - Copy Files to FTP Server [FileSystemTask]
+  - spOutputStorefrontCatalogs [ExecuteSQLTask]
+- Foreach Loop Log File Size [FOREACHLOOP]
+  - Get File and Size [ExecuteProcess]
+  - Load File and Size [Pipeline]
+- Send File Stage Summary Email [ExecuteSQLTask]
+- Stage Data [SEQUENCE]
+  - Categories [SEQUENCE]
+    - Merge Categories [ExecuteSQLTask]
+    - Stage Categories [Pipeline]
+  - Omniture Sequence [SEQUENCE]
+    - Append Data to Template File [Pipeline]
+    - For Each FTP [FOREACHLOOP]
+      - FTP Task [FtpTask]
+    - Foreach Loop Container [FOREACHLOOP]
+      - Copy Omniture Template File to Stage [FileSystemTask]
+  - ProductCategoryMap [SEQUENCE]
+    - Merge ProductStorefrontCategoryMap [ExecuteSQLTask]
+    - Stage ProductCategoryMap [Pipeline]
+  - Sequence Load Product Category Map to DW [SEQUENCE]
+    - Load Product Category Map to DW [Pipeline]
+    - Truncate Stage [ExecuteSQLTask]
+  - Truncate Staging [ExecuteSQLTask]
+  - XREF CSVs [SEQUENCE]
+    - Import Category Lookups [Pipeline]
+    - Merge CategoryXREF [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_File_Generation_and_Move["File Generation and Move"]
+    n_Package_File_Generation_and_Move_Delete_Old_Files["Delete Old Files"]
+    n_Package_File_Generation_and_Move_Foreach_Loop_Container["Foreach Loop Container"]
+    n_Package_File_Generation_and_Move_Foreach_Loop_Container_Archive_Files["Archive Files"]
+    n_Package_File_Generation_and_Move_Foreach_Loop_Container_Copy_Files_to_FTP_Server["Copy Files to FTP Server"]
+    n_Package_File_Generation_and_Move_spOutputStorefrontCatalogs["spOutputStorefrontCatalogs"]
+    n_Package_Foreach_Loop_Log_File_Size["Foreach Loop Log File Size"]
+    n_Package_Foreach_Loop_Log_File_Size_Get_File_and_Size["Get File and Size"]
+    n_Package_Foreach_Loop_Log_File_Size_Load_File_and_Size["Load File and Size"]
+    n_Package_Send_File_Stage_Summary_Email["Send File Stage Summary Email"]
+    n_Package_Stage_Data["Stage Data"]
+    n_Package_Stage_Data_Categories["Categories"]
+    n_Package_Stage_Data_Categories_Merge_Categories["Merge Categories"]
+    n_Package_Stage_Data_Categories_Stage_Categories["Stage Categories"]
+    n_Package_Stage_Data_Omniture_Sequence["Omniture Sequence"]
+    n_Package_Stage_Data_Omniture_Sequence_Append_Data_to_Template_File["Append Data to Template File"]
+    n_Package_Stage_Data_Omniture_Sequence_For_Each_FTP["For Each FTP"]
+    n_Package_Stage_Data_Omniture_Sequence_For_Each_FTP_FTP_Task["FTP Task"]
+    n_Package_Stage_Data_Omniture_Sequence_Foreach_Loop_Container["Foreach Loop Container"]
+    n_Package_Stage_Data_Omniture_Sequence_Foreach_Loop_Container_Copy_Omniture_Template_File_to_Stage["Copy Omniture Template File to Stage"]
+    n_Package_Stage_Data_ProductCategoryMap["ProductCategoryMap"]
+    n_Package_Stage_Data_ProductCategoryMap_Merge_ProductStorefrontCategoryMap["Merge ProductStorefrontCategoryMap"]
+    n_Package_Stage_Data_ProductCategoryMap_Stage_ProductCategoryMap["Stage ProductCategoryMap"]
+    n_Package_Stage_Data_Sequence_Load_Product_Category_Map_to_DW["Sequence Load Product Category Map to DW"]
+    n_Package_Stage_Data_Sequence_Load_Product_Category_Map_to_DW_Load_Product_Category_Map_to_DW["Load Product Category Map to DW"]
+    n_Package_Stage_Data_Sequence_Load_Product_Category_Map_to_DW_Truncate_Stage["Truncate Stage"]
+    n_Package_Stage_Data_Truncate_Staging["Truncate Staging"]
+    n_Package_Stage_Data_XREF_CSVs["XREF CSVs"]
+    n_Package_Stage_Data_XREF_CSVs_Import_Category_Lookups["Import Category Lookups"]
+    n_Package_Stage_Data_XREF_CSVs_Merge_CategoryXREF["Merge CategoryXREF"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_File_Generation_and_Move_Foreach_Loop_Container_Copy_Files_to_FTP_Server --> n_Package_File_Generation_and_Move_Foreach_Loop_Container_Archive_Files
+    n_Package_File_Generation_and_Move_spOutputStorefrontCatalogs --> n_Package_File_Generation_and_Move_Foreach_Loop_Container
+    n_Package_File_Generation_and_Move_Foreach_Loop_Container --> n_Package_File_Generation_and_Move_Delete_Old_Files
+    n_Package_Foreach_Loop_Log_File_Size_Get_File_and_Size --> n_Package_Foreach_Loop_Log_File_Size_Load_File_and_Size
+    n_Package_Stage_Data_Categories_Stage_Categories --> n_Package_Stage_Data_Categories_Merge_Categories
+    n_Package_Stage_Data_Omniture_Sequence_Foreach_Loop_Container --> n_Package_Stage_Data_Omniture_Sequence_Append_Data_to_Template_File
+    n_Package_Stage_Data_Omniture_Sequence_Append_Data_to_Template_File --> n_Package_Stage_Data_Omniture_Sequence_For_Each_FTP
+    n_Package_Stage_Data_ProductCategoryMap_Stage_ProductCategoryMap --> n_Package_Stage_Data_ProductCategoryMap_Merge_ProductStorefrontCategoryMap
+    n_Package_Stage_Data_Sequence_Load_Product_Category_Map_to_DW_Truncate_Stage --> n_Package_Stage_Data_Sequence_Load_Product_Category_Map_to_DW_Load_Product_Category_Map_to_DW
+    n_Package_Stage_Data_XREF_CSVs_Import_Category_Lookups --> n_Package_Stage_Data_XREF_CSVs_Merge_CategoryXREF
+    n_Package_Stage_Data_Truncate_Staging --> n_Package_Stage_Data_XREF_CSVs
+    n_Package_Stage_Data_XREF_CSVs --> n_Package_Stage_Data_Categories
+    n_Package_Stage_Data_Categories --> n_Package_Stage_Data_ProductCategoryMap
+    n_Package_Stage_Data_ProductCategoryMap --> n_Package_Stage_Data_Omniture_Sequence
+    n_Package_Stage_Data_Omniture_Sequence --> n_Package_Stage_Data_Sequence_Load_Product_Category_Map_to_DW
+    n_Package_Stage_Data --> n_Package_File_Generation_and_Move
+    n_Package_File_Generation_and_Move --> n_Package_Foreach_Loop_Log_File_Size
+    n_Package_Foreach_Loop_Log_File_Size --> n_Package_Send_File_Stage_Summary_Email
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | FTPStageDirectory | No |
+| User | FileData | No |
+| User | FileName | No |
+| User | FileQuery | Yes |
+| User | FileSizeData | No |
+| User | FileSizePowerShell | Yes |
+| User | OmnitureFTPFile | No |
+| User | OmnitureStageDirectory | No |
+| User | OmnitureTemplateFile | No |
+| User | datestring | Yes |
+
+### Expression-bound variable values
+
+#### User::FileQuery
+
+**Expression:**
+
+```sql
+"select '" +  @[User::FileData] + "' as FileData, '" +  @[User::FileSizeData] + "' as FileSize"
+```
+
+**Evaluated value:**
+
+```sql
+select '' as FileData, '' as FileSize
+```
+
+#### User::FileSizePowerShell
+
+**Expression:**
+
+```sql
+"(Get-Item '" + @[User::FileData] + "').length"
+```
+
+**Evaluated value:**
+
+```sql
+(Get-Item '').length
+```
+
+#### User::datestring
+
+**Expression:**
+
+```sql
+(DT_STR, 4, 1252) DATEPART("yy" , GETDATE()) + RIGHT("0" + (DT_STR, 2, 1252) DATEPART("mm" , GETDATE()), 2) + (DT_STR, 2, 1252) DATEPART("dd" , GETDATE()) + (DT_STR, 2, 1252) DATEPART("hh" , GETDATE()) + (DT_STR, 2, 1252) DATEPART("mi" , GETDATE())+ (DT_STR, 2, 1252) DATEPART("ss" , GETDATE()) +  (DT_STR, 3, 1252) DATEPART("ms" , GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+20181128144440163
+```
+
+## Execute SQL Tasks
+
+### Delete Old Files
+
+**Path:** `Package\File Generation and Move\Delete Old Files`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec spDeleteOldFiles @path = '\\STL-SSIS-P-01\IntegrationStaging\WEB\Outbound\ProductCatalogStorefront\Archive', @filemask = '*.xml', @retention = 14
+```
+
+### spOutputStorefrontCatalogs
+
+**Path:** `Package\File Generation and Move\spOutputStorefrontCatalogs`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+exec WEB.spOutputStorefrontCatalogs 'FULL'
+```
+
+**Property expression (runtime override):**
+
+```sql
+"exec WEB.spOutputStorefrontCatalogs " +  "'" + @[$Package::LoadType] + "'"
+```
+
+### Send File Stage Summary Email
+
+**Path:** `Package\Send File Stage Summary Email`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+
+declare @text nvarchar(max)
+set @text = 
+'The Web Storefront Catalog Files have been staged for upload to SFCC. <br> <br>'+
+'<font face =arial size = 2><B>File Details</B><br>' +
+'</font>' +
+'<table border="1">' +
+'<tr><th>Process Name</th>' +
+'		<th>File Path and Name</th>' +
+'<th>File Size</th>' +
+'<th>InsertDate</th>'  +
+'<font face =arial size = 2>' +
+CAST ( ( SELECT 
+td = Process, '',
+td = FileNamed,'',
+td = FileSize, '',
+td = InsertDate, ''
+from Web.FileSizeData 
+where Process = 'WebCatalogStoreFront'
+order by FileNamed, FileSize
+FOR XML PATH('tr'), TYPE 
+) AS NVARCHAR(MAX) ) +
+'</font></table></font></p></p>
+<br>
+<br>
+<br>' 
+
+	
+
+exec msdb.dbo.sp_send_dbmail
+@profile_name = 'BIAdmin',
+@recipients = 'biadmin@buildabear.com;arth@buildabear.com;michaelg@buildabear.com',
+@body = @text,
+@subject = 'Web Catalog File Stage Summary',
+@body_format = 'html'
+```
+
+### Merge Categories
+
+**Path:** `Package\Stage Data\Categories\Merge Categories`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+exec WEB.spMergeProductCatalogStorefrontCategory 'FULL'
+```
+
+**Property expression (runtime override):**
+
+```sql
+"exec WEB.spMergeProductCatalogStorefrontCategory " + "'" +  @[$Package::LoadType] + "'"
+```
+
+### Merge ProductStorefrontCategoryMap
+
+**Path:** `Package\Stage Data\ProductCategoryMap\Merge ProductStorefrontCategoryMap`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+exec WEB.spMergeProductStorefrontCategoryMap 'FULL'
+```
+
+**Property expression (runtime override):**
+
+```sql
+"exec WEB.spMergeProductStorefrontCategoryMap " + "'" +  @[$Package::LoadType] + "'"
+```
+
+### Truncate Stage
+
+**Path:** `Package\Stage Data\Sequence Load Product Category Map to DW\Truncate Stage`  
+**Connection:** DW (papamart/dw)  
+
+```sql
+TRUNCATE TABLE Azure.WebProductStorefrontCategoryMap
+```
+
+### Truncate Staging
+
+**Path:** `Package\Stage Data\Truncate Staging`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE WEB.CategoryXREFstage
+TRUNCATE TABLE WEB.AttributeNullExceptions
+TRUNCATE TABLE WEB.ProductCatalogStorefrontCategoryStage
+TRUNCATE TABLE WEB.ProductStorefrontCategoryMapStage
+TRUNCATE TABLE WEB.CategoryExceptions
+TRUNCATE TABLE  WEB.OmnitureProductStorefrontCategoryStage
+TRUNCATE TABLE Web.FileSizeData
+```
+
+### Merge CategoryXREF
+
+**Path:** `Package\Stage Data\XREF CSVs\Merge CategoryXREF`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+exec WEB.spMergeCategoryXREF 'FULL'
+```
+
+**Property expression (runtime override):**
+
+```sql
+"exec WEB.spMergeCategoryXREF " +  "'" + @[$Package::LoadType] + "'"
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select  	BABWProductID, 	substring(Category,4,100) as Category, 	SubCategory, 	Collection, 	ProductName from Web.OmnitureProductStorefrontCategoryStage where left(Category,2) = 'US' |
-|  | select 	BABWProductID, 	min(PrimaryCategoryDesignation) PrimaryCategoryDesignation  from WEB.vwProductStorefrontCategoryMap  where substring(CategoryID,4,12) <> 'bear-builder'  group by BABWProductID |
-|  | select   	style_code, 	jurisdiction_code, 	product_key  from product_dim with (nolock) where style_code is not null and jurisdiction_code in ('US', 'UK') |
-|  | select  	cast(left(Category,2) as nvarchar(2)) SiteCountry, 	BABWProductID, 	substring(Category,4,100) as Category, 	SubCategory, 	Collection, 	ProductName, cast(left(Category,2) as varchar(2)) JurisdictionCode from Web.OmnitureProductStorefrontCategoryStage where left(Category,2) in ('US', 'UK') |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| ForEachLoopData |  | OLEDBSource | Load File and Size | IntegrationStaging |  |
+| vwProductStorefrontCatalogCategories |  | OLEDBSource | Stage Categories | IntegrationStaging |  |
+| OmnitureProductStorefrontCategoryStage |  | OLEDBSource | Append Data to Template File | IntegrationStaging | SqlCommand |
+| vwProductStorefrontCategoryMap |  | OLEDBSource | Stage ProductCategoryMap | IntegrationStaging |  |
+| OmnitureProductStorefrontCategoryStage |  | OLEDBSource | Load Product Category Map to DW | IntegrationStaging | SqlCommand |
+| AttributeNullExceptions csv |  | FlatFileSource | Import Category Lookups | AttributeNullExceptionsStage.csv |  |
+| CategoryExceptions csv |  | FlatFileSource | Import Category Lookups | CategoryExceptions |  |
+| CategoryXREF csv |  | FlatFileSource | Import Category Lookups | CategoryXREF.csv |  |
+
+#### OmnitureProductStorefrontCategoryStage — SqlCommand
+
+```sql
+select 
+	BABWProductID,
+	substring(Category,4,100) as Category,
+	SubCategory,
+	Collection,
+	ProductName
+from Web.OmnitureProductStorefrontCategoryStage
+where left(Category,2) = 'US'
+```
+
+#### OmnitureProductStorefrontCategoryStage — SqlCommand
+
+```sql
+select 
+	cast(left(Category,2) as nvarchar(2)) SiteCountry,
+	BABWProductID,
+	substring(Category,4,100) as Category,
+	SubCategory,
+	Collection,
+	ProductName,
+cast(left(Category,2) as varchar(2)) JurisdictionCode
+from Web.OmnitureProductStorefrontCategoryStage
+where left(Category,2) in ('US', 'UK')
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WEB].[FileSizeData] |
-|  | [WEB].[ProductCatalogStorefrontCategoryStage] |
-|  | [WEB].[vwProductStorefrontCatalogCategories] |
-|  | [WEB].[OmnitureProductStorefrontCategoryStage] |
-|  | [WEB].[OmnitureProductStorefrontCategoryStage] |
-|  | [WEB].[ProductStorefrontCategoryMapStage] |
-|  | [WEB].[vwProductStorefrontCategoryMap] |
-|  | [Azure].[WebProductStorefrontCategoryMap] |
-|  | [WEB].[AttributeNullExceptions] |
-|  | [WEB].[CategoryExceptions] |
-|  | [WEB].[CategoryXREFstage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| FileSizeData |  | OLEDBDestination | Load File and Size | IntegrationStaging |  |
+| ProductCatalogStorefrontCategoryStage |  | OLEDBDestination | Stage Categories | IntegrationStaging |  |
+| SiteCatalystClassification |  | FlatFileDestination | Append Data to Template File | SiteCatalystClassification |  |
+| OmnitureProductStorefrontCategoryStage |  | OLEDBDestination | Stage ProductCategoryMap | IntegrationStaging |  |
+| ProductStorefrontCategoryMapStage |  | OLEDBDestination | Stage ProductCategoryMap | IntegrationStaging |  |
+| WebProductStorefrontCategoryMap |  | OLEDBDestination | Load Product Category Map to DW | DW |  |
+| AttributeNullExceptions |  | OLEDBDestination | Import Category Lookups | IntegrationStaging |  |
+| CategoryExceptions |  | OLEDBDestination | Import Category Lookups | IntegrationStaging |  |
+| CategoryXREFstage |  | OLEDBDestination | Import Category Lookups | IntegrationStaging |  |

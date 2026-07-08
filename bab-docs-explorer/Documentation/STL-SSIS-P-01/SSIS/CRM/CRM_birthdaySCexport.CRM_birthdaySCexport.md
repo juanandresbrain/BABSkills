@@ -1,88 +1,134 @@
-﻿# SSIS Package: CRM_birthdaySCexport
+# SSIS Package: CRM_birthdaySCexport
 
 **Project:** CRM_birthdaySCexport  
 **Folder:** CRM  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        12M_conn(["12M [CACHE]"])
-        18M_conn(["18M [CACHE]"])
-        1M_conn(["1M [CACHE]"])
-        24M_conn(["24M [CACHE]"])
-        3M_conn(["3M [CACHE]"])
-        6M_conn(["6M [CACHE]"])
-        archive_conn(["archive [FILE]"])
-        birthday_export_csv_conn(["birthday_export.csv [FILE]"])
-        cDim_conn(["cDim [CACHE]"])
-        CRM_conn(["CRM [OLEDB]"])
-        delta_conn(["delta [EXCEL]"])
-        DW_conn(["DW [OLEDB]"])
-        DWStaging_conn(["DWStaging [OLEDB]"])
-        Flat_File_Connection_Manager_conn(["Flat File Connection Manager [FLATFILE]"])
-        SMTP_conn(["SMTP [SMTP]"])
-        STL_SSIS_P_01_IntegrationStaging_conn(["STL-SSIS-P-01.IntegrationStaging [OLEDB]"])
-    end
-    subgraph ControlFlow
-        CRM_birthdaySCexport_task["CRM_birthdaySCexport"]
-        Sequence_Container_task["Sequence Container"]
-        CRM_birthdaySCexport_task --> Sequence_Container_task
-        archive_task["archive"]
-        Sequence_Container_task --> archive_task
-        bday_stage_task["bday_stage"]
-        archive_task --> bday_stage_task
-        delete_task["delete"]
-        bday_stage_task --> delete_task
-        truncate_tmpCrmDe2_SC_task["truncate tmpCrmDe2_SC"]
-        delete_task --> truncate_tmpCrmDe2_SC_task
-        Send_Mail_Task_task["Send Mail Task"]
-        truncate_tmpCrmDe2_SC_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| 12M | CACHE |
-| 18M | CACHE |
-| 1M | CACHE |
-| 24M | CACHE |
-| 3M | CACHE |
-| 6M | CACHE |
-| archive | FILE |
-| birthday_export.csv | FILE |
-| cDim | CACHE |
-| CRM | OLEDB |
-| delta | EXCEL |
-| DW | OLEDB |
-| DWStaging | OLEDB |
-| Flat File Connection Manager | FLATFILE |
-| SMTP | SMTP |
-| STL-SSIS-P-01.IntegrationStaging | OLEDB |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| 12M | CACHE |  |  |  |
+| 18M | CACHE |  |  |  |
+| 1M | CACHE |  |  |  |
+| 24M | CACHE |  |  |  |
+| 3M | CACHE |  |  |  |
+| 6M | CACHE |  |  |  |
+| CRM | OLEDB | stl-crmdb-p-01 | crm | Data Source=stl-crmdb-p-01; Initial Catalog=crm; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DW | OLEDB | papamart | dw | Data Source=papamart; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| Flat File Connection Manager | FLATFILE |  |  |  |
+| SMTP | SMTP |  |  |  |
+| STL-SSIS-P-01.IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| archive | FILE |  |  |  |
+| birthday_export.csv | FILE |  |  |  |
+| cDim | CACHE |  |  |  |
+| delta | EXCEL | \\stl-ssis-p-01\IntegrationStaging\CRM\test\delta.xlsx |  | Provider=Microsoft.ACE.OLEDB.12.0; Data Source=\\stl-ssis-p-01\IntegrationStaging\CRM\test\delta.xlsx; Extended Properties="EXCEL 12.0 XML; HDR=YES" |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| CRM_birthdaySCexport | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| archive | Microsoft.FileSystemTask |
-| bday_stage | Microsoft.Pipeline |
-| delete | Microsoft.FileSystemTask |
-| truncate tmpCrmDe2_SC | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| CRM_birthdaySCexport | Package |
+| Sequence Container | SEQUENCE |
+| archive | FileSystemTask |
+| bday_stage | Pipeline |
+| delete | FileSystemTask |
+| truncate tmpCrmDe2_SC | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- Sequence Container [SEQUENCE]
+  - archive [FileSystemTask]
+  - bday_stage [Pipeline]
+  - delete [FileSystemTask]
+  - truncate tmpCrmDe2_SC [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_archive["archive"]
+    n_Package_Sequence_Container_bday_stage["bday_stage"]
+    n_Package_Sequence_Container_delete["delete"]
+    n_Package_Sequence_Container_truncate_tmpCrmDe2_SC["truncate tmpCrmDe2_SC"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_Sequence_Container_truncate_tmpCrmDe2_SC --> n_Package_Sequence_Container_bday_stage
+    n_Package_Sequence_Container_bday_stage --> n_Package_Sequence_Container_archive
+    n_Package_Sequence_Container_archive --> n_Package_Sequence_Container_delete
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | allRecords | No |
+| User | varDEarchivePath | Yes |
+| User | varFileToArchive | No |
+| User | varStageFolder | No |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+202282695734653
+```
+
+#### User::varDEarchivePath
+
+**Expression:**
+
+```sql
+"\\\\stl-ssis-p-01\\IntegrationStaging\\CRM\\DataExtension\\archive\\birthday_export" +  @[User::DateTimeStamp] + ".csv"
+```
+
+**Evaluated value:**
+
+```sql
+\\stl-ssis-p-01\IntegrationStaging\CRM\DataExtension\archive\birthday_export202282695734653.csv
+```
+
+## Execute SQL Tasks
+
+### truncate tmpCrmDe2_SC
+
+**Path:** `Package\Sequence Container\truncate tmpCrmDe2_SC`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+truncate table [dbo].[tmpCrmDe2_SC]
+```
 
 ## Data Flow: Sources
 
-_None detected._
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Flat File Source |  | FlatFileSource | bday_stage | Flat File Connection Manager |  |
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[tmpCrmDe2_SC] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OLE DB Destination |  | OLEDBDestination | bday_stage | DWStaging |  |

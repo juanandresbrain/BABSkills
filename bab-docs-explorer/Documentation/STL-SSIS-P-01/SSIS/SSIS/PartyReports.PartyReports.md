@@ -1,69 +1,123 @@
-﻿# SSIS Package: PartyReports
+# SSIS Package: PartyReports
 
 **Project:** PartyReports  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        BABWPartyPlanner_conn(["BABWPartyPlanner [OLEDB]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        me_01_conn(["me_01 [OLEDB]"])
-    end
-    subgraph ControlFlow
-        PartyReports_task["PartyReports"]
-        Party_Reports_Daily_Emails_task["Party Reports Daily Emails"]
-        PartyReports_task --> Party_Reports_Daily_Emails_task
-        Girl_Scouts_task["Girl Scouts"]
-        Party_Reports_Daily_Emails_task --> Girl_Scouts_task
-        UK_task["UK"]
-        Girl_Scouts_task --> UK_task
-        US_task["US"]
-        UK_task --> US_task
-        Web_Party_Transfer_Report_task["Web Party Transfer Report"]
-        US_task --> Web_Party_Transfer_Report_task
-        Send_Email_Summary_task["Send Email Summary"]
-        Web_Party_Transfer_Report_task --> Send_Email_Summary_task
-        Stage_Report_Data_task["Stage Report Data"]
-        Send_Email_Summary_task --> Stage_Report_Data_task
-        Truncate_Stage_task["Truncate Stage"]
-        Stage_Report_Data_task --> Truncate_Stage_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| BABWPartyPlanner | OLEDB |
-| IntegrationStaging | OLEDB |
-| me_01 | OLEDB |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| BABWPartyPlanner | OLEDB | stl-sqlaag-p-01 | BABWPartyPlanner | Data Source=stl-sqlaag-p-01; Initial Catalog=BABWPartyPlanner; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| me_01 | OLEDB | bedrockdb02 | me_01 | Data Source=bedrockdb02; Initial Catalog=me_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| PartyReports | Microsoft.Package |
-| Party Reports Daily Emails | STOCK:SEQUENCE |
-| Girl Scouts | Microsoft.ExecuteSQLTask |
-| UK | Microsoft.ExecuteSQLTask |
-| US | Microsoft.ExecuteSQLTask |
-| Web Party Transfer Report | STOCK:SEQUENCE |
-| Send Email Summary | Microsoft.ExecuteSQLTask |
-| Stage Report Data | Microsoft.Pipeline |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
+| PartyReports | Package |
+| Party Reports Daily Emails | SEQUENCE |
+| Girl Scouts | ExecuteSQLTask |
+| UK | ExecuteSQLTask |
+| US | ExecuteSQLTask |
+| Web Party Transfer Report | SEQUENCE |
+| Send Email Summary | ExecuteSQLTask |
+| Stage Report Data | Pipeline |
+| Truncate Stage | ExecuteSQLTask |
 
-## Data Flow: Sources
+## Control Flow Outline
+
+```text
+- Party Reports Daily Emails [SEQUENCE]
+  - Girl Scouts [ExecuteSQLTask]
+  - UK [ExecuteSQLTask]
+  - US [ExecuteSQLTask]
+- Web Party Transfer Report [SEQUENCE]
+  - Send Email Summary [ExecuteSQLTask]
+  - Stage Report Data [Pipeline]
+  - Truncate Stage [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Party_Reports_Daily_Emails["Party Reports Daily Emails"]
+    n_Package_Party_Reports_Daily_Emails_Girl_Scouts["Girl Scouts"]
+    n_Package_Party_Reports_Daily_Emails_UK["UK"]
+    n_Package_Party_Reports_Daily_Emails_US["US"]
+    n_Package_Web_Party_Transfer_Report["Web Party Transfer Report"]
+    n_Package_Web_Party_Transfer_Report_Send_Email_Summary["Send Email Summary"]
+    n_Package_Web_Party_Transfer_Report_Stage_Report_Data["Stage Report Data"]
+    n_Package_Web_Party_Transfer_Report_Truncate_Stage["Truncate Stage"]
+    n_Package_Party_Reports_Daily_Emails_Girl_Scouts --> n_Package_Party_Reports_Daily_Emails_UK
+    n_Package_Party_Reports_Daily_Emails_UK --> n_Package_Party_Reports_Daily_Emails_US
+    n_Package_Web_Party_Transfer_Report_Truncate_Stage --> n_Package_Web_Party_Transfer_Report_Stage_Report_Data
+    n_Package_Web_Party_Transfer_Report_Stage_Report_Data --> n_Package_Web_Party_Transfer_Report_Send_Email_Summary
+    n_Package_Party_Reports_Daily_Emails --> n_Package_Web_Party_Transfer_Report
+```
+
+## Variables
 
 _None detected._
 
+## Execute SQL Tasks
+
+### Girl Scouts
+
+**Path:** `Package\Party Reports Daily Emails\Girl Scouts`  
+**Connection:** BABWPartyPlanner (stl-sqlaag-p-01/BABWPartyPlanner)  
+
+```sql
+exec spRPT_GSPartyBookingsReportDaily
+
+```
+
+### UK
+
+**Path:** `Package\Party Reports Daily Emails\UK`  
+**Connection:** BABWPartyPlanner (stl-sqlaag-p-01/BABWPartyPlanner)  
+
+```sql
+exec spRPT_PartyBookingSummaryDailyUK 'PartyReportsUK@buildabear.com'
+```
+
+### US
+
+**Path:** `Package\Party Reports Daily Emails\US`  
+**Connection:** BABWPartyPlanner (stl-sqlaag-p-01/BABWPartyPlanner)  
+
+```sql
+exec spRPT_PartyBookingSummaryDailyUS 'PartyReportsUS@buildabear.com'
+```
+
+### Send Email Summary
+
+**Path:** `Package\Web Party Transfer Report\Send Email Summary`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec web.spEmailPartyWebOrderShippedSummary
+```
+
+### Truncate Stage
+
+**Path:** `Package\Web Party Transfer Report\Truncate Stage`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+Truncate Table WEB.PartyTransferOrdersShipped
+```
+
+## Data Flow: Sources
+
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| vwPartyWebOrdersShipped |  | OLEDBSource | Stage Report Data | IntegrationStaging |  |
+
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WEB].[PartyTransferOrdersShipped] |
-|  | [WEB].[vwPartyWebOrdersShipped] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| PartyTransferOrdersShipped |  | OLEDBDestination | Stage Report Data | IntegrationStaging |  |

@@ -1,50 +1,73 @@
-﻿# SSIS Package: PromotionLocationsToSalesforceCore
+# SSIS Package: PromotionLocationsToSalesforceCore
 
 **Project:** PromotionLocationsToSalesforceCore  
 **Folder:** POS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        LocationsCSV_conn(["LocationsCSV [FLATFILE]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-    end
-    subgraph ControlFlow
-        PromotionLocationsToSalesforceCore_task["PromotionLocationsToSalesforceCore"]
-        Data_Flow_Task_task["Data Flow Task"]
-        PromotionLocationsToSalesforceCore_task --> Data_Flow_Task_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Data_Flow_Task_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| IntegrationStaging | OLEDB |
-| LocationsCSV | FLATFILE |
-| SMTP_EMAIL | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| LocationsCSV | FLATFILE |  |  |  |
+| SMTP_EMAIL | SMTP |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| PromotionLocationsToSalesforceCore | Microsoft.Package |
-| Data Flow Task | Microsoft.Pipeline |
-| Send Mail Task | Microsoft.SendMailTask |
+| PromotionLocationsToSalesforceCore | Package |
+| Data Flow Task | Pipeline |
+| Send Mail Task | SendMailTask |
 
-## Data Flow: Sources
+## Control Flow Outline
 
-| Component | SQL Preview |
-|---|---|
-|  | select  	Code as LocationCode, 	case  		when Code >=2000  			then Code 		else concat(cast('1' as varchar), right(Code,3)) 	end as LocationNumber, 	LocationName, 	LocationType, 	Country  from web.LocationStage |
+```text
+- Data Flow Task [Pipeline]
+- Send Mail Task [SendMailTask]
+```
 
-## Data Flow: Destinations
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Data_Flow_Task["Data Flow Task"]
+    n_Package_Send_Mail_Task["Send Mail Task"]
+    n_Package_Data_Flow_Task --> n_Package_Send_Mail_Task
+```
+
+## Variables
 
 _None detected._
 
+## Execute SQL Tasks
+
+_None detected._
+
+## Data Flow: Sources
+
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Web_LocationsStage |  | OLEDBSource | Data Flow Task | IntegrationStaging | SqlCommand |
+
+#### Web_LocationsStage — SqlCommand
+
+```sql
+select 
+	Code as LocationCode,
+	case 
+		when Code >=2000 
+			then Code
+		else concat(cast('1' as varchar), right(Code,3))
+	end as LocationNumber,
+	LocationName,
+	LocationType,
+	Country 
+from web.LocationStage
+```
+
+## Data Flow: Destinations
+
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| LocationsCSV |  | FlatFileDestination | Data Flow Task | LocationsCSV |  |

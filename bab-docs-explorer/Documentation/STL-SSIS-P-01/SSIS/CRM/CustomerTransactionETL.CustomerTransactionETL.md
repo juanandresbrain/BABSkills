@@ -1,146 +1,1395 @@
-﻿# SSIS Package: CustomerTransactionETL
+# SSIS Package: CustomerTransactionETL
 
 **Project:** CustomerTransactionETL  
 **Folder:** CRM  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        auditworks_conn(["auditworks [OLEDB]"])
-        CRM_conn(["CRM [OLEDB]"])
-        DW_conn(["DW [OLEDB]"])
-        DWStaging_conn(["DWStaging [OLEDB]"])
-        Kodiak_BABW_conn(["Kodiak.BABW [OLEDB]"])
-        MA_01_conn(["MA_01 [OLEDB]"])
-        SMTP_Connection_Manager_conn(["SMTP Connection Manager [SMTP]"])
-    end
-    subgraph ControlFlow
-        CustomerTransactionETL_task["CustomerTransactionETL"]
-        ETL_Sequence_task["ETL Sequence"]
-        CustomerTransactionETL_task --> ETL_Sequence_task
-        CRM_Customer_ETL_task["CRM Customer ETL"]
-        ETL_Sequence_task --> CRM_Customer_ETL_task
-        Customer_DataFlow_task["Customer DataFlow"]
-        CRM_Customer_ETL_task --> Customer_DataFlow_task
-        Merge_CRMCustomerDim_task["Merge CRMCustomerDim"]
-        Customer_DataFlow_task --> Merge_CRMCustomerDim_task
-        PreStage_CustAttr_task["PreStage CustAttr"]
-        Merge_CRMCustomerDim_task --> PreStage_CustAttr_task
-        PreStage_Email_task["PreStage Email"]
-        PreStage_CustAttr_task --> PreStage_Email_task
-        PreStage_PhoneAttr_task["PreStage PhoneAttr"]
-        PreStage_Email_task --> PreStage_PhoneAttr_task
-        PreStage_Points_task["PreStage Points"]
-        PreStage_PhoneAttr_task --> PreStage_Points_task
-        PreStage_SubscriberKey_task["PreStage SubscriberKey"]
-        PreStage_Points_task --> PreStage_SubscriberKey_task
-        PreStageLoyalty_task["PreStageLoyalty"]
-        PreStage_SubscriberKey_task --> PreStageLoyalty_task
-        Truncate_Stage_task["Truncate Stage"]
-        PreStageLoyalty_task --> Truncate_Stage_task
-        CRM_Transactions_ETL_task["CRM Transactions ETL"]
-        Truncate_Stage_task --> CRM_Transactions_ETL_task
-        Calculate_Visit_Count_task["Calculate Visit Count"]
-        CRM_Transactions_ETL_task --> Calculate_Visit_Count_task
-        CRM_Transactions_DataFlow_task["CRM Transactions DataFlow"]
-        Calculate_Visit_Count_task --> CRM_Transactions_DataFlow_task
-        Insert_CRMTransactionFactStage_task["Insert CRMTransactionFactStage"]
-        CRM_Transactions_DataFlow_task --> Insert_CRMTransactionFactStage_task
-        Merge_CRMTransactionFact_task["Merge CRMTransactionFact"]
-        Insert_CRMTransactionFactStage_task --> Merge_CRMTransactionFact_task
-        MergeCRMTransactionFact_EnterpriseSellingTransactions_task["MergeCRMTransactionFact_EnterpriseSellingTransactions"]
-        Merge_CRMTransactionFact_task --> MergeCRMTransactionFact_EnterpriseSellingTransactions_task
-        Set_LifetimeTransactionSequence_task["Set LifetimeTransactionSequence"]
-        MergeCRMTransactionFact_EnterpriseSellingTransactions_task --> Set_LifetimeTransactionSequence_task
-        Truncate_Stage_task["Truncate Stage"]
-        Set_LifetimeTransactionSequence_task --> Truncate_Stage_task
-        NameMe_Transactions_ETL_task["NameMe Transactions ETL"]
-        Truncate_Stage_task --> NameMe_Transactions_ETL_task
-        Merge_AnimailID_task["Merge AnimailID"]
-        NameMe_Transactions_ETL_task --> Merge_AnimailID_task
-        Merge_NameMeTransactionFact_task["Merge NameMeTransactionFact"]
-        Merge_AnimailID_task --> Merge_NameMeTransactionFact_task
-        NameMe_Transactions_DataFlow_task["NameMe Transactions DataFlow"]
-        Merge_NameMeTransactionFact_task --> NameMe_Transactions_DataFlow_task
-        POSAnimalIDStaging_task["POSAnimalIDStaging"]
-        NameMe_Transactions_DataFlow_task --> POSAnimalIDStaging_task
-        Stage_POS_Data_From_AW_task["Stage POS Data From AW"]
-        POSAnimalIDStaging_task --> Stage_POS_Data_From_AW_task
-        Truncate_Staging_task["Truncate Staging"]
-        Stage_POS_Data_From_AW_task --> Truncate_Staging_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| auditworks | OLEDB |
-| CRM | OLEDB |
-| DW | OLEDB |
-| DWStaging | OLEDB |
-| Kodiak.BABW | OLEDB |
-| MA_01 | OLEDB |
-| SMTP Connection Manager | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| CRM | OLEDB | STL-CRMDB-P-01 | crm | Data Source=STL-CRMDB-P-01; Initial Catalog=crm; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DW | OLEDB | papamart | dw | Data Source=papamart; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| Kodiak.BABW | OLEDB | KODIAK | babw | Data Source=KODIAK; Initial Catalog=babw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| MA_01 | OLEDB | bedrockdb02 | ma_01 | Data Source=bedrockdb02; Initial Catalog=ma_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP Connection Manager | SMTP |  |  |  |
+| auditworks | OLEDB | BEDROCKDB01 | auditworks | Data Source=BEDROCKDB01; Initial Catalog=auditworks; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| CustomerTransactionETL | Microsoft.Package |
-| ETL Sequence | STOCK:SEQUENCE |
-| CRM Customer ETL | STOCK:SEQUENCE |
-| Customer DataFlow | Microsoft.Pipeline |
-| Merge CRMCustomerDim | Microsoft.ExecuteSQLTask |
-| PreStage CustAttr | Microsoft.ExecuteSQLTask |
-| PreStage Email | Microsoft.ExecuteSQLTask |
-| PreStage PhoneAttr | Microsoft.ExecuteSQLTask |
-| PreStage Points | Microsoft.ExecuteSQLTask |
-| PreStage SubscriberKey | Microsoft.ExecuteSQLTask |
-| PreStageLoyalty | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| CRM Transactions ETL | STOCK:SEQUENCE |
-| Calculate Visit Count | Microsoft.ExecuteSQLTask |
-| CRM Transactions DataFlow | Microsoft.Pipeline |
-| Insert CRMTransactionFactStage | Microsoft.Pipeline |
-| Merge CRMTransactionFact | Microsoft.ExecuteSQLTask |
-| MergeCRMTransactionFact_EnterpriseSellingTransactions | Microsoft.ExecuteSQLTask |
-| Set LifetimeTransactionSequence | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| NameMe Transactions ETL | STOCK:SEQUENCE |
-| Merge AnimailID | Microsoft.ExecuteSQLTask |
-| Merge NameMeTransactionFact | Microsoft.ExecuteSQLTask |
-| NameMe Transactions DataFlow | Microsoft.Pipeline |
-| POSAnimalIDStaging | Microsoft.ExecuteSQLTask |
-| Stage POS Data From AW | Microsoft.Pipeline |
-| Truncate Staging | Microsoft.ExecuteSQLTask |
+| CustomerTransactionETL | Package |
+| ETL Sequence | SEQUENCE |
+| CRM Customer ETL | SEQUENCE |
+| Customer DataFlow | Pipeline |
+| Merge CRMCustomerDim | ExecuteSQLTask |
+| PreStage CustAttr | ExecuteSQLTask |
+| PreStage Email | ExecuteSQLTask |
+| PreStage PhoneAttr | ExecuteSQLTask |
+| PreStage Points | ExecuteSQLTask |
+| PreStage SubscriberKey | ExecuteSQLTask |
+| PreStageLoyalty | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| CRM Transactions ETL | SEQUENCE |
+| Calculate Visit Count | ExecuteSQLTask |
+| CRM Transactions DataFlow | Pipeline |
+| Insert CRMTransactionFactStage | Pipeline |
+| Merge CRMTransactionFact | ExecuteSQLTask |
+| MergeCRMTransactionFact_EnterpriseSellingTransactions | ExecuteSQLTask |
+| Set LifetimeTransactionSequence | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| NameMe Transactions ETL | SEQUENCE |
+| Merge AnimailID | ExecuteSQLTask |
+| Merge NameMeTransactionFact | ExecuteSQLTask |
+| NameMe Transactions DataFlow | Pipeline |
+| POSAnimalIDStaging | ExecuteSQLTask |
+| Stage POS Data From AW | Pipeline |
+| Truncate Staging | ExecuteSQLTask |
+
+## Control Flow Outline
+
+```text
+- ETL Sequence [SEQUENCE]
+  - CRM Customer ETL [SEQUENCE]
+    - Customer DataFlow [Pipeline]
+    - Merge CRMCustomerDim [ExecuteSQLTask]
+    - PreStage CustAttr [ExecuteSQLTask]
+    - PreStage Email [ExecuteSQLTask]
+    - PreStage PhoneAttr [ExecuteSQLTask]
+    - PreStage Points [ExecuteSQLTask]
+    - PreStage SubscriberKey [ExecuteSQLTask]
+    - PreStageLoyalty [ExecuteSQLTask]
+    - Truncate Stage [ExecuteSQLTask]
+  - CRM Transactions ETL [SEQUENCE]
+    - CRM Transactions DataFlow [Pipeline]
+    - Calculate Visit Count [ExecuteSQLTask]
+    - Insert CRMTransactionFactStage [Pipeline]
+    - Merge CRMTransactionFact [ExecuteSQLTask]
+    - MergeCRMTransactionFact_EnterpriseSellingTransactions [ExecuteSQLTask]
+    - Set LifetimeTransactionSequence [ExecuteSQLTask]
+    - Truncate Stage [ExecuteSQLTask]
+  - NameMe Transactions ETL [SEQUENCE]
+    - Merge AnimailID [ExecuteSQLTask]
+    - Merge NameMeTransactionFact [ExecuteSQLTask]
+    - NameMe Transactions DataFlow [Pipeline]
+    - POSAnimalIDStaging [ExecuteSQLTask]
+    - Stage POS Data From AW [Pipeline]
+- Truncate Staging [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_ETL_Sequence["ETL Sequence"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL["CRM Customer ETL"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_Customer_DataFlow["Customer DataFlow"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_Merge_CRMCustomerDim["Merge CRMCustomerDim"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_CustAttr["PreStage CustAttr"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_Email["PreStage Email"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_PhoneAttr["PreStage PhoneAttr"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_Points["PreStage Points"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_SubscriberKey["PreStage SubscriberKey"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStageLoyalty["PreStageLoyalty"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_Truncate_Stage["Truncate Stage"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL["CRM Transactions ETL"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Calculate_Visit_Count["Calculate Visit Count"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_CRM_Transactions_DataFlow["CRM Transactions DataFlow"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Insert_CRMTransactionFactStage["Insert CRMTransactionFactStage"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Merge_CRMTransactionFact["Merge CRMTransactionFact"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_MergeCRMTransactionFact_EnterpriseSellingTransactions["MergeCRMTransactionFact_EnterpriseSellingTransactions"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Set_LifetimeTransactionSequence["Set LifetimeTransactionSequence"]
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Truncate_Stage["Truncate Stage"]
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL["NameMe Transactions ETL"]
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_Merge_AnimailID["Merge AnimailID"]
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_Merge_NameMeTransactionFact["Merge NameMeTransactionFact"]
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_NameMe_Transactions_DataFlow["NameMe Transactions DataFlow"]
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_POSAnimalIDStaging["POSAnimalIDStaging"]
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_Stage_POS_Data_From_AW["Stage POS Data From AW"]
+    n_Package_Truncate_Staging["Truncate Staging"]
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_Points --> n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_PhoneAttr
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_PhoneAttr --> n_Package_ETL_Sequence_CRM_Customer_ETL_PreStageLoyalty
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStageLoyalty --> n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_Email
+    n_Package_ETL_Sequence_CRM_Customer_ETL_Customer_DataFlow --> n_Package_ETL_Sequence_CRM_Customer_ETL_Merge_CRMCustomerDim
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_SubscriberKey --> n_Package_ETL_Sequence_CRM_Customer_ETL_Customer_DataFlow
+    n_Package_ETL_Sequence_CRM_Customer_ETL_Truncate_Stage --> n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_Points
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_Email --> n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_CustAttr
+    n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_CustAttr --> n_Package_ETL_Sequence_CRM_Customer_ETL_PreStage_SubscriberKey
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_CRM_Transactions_DataFlow --> n_Package_ETL_Sequence_CRM_Transactions_ETL_Insert_CRMTransactionFactStage
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Merge_CRMTransactionFact --> n_Package_ETL_Sequence_CRM_Transactions_ETL_MergeCRMTransactionFact_EnterpriseSellingTransactions
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Truncate_Stage --> n_Package_ETL_Sequence_CRM_Transactions_ETL_CRM_Transactions_DataFlow
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Calculate_Visit_Count --> n_Package_ETL_Sequence_CRM_Transactions_ETL_Set_LifetimeTransactionSequence
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_Insert_CRMTransactionFactStage --> n_Package_ETL_Sequence_CRM_Transactions_ETL_Merge_CRMTransactionFact
+    n_Package_ETL_Sequence_CRM_Transactions_ETL_MergeCRMTransactionFact_EnterpriseSellingTransactions --> n_Package_ETL_Sequence_CRM_Transactions_ETL_Calculate_Visit_Count
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_Stage_POS_Data_From_AW --> n_Package_ETL_Sequence_NameMe_Transactions_ETL_Merge_AnimailID
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_POSAnimalIDStaging --> n_Package_ETL_Sequence_NameMe_Transactions_ETL_Stage_POS_Data_From_AW
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_Merge_AnimailID --> n_Package_ETL_Sequence_NameMe_Transactions_ETL_NameMe_Transactions_DataFlow
+    n_Package_ETL_Sequence_NameMe_Transactions_ETL_NameMe_Transactions_DataFlow --> n_Package_ETL_Sequence_NameMe_Transactions_ETL_Merge_NameMeTransactionFact
+    n_Package_ETL_Sequence_CRM_Customer_ETL --> n_Package_ETL_Sequence_CRM_Transactions_ETL
+    n_Package_Truncate_Staging --> n_Package_ETL_Sequence
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| User | BatchRunDate | No |
+| User | CRMTransactionsTemp | No |
+| User | Count_CRMTransactionFactMergeInsert | No |
+| User | Count_CRMTransactionFactMergeUpdate | No |
+| User | Count_CRMTransactionFactStage | No |
+| User | Count_CustomerDimMergeInsert | No |
+| User | Count_CustomerDimMergeUpdate | No |
+| User | Count_CustomerDimStage | No |
+| User | Count_NameMeTransactionFactMergeInsert | No |
+| User | Count_NameMeTransactionFactMergeUpdate | No |
+| User | Count_NameMeTransactionFactStage | No |
+| User | CustFile | No |
+| User | DeleteCount | No |
+| User | DisableEventHandlerPostExecute | No |
+| User | EndDate | Yes |
+| User | ErrorCount | No |
+| User | ErrorEmailActive | No |
+| User | ErrorEmailMsg | No |
+| User | ErrorEmailMsgAdditional | No |
+| User | ErrorEmailMsgFooter | No |
+| User | ErrorEmailMsgHeader | Yes |
+| User | ErrorEmailMsgLog | No |
+| User | ErrorEmailMsgLogQuery | Yes |
+| User | ErrorEmailMsgValidation | No |
+| User | ErrorEmailRecipientList | No |
+| User | ErrorEmailSubject | Yes |
+| User | GetDate | Yes |
+| User | InsertCount | No |
+| User | LogID | No |
+| User | ParentLogID | No |
+| User | RowCount | No |
+| User | SQL_NameMeAnimalIDLookup | Yes |
+| User | SQL_NameMeTransLookup | Yes |
+| User | SQL_ValidationLog | Yes |
+| User | SQL_vwDW_CRMTransactionFact | Yes |
+| User | SQL_vwDW_CustomerDim | Yes |
+| User | SQL_vwDW_CustomerDimWIP | Yes |
+| User | SQL_vwDW_CustomerDimWIP2 | Yes |
+| User | SQL_vwDW_NameMeTransactionFact | Yes |
+| User | StartDate | Yes |
+| User | UnprocessedCount | No |
+| User | UpdateCount | No |
+| User | ValidationStatus_CRMCustomerDimMerge | No |
+| User | ValidationStatus_CRMTransactionFactMerge | No |
+| User | ValidationStatus_NameMeTransactionFactMerge | No |
+
+### Expression-bound variable values
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+6/25/2024
+```
+
+#### User::ErrorEmailMsgHeader
+
+**Expression:**
+
+```sql
+"Machine:  " + @[System::MachineName] + " Package:  " + @[System::PackageName] + " Date:   " + (DT_STR, 30, 1252)  GETDATE() + " LogID:  " + (DT_STR, 30, 1252)@[User::ParentLogID]
+```
+
+**Evaluated value:**
+
+```sql
+Machine:  STL-BIDEV-D-05 Package:  CustomerTransactionETL Date:   2024-06-25 11:58:00.608000000 LogID:  435135
+```
+
+#### User::ErrorEmailMsgLogQuery
+
+**Expression:**
+
+```sql
+"
+select 'Source: ' + source + ' Error: ' + message as Message 
+from ssistemplates.dbo.sysssislog with (nolock) 
+where executionid = '" +  @[System::ExecutionInstanceGUID] + "' and event = 'OnError'"
+```
+
+**Evaluated value:**
+
+```sql
+
+select 'Source: ' + source + ' Error: ' + message as Message 
+from ssistemplates.dbo.sysssislog with (nolock) 
+where executionid = '{FD6FA229-4118-40BB-A7F1-99A3F9ED8E86}' and event = 'OnError'
+```
+
+#### User::ErrorEmailSubject
+
+**Expression:**
+
+```sql
+"Error: " + @[System::PackageName] + " On " + @[System::MachineName] 
+```
+
+**Evaluated value:**
+
+```sql
+Error: CustomerTransactionETL On STL-BIDEV-D-05
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+6/25/2024
+```
+
+#### User::SQL_NameMeAnimalIDLookup
+
+**Expression:**
+
+```sql
+"
+select transaction_id, animal_id from POSAnimalID WITH (nolock) where TransactionDate between  '" + (DT_STR, 10, 1252)@[User::StartDate] + "' and '" + (DT_STR, 10, 1252)@[User::EndDate] + "'"
+```
+
+**Evaluated value:**
+
+```sql
+
+select transaction_id, animal_id from POSAnimalID WITH (nolock) where TransactionDate between  '3/17/2024' and '6/25/2024'
+```
+
+#### User::SQL_NameMeTransLookup
+
+**Expression:**
+
+```sql
+"
+select 
+max(ID) as ID
+from tblcustomerrecipient with (nolock)
+where dRStartTime > '1/1/2003'
+and pull_storeid <> 0
+and dREndTime between '" + (DT_STR, 10, 1252)@[User::StartDate] + "' and '" + (DT_STR, 10, 1252)@[User::EndDate] +
+"' group by Pull_StoreID, sRBarCodeNumber, dREndTime
+"
+```
+
+**Evaluated value:**
+
+```sql
+
+select 
+max(ID) as ID
+from tblcustomerrecipient with (nolock)
+where dRStartTime > '1/1/2003'
+and pull_storeid <> 0
+and dREndTime between '3/17/2024' and '6/25/2024' group by Pull_StoreID, sRBarCodeNumber, dREndTime
+
+```
+
+#### User::SQL_ValidationLog
+
+**Expression:**
+
+```sql
+"exec spCustomerTransactionETLLog '" + 
+(DT_STR, 25, 1252) @[System::StartTime] + "'"
++
+", " +
+(DT_STR, 25, 1252) @[User::Count_CustomerDimStage] + ","  +
+(DT_STR, 25, 1252) @[User::Count_CustomerDimMergeInsert] + ","  +
+(DT_STR, 25, 1252) @[User::Count_CustomerDimMergeUpdate] + ","  +
+(DT_STR, 25, 1252) @[User::Count_CRMTransactionFactStage] + ","  +
+(DT_STR, 25, 1252) @[User::Count_CRMTransactionFactMergeInsert] + ","  +
+(DT_STR, 25, 1252) @[User::Count_CRMTransactionFactMergeUpdate] + ","  +
+(DT_STR, 25, 1252) @[User::Count_NameMeTransactionFactStage] + ","  +
+(DT_STR, 25, 1252) @[User::Count_NameMeTransactionFactMergeInsert] + ","  +
+(DT_STR, 25, 1252) @[User::Count_NameMeTransactionFactMergeUpdate] + ","  +
+ (DT_STR, 25, 1252)  @[User::LogID]  + ","
+ +  (DT_STR, 25, 1252) @[User::ValidationStatus_CRMCustomerDimMerge] + "," +  (DT_STR, 25, 1252) @[User::ValidationStatus_CRMTransactionFactMerge] + "," +  (DT_STR, 25, 1252) @[User::ValidationStatus_NameMeTransactionFactMerge] + ""
+```
+
+**Evaluated value:**
+
+```sql
+exec spCustomerTransactionETLLog '6/25/2024 11:57:59 AM', 0,0,0,0,0,0,0,0,0,1,0,0,0
+```
+
+#### User::SQL_vwDW_CRMTransactionFact
+
+**Expression:**
+
+```sql
+"SELECT 
+CRMTransactionID,
+StoreNo,
+TransactionDate,
+TransactionPostedDate,
+CRMTransactionType,
+POSTransactionNumber,
+POSRegisterNumber,
+CustomerNumber,
+PointsEarned, TransactionIDTF
+ FROM vwDW_CRMTransactionFactPreStage 
+WHERE
+ TransactionPostedDate between '" + (DT_STR, 10, 1252)@[User::StartDate] + "' and '" + (DT_STR, 10, 1252)@[User::EndDate] + "'"
+```
+
+**Evaluated value:**
+
+```sql
+SELECT 
+CRMTransactionID,
+StoreNo,
+TransactionDate,
+TransactionPostedDate,
+CRMTransactionType,
+POSTransactionNumber,
+POSRegisterNumber,
+CustomerNumber,
+PointsEarned, TransactionIDTF
+ FROM vwDW_CRMTransactionFactPreStage 
+WHERE
+ TransactionPostedDate between '3/17/2024' and '6/25/2024'
+```
+
+#### User::SQL_vwDW_CustomerDim
+
+**Expression:**
+
+```sql
+"SELECT
+ 
+CustomerID,
+ 
+CustomerNumber,
+ 
+MembershipDate,
+ 
+Gender,
+ 
+BirthDate,
+	 
+LanguageCode,
+ 
+ CRMUpdateDate,
+ 
+StoreNo, 
+CountryCode,
+ 
+PostalCode,
+ 
+PointsEligible,
+ 
+MembershipType, Emailable, SubscriberKey, DirectMailOptIn, HasPhoneNumber  
+FROM vwDW_CustomerDim WHERE 
+cast(MembershipDate as date)  between '" + (DT_STR, 10, 1252)@[User::StartDate] + "' and '" + (DT_STR, 10, 1252)@[User::EndDate] +"' 
+
+or cast(CRMUpdateDate as date)  between '" + (DT_STR, 10, 1252)@[User::StartDate] + "' and '" + (DT_STR, 10, 1252)@[User::EndDate] + "'"
+```
+
+**Evaluated value:**
+
+```sql
+SELECT
+ 
+CustomerID,
+ 
+CustomerNumber,
+ 
+MembershipDate,
+ 
+Gender,
+ 
+BirthDate,
+	 
+LanguageCode,
+ 
+ CRMUpdateDate,
+ 
+StoreNo, 
+CountryCode,
+ 
+PostalCode,
+ 
+PointsEligible,
+ 
+MembershipType, Emailable, SubscriberKey, DirectMailOptIn, HasPhoneNumber  
+FROM vwDW_CustomerDim WHERE 
+cast(MembershipDate as date)  between '3/17/2024' and '6/25/2024' 
+
+or cast(CRMUpdateDate as date)  between '3/17/2024' and '6/25/2024'
+```
+
+#### User::SQL_vwDW_CustomerDimWIP
+
+**Expression:**
+
+```sql
+"SELECT 
+	d.CustomerID,
+	d.CustomerNumber,
+	d.MembershipDate,
+	d.Gender,
+	d.BirthDate,
+	d.LanguageCode,
+	d.CreateDate,
+	d.CRMUpdateDate,
+	d.StoreNo,
+	d.CountryCode,
+	d.PostalCode,
+	d.PointsEligible,
+	d.MembershipType,
+	d.MembershipPlan,
+ d.Emailable,
+	d.SubscriberKey,
+	d.DirectMailOptIn,
+	d.HasPhoneNumber,
+	d.telephone_no,
+	d.locale,
+	d.text_opt_in_flag,
+	d.EmailOptInDate,
+	d.EmailAddress,
+	d.ClubStatus,
+	d.CurrentRewardPoints,
+	d.LifetimeTotalPointsEarned,
+	d.SignUpSource,
+	d.address_1,
+	d.address_2,
+	d.address_3,
+	d.address_4,
+	d.hasOnlineAccount,
+	/*case 
+		when d.ClubStatus = 'active' and 
+		d.MembershipType in ('BASI','SFS','CLUB','PREF') 
+			then 1 
+		else 0 
+	end as isBonusClubMember*/
+	d.PointsEligible as isBonusClubMember,
+	d.first_name,
+	d.last_name
+FROM vwDW_CustomerDimWIP d
+ WHERE cast(MembershipDate as date)  between cast('" + (DT_STR, 10, 1252)@[User::StartDate] + "' as date) and cast('" + (DT_STR, 10, 1252)@[User::EndDate] +"' as date) 
+or cast(CRMUpdateDate as date)  between cast('" + (DT_STR, 10, 1252)@[User::StartDate] + "' as date) and cast('" + (DT_STR, 10, 1252)@[User::EndDate] + "' as date) 
+or exists (select p.CustomerNumber from tmpPointsEarned p where p.CustomerNumber=d.CustomerNumber and isUpdatedRecently=1)"
+```
+
+**Evaluated value:**
+
+```sql
+SELECT 
+	d.CustomerID,
+	d.CustomerNumber,
+	d.MembershipDate,
+	d.Gender,
+	d.BirthDate,
+	d.LanguageCode,
+	d.CreateDate,
+	d.CRMUpdateDate,
+	d.StoreNo,
+	d.CountryCode,
+	d.PostalCode,
+	d.PointsEligible,
+	d.MembershipType,
+	d.MembershipPlan,
+ d.Emailable,
+	d.SubscriberKey,
+	d.DirectMailOptIn,
+	d.HasPhoneNumber,
+	d.telephone_no,
+	d.locale,
+	d.text_opt_in_flag,
+	d.EmailOptInDate,
+	d.EmailAddress,
+	d.ClubStatus,
+	d.CurrentRewardPoints,
+	d.LifetimeTotalPointsEarned,
+	d.SignUpSource,
+	d.address_1,
+	d.address_2,
+	d.address_3,
+	d.address_4,
+	d.hasOnlineAccount,
+	/*case 
+		when d.ClubStatus = 'active' and 
+		d.MembershipType in ('BASI','SFS','CLUB','PREF') 
+			then 1 
+		else 0 
+	end as isBonusClubMember*/
+	d.PointsEligible as isBonusClubMember,
+	d.first_name,
+	d.last_name
+FROM vwDW_CustomerDimWIP d
+ WHERE cast(MembershipDate as date)  between cast('3/17/2024' as date) and cast('6/25/2024' as date) 
+or cast(CRMUpdateDate as date)  between cast('3/17/2024' as date) and cast('6/25/2024' as date) 
+or exists (select p.CustomerNumber from tmpPointsEarned p where p.CustomerNumber=d.CustomerNumber and isUpdatedRecently=1)
+```
+
+#### User::SQL_vwDW_CustomerDimWIP2
+
+**Expression:**
+
+```sql
+"SELECT 
+	d.CustomerID,
+	d.CustomerNumber,
+	d.MembershipDate,
+	d.OriginDate, d.Gender,
+	d.BirthDate,
+	d.LanguageCode,
+	d.CreateDate,
+	d.CRMUpdateDate,
+	d.StoreNo,
+	d.CountryCode,
+	d.PostalCode,
+	d.PointsEligible,
+	d.MembershipType,
+	d.MembershipPlan,
+ d.Emailable,
+	d.SubscriberKey,
+	d.DirectMailOptIn,
+	d.HasPhoneNumber,
+	d.telephone_no,
+	d.locale,
+	d.text_opt_in_flag,
+	d.EmailOptInDate,
+	d.EmailAddress,
+	d.ClubStatus,
+	d.CurrentRewardPoints,
+	d.LifetimeTotalPointsEarned,
+	d.SignUpSource,
+	d.address_1,
+	d.address_2,
+	d.address_3,
+	d.address_4,
+	d.hasOnlineAccount,
+	/*case 
+		when d.ClubStatus = 'active' and 
+		d.MembershipType in ('BASI','SFS','CLUB','PREF') 
+			then 1 
+		else 0 
+	end as isBonusClubMember*/
+	d.PointsEligible as isBonusClubMember,
+	d.first_name,
+	d.last_name
+FROM vwDW_CustomerDimWIP2 d
+ WHERE cast(MembershipDate as date)  between cast('" + (DT_STR, 10, 1252)@[User::StartDate] + "' as date) and cast('" + (DT_STR, 10, 1252)@[User::EndDate] +"' as date) 
+or cast(CRMUpdateDate as date)  between cast('" + (DT_STR, 10, 1252)@[User::StartDate] + "' as date) and cast('" + (DT_STR, 10, 1252)@[User::EndDate] + "' as date) 
+or exists (select p.CustomerNumber from tmpPointsEarned p where p.CustomerNumber=d.CustomerNumber and isUpdatedRecently=1)"
+```
+
+**Evaluated value:**
+
+```sql
+SELECT 
+	d.CustomerID,
+	d.CustomerNumber,
+	d.MembershipDate,
+	d.OriginDate, d.Gender,
+	d.BirthDate,
+	d.LanguageCode,
+	d.CreateDate,
+	d.CRMUpdateDate,
+	d.StoreNo,
+	d.CountryCode,
+	d.PostalCode,
+	d.PointsEligible,
+	d.MembershipType,
+	d.MembershipPlan,
+ d.Emailable,
+	d.SubscriberKey,
+	d.DirectMailOptIn,
+	d.HasPhoneNumber,
+	d.telephone_no,
+	d.locale,
+	d.text_opt_in_flag,
+	d.EmailOptInDate,
+	d.EmailAddress,
+	d.ClubStatus,
+	d.CurrentRewardPoints,
+	d.LifetimeTotalPointsEarned,
+	d.SignUpSource,
+	d.address_1,
+	d.address_2,
+	d.address_3,
+	d.address_4,
+	d.hasOnlineAccount,
+	/*case 
+		when d.ClubStatus = 'active' and 
+		d.MembershipType in ('BASI','SFS','CLUB','PREF') 
+			then 1 
+		else 0 
+	end as isBonusClubMember*/
+	d.PointsEligible as isBonusClubMember,
+	d.first_name,
+	d.last_name
+FROM vwDW_CustomerDimWIP2 d
+ WHERE cast(MembershipDate as date)  between cast('3/17/2024' as date) and cast('6/25/2024' as date) 
+or cast(CRMUpdateDate as date)  between cast('3/17/2024' as date) and cast('6/25/2024' as date) 
+or exists (select p.CustomerNumber from tmpPointsEarned p where p.CustomerNumber=d.CustomerNumber and isUpdatedRecently=1)
+```
+
+#### User::SQL_vwDW_NameMeTransactionFact
+
+**Expression:**
+
+```sql
+"SELECT
+	Pull_StoreID,
+	LocationCode, SKULookUp,
+	NameMeTransactionNumber,
+	AnimalBarcode,
+	AnimalName,
+	AnimalBirthDate,
+	TransactionStartDate,
+	TransactionEndDate,
+	Gift,
+	FirstVisit,
+	RecipBirthDate
+,TransactionSource, Gender FROM vwDW_NameMeTransactionFact
+WHERE 
+cast(TransactionStartDate as date)  between '" + (DT_STR, 10, 1252)@[User::StartDate] + "' and '" + (DT_STR, 10, 1252)@[User::EndDate] + "'"
+```
+
+**Evaluated value:**
+
+```sql
+SELECT
+	Pull_StoreID,
+	LocationCode, SKULookUp,
+	NameMeTransactionNumber,
+	AnimalBarcode,
+	AnimalName,
+	AnimalBirthDate,
+	TransactionStartDate,
+	TransactionEndDate,
+	Gift,
+	FirstVisit,
+	RecipBirthDate
+,TransactionSource, Gender FROM vwDW_NameMeTransactionFact
+WHERE 
+cast(TransactionStartDate as date)  between '3/17/2024' and '6/25/2024'
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+3/17/2024
+```
+
+## Execute SQL Tasks
+
+### Merge CRMCustomerDim
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\Merge CRMCustomerDim`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec spMergeCRMCustomerDimFromAptos
+
+--exec spCRMCustomerDimMerge
+
+```
+
+### PreStage CustAttr
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\PreStage CustAttr`  
+**Connection:** CRM (STL-CRMDB-P-01/crm)  
+
+```sql
+IF (Object_ID('crm..tmpCustomerAttr') IS NOT NULL) DROP TABLE tmpCustomerAttr
+select 
+	customer_id,
+	attribute_grouping_code,
+	attribute_code,
+	attribute_value
+into tmpCustomerAttr
+from customer_attribute ca2 with (nolock) 
+where attribute_grouping_code='GDPR' 
+	and attribute_code='OPTIN' 
+	and attribute_value=1
+```
+
+### PreStage Email
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\PreStage Email`  
+**Connection:** CRM (STL-CRMDB-P-01/crm)  
+
+```sql
+IF (Object_ID('crm..tmpEml') IS NOT NULL) DROP TABLE tmpEml
+select 
+	c.customer_id,
+	sum(
+				case when 
+					isnull(e.email_address, 'X') like '%@%.%'
+					and isnull(e.email_indicator, 2) in (0,9)
+					and isnull(ed.email_opt_in_flag, 2) in (0,1)
+				then 1
+				else 0
+			end
+			) as Emailable,
+	ed.email_opt_in_date as email_opt_in_date,
+	lower(e.email_address) as email_address,
+	e.email_indicator,
+	ed.email_opt_in_flag,
+	e.create_store_no
+into tmpEml
+from 
+		customer c with (nolock)
+join customer_division cd with (nolock) 
+	ON c.customer_id = cd.customer_id 
+	and cd.division_id = 89
+left join email e with (nolock) 
+	ON c.customer_id = e.customer_id --and e.email_type_code = 'EML'
+	and cd.primary_email_id = e.email_id
+left join email_division ed  with (nolock) 
+	ON c.customer_id = ed.customer_id 
+	AND e.email_id = ed.email_id
+group by 
+	c.customer_id,
+	ed.email_opt_in_date,
+	lower(e.email_address),
+	e.email_indicator,
+	ed.email_opt_in_flag,
+	e.create_store_no
+```
+
+### PreStage PhoneAttr
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\PreStage PhoneAttr`  
+**Connection:** CRM (STL-CRMDB-P-01/crm)  
+
+```sql
+IF (Object_ID('crm..tmpPhoneAttr') IS NOT NULL) DROP TABLE tmpPhoneAttr;
+with
+LastCell as 
+	(
+		select 
+			customer_id, 
+			max(phone_id) as 'maxPhoneId' 
+		from phone with (nolock)
+		where phone_type_code = 'MOBI'
+		group by customer_id
+	)
+select 
+	c.customer_id,
+	p.telephone_no, 
+	case 
+		when p.country_code = 'USA' then 'en-us'
+		when  p.country_code = 'CAN' then 'ca'
+		when  p.country_code = 'GBR' then 'en-gb'
+		else null 
+	end as 'locale',
+	case 
+		when pd.text_opt_in_flag = 1 
+			then 1 
+		else 0 
+	end as 'text_opt_in_flag'
+into tmpPhoneAttr
+from customer c with (nolock)
+join lastCell on c.customer_id = lastCell.customer_id
+join phone p with (nolock) on c.customer_id = p.customer_id  and p.phone_id = lastCell.maxPhoneId 
+join phone_division pd with (nolock) on c.customer_id = pd.customer_id and pd.phone_id = lastCell.maxPhoneId 
+```
+
+### PreStage Points
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\PreStage Points`  
+**Connection:** CRM (STL-CRMDB-P-01/crm)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+IF (Object_ID('crm..tmpPointsEarned') IS NOT NULL) DROP TABLE tmpPointsEarned;
+with
+LifetimeTotal as
+	(
+		select
+			rh1.customer_id,
+			sum(rh1.points_posted) LifetimeTotalPointsEarned,
+			case
+				when cast(max(rh1.transaction_date) as date) >= getdate()-2
+				or cast(max(rh1.date_points_posted) as date) >= getdate()-2
+				then 1
+				else 0
+			end as isUpdatedRecently
+		from reward_header rh1 with (nolock)
+		join reward_reason rr with (nolock) 
+		on rh1.reward_reason_id = rr.reward_reason_id 
+		and rr.reward_category in ('S','A')
+		group by
+			rh1.customer_id
+	),
+CurrentPoints as
+	(
+		select
+			rh2.customer_id,
+			sum(rh2.points_available) CurrentPointsBalance,
+			case 
+				when cast(max(rh2.transaction_date) as date) >= getdate()-2		
+				or cast(max(rh2.date_points_posted) as date) >= getdate()-2
+				then 1
+				else 0
+			end as isUpdatedRecently
+		from reward_header rh2 with (nolock)
+		group by 
+			rh2.customer_id
+	)
+select
+	c.customer_no as CustomerNumber,
+	isnull(lt.LifetimeTotalPointsEarned,0) LifetimeTotalPointsEarned,
+	isnull(cp.CurrentPointsBalance,0) CurrentPointsBalance,
+	isnull(lt.isUpdatedRecently,0) + isnull(cp.isUpdatedRecently,0) as isUpdatedRecently
+into tmpPointsEarned
+from customer c with (nolock)
+left join LifetimeTotal lt on c.customer_id=lt.customer_id
+left join CurrentPoints cp on c.customer_id=cp.customer_id
+
+
+
+
+/*IF (Object_ID('crm..tmpPointsEarned') IS NOT NULL) DROP TABLE tmpPointsEarned
+select 
+	c.Customer_no as CustomerNumber,
+	SUM(rh1.points_posted) LifetimeTotalPointsEarned,
+	sum(rh2.points_available) CurrentPointsBalance,
+	case 
+		when cast(max(rh1.transaction_date) as date) >= getdate()-100
+		or cast(max(rh1.date_points_posted) as date) >= getdate()-100
+		or cast(max(rh2.transaction_date) as date) >= getdate()-100		
+		or cast(max(rh2.date_points_posted) as date) >= getdate()-100
+		then 1
+		else 0
+	end as isUpdatedRecently
+into tmpPointsEarned
+from reward_header rh1 with (nolock)
+join reward_reason rr with (nolock) 
+	on rh1.reward_reason_id = rr.reward_reason_id 
+	and rr.reward_category='S'
+join customer c with (nolock) on rh1.customer_id=c.customer_id
+join reward_header rh2 with (nolock) on rh2.customer_id=c.customer_id
+group by 
+	c.Customer_no*/
+```
+
+**Property expression (runtime override):**
+
+```sql
+"IF (Object_ID('crm..tmpPointsEarned') IS NOT NULL) DROP TABLE tmpPointsEarned;
+with
+LifetimeTotal as
+	(
+		select
+			rh1.customer_id,
+			sum(rh1.points_posted) LifetimeTotalPointsEarned,
+			case
+				when cast(max(rh1.transaction_date) as date) >= getdate()-2
+				or cast(max(rh1.date_points_posted) as date) >= getdate()-2
+				then 1
+				else 0
+			end as isUpdatedRecently
+		from reward_header rh1 with (nolock)
+		join reward_reason rr with (nolock) 
+		on rh1.reward_reason_id = rr.reward_reason_id 
+		and rr.reward_category in ('S','A')
+		group by
+			rh1.customer_id
+	),
+CurrentPoints as
+	(
+		select
+			rh2.customer_id,
+			sum(rh2.points_available) CurrentPointsBalance,
+			case 
+				when cast(max(rh2.transaction_date) as date) >= getdate()-2		
+				or cast(max(rh2.date_points_posted) as date) >= getdate()-2
+				then 1
+				else 0
+			end as isUpdatedRecently
+		from reward_header rh2 with (nolock)
+		group by 
+			rh2.customer_id
+	)
+select
+	c.customer_no as CustomerNumber,
+	isnull(lt.LifetimeTotalPointsEarned,0) LifetimeTotalPointsEarned,
+	isnull(cp.CurrentPointsBalance,0) CurrentPointsBalance,
+	isnull(lt.isUpdatedRecently,0) + isnull(cp.isUpdatedRecently,0) as isUpdatedRecently
+into tmpPointsEarned
+from customer c with (nolock)
+left join LifetimeTotal lt on c.customer_id=lt.customer_id
+left join CurrentPoints cp on c.customer_id=cp.customer_id
+
+
+
+
+/*IF (Object_ID('crm..tmpPointsEarned') IS NOT NULL) DROP TABLE tmpPointsEarned
+select 
+	c.Customer_no as CustomerNumber,
+	SUM(rh1.points_posted) LifetimeTotalPointsEarned,
+	sum(rh2.points_available) CurrentPointsBalance,
+	case 
+		when cast(max(rh1.transaction_date) as date) >= getdate()-" + (DT_WSTR, 10) @[$Package::DaysToGoBack] + "
+		or cast(max(rh1.date_points_posted) as date) >= getdate()-" + (DT_WSTR, 10) @[$Package::DaysToGoBack] + "
+		or cast(max(rh2.transaction_date) as date) >= getdate()-" + (DT_WSTR, 10) @[$Package::DaysToGoBack] + "		
+		or cast(max(rh2.date_points_posted) as date) >= getdate()-" + (DT_WSTR, 10) @[$Package::DaysToGoBack] + "
+		then 1
+		else 0
+	end as isUpdatedRecently
+into tmpPointsEarned
+from reward_header rh1 with (nolock)
+join reward_reason rr with (nolock) 
+	on rh1.reward_reason_id = rr.reward_reason_id 
+	and rr.reward_category='S'
+join customer c with (nolock) on rh1.customer_id=c.customer_id
+join reward_header rh2 with (nolock) on rh2.customer_id=c.customer_id
+group by 
+	c.Customer_no*/"
+```
+
+### PreStage SubscriberKey
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\PreStage SubscriberKey`  
+**Connection:** CRM (STL-CRMDB-P-01/crm)  
+
+```sql
+IF (Object_ID('crm..tmpCustomerSubscriberKey') IS NOT NULL) DROP TABLE tmpCustomerSubscriberKey
+select CustomerID, subscriber_key
+into tmpCustomerSubscriberKey
+from vwDW_CustomerSubscriberKey
+```
+
+### PreStageLoyalty
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\PreStageLoyalty`  
+**Connection:** CRM (STL-CRMDB-P-01/crm)  
+
+```sql
+IF (Object_ID('tempdb..#emp') IS NOT NULL) DROP TABLE #emp
+select c.customer_id 
+into #emp
+from customer c
+join email e with (nolock) on c.customer_id=e.customer_id
+where 1=1
+and (e.email_address like '%@buildabear.%' or c.title like '%emp%')
+group by c.customer_id
+
+--members of bonus club -- no termination date
+IF (Object_ID('tempdb..#BC') IS NOT NULL) DROP TABLE #BC
+select 
+	customer_id,
+	join_date,
+	plan_name,
+	membership_type_code
+into #BC
+from vwDWLoyaltyPlansLookup
+where loyalty_plan_id=1 
+and termination_date is null
+group by 
+	customer_id,
+	join_date,
+	plan_name,
+	membership_type_code
+
+--members of heritage - non points earning
+IF (Object_ID('tempdb..#htg') IS NOT NULL) DROP TABLE #htg
+select 
+	customer_id,
+	join_date,
+	plan_name,
+	membership_type_code
+into #htg
+from vwDWLoyaltyPlansLookup
+where loyalty_plan_id=2 --plan_name=heritage..
+and termination_date is null
+group by 
+	customer_id,
+	join_date,
+	plan_name,
+	membership_type_code
+
+-- origin date 
+IF (Object_ID('tempdb..#OD') IS NOT NULL) DROP TABLE #OD
+select 
+	customer_id,
+	min(join_date) as OriginDate
+	--plan_name,
+	--membership_type_code
+into #OD
+from vwDWLoyaltyPlansLookup
+where 1=1
+--and loyalty_plan_id=1 
+--and termination_date is null
+--and customer_id in (26143831, 20284308,33205888,55702720)
+group by 
+	customer_id
+
+---members of bonus club or heritage, both without termination dates... derives their club as that with more recent join date
+--IF (Object_ID('tempdb..tmpLoyalty') IS NOT NULL) DROP TABLE tmpLoyalty
+IF (Object_ID('crm..tmpLoyalty') IS NOT NULL) DROP TABLE tmpLoyalty
+select 
+	c.customer_no,
+	c.customer_id,
+	case 
+		when  emp.customer_id is not null then 'Heritage Non Points Earning Loyalty Plan'
+		
+		when (bc.customer_id is not null and htg.customer_id is null) --in BC, not in HTG
+			then bc.plan_name
+		when (htg.customer_id is not null and bc.customer_id is null) --in HTG, not in BC
+			then htg.plan_name
+		when (bc.customer_id is not null and htg.customer_id is not null) --in both
+			then case 
+					when bc.join_date>isnull(htg.join_date, '1900-12-01') 
+						then bc.plan_name
+					else htg.plan_name
+				end
+	end as MembershipPlan,
+
+	case 
+		when emp.customer_id is not null then 'EMP'
+		
+		when (bc.customer_id is not null and htg.customer_id is null) --in BC, not in HTG
+			then bc.membership_type_code
+		when (htg.customer_id is not null and bc.customer_id is null) --in HTG, not in BC
+			then htg.membership_type_code
+		when (bc.customer_id is not null and htg.customer_id is not null) --in both
+			then case 
+					when bc.join_date>isnull(htg.join_date, '1900-12-01') 
+						then bc.membership_type_code
+					else htg.membership_type_code
+				end
+	end as MembershipType,
+
+	case 
+		when (bc.customer_id is not null and htg.customer_id is null) --in BC, not in HTG
+			then bc.join_date
+		when (htg.customer_id is not null and bc.customer_id is null) --in HTG, not in BC
+			then htg.join_date
+		when (bc.customer_id is not null and htg.customer_id is not null) --in both
+			then case 
+					when bc.join_date>isnull(htg.join_date, '1900-12-01') 
+						then bc.join_date
+					else htg.join_date
+				end
+	end as MembershipDate,
+
+
+	od.OriginDate,
+
+
+	case 
+		when emp.customer_id is not null then '0'
+		
+		when (bc.customer_id is not null and htg.customer_id is null) and emp.customer_id is null --in BC, not in HTG
+			then '1'
+		when (htg.customer_id is not null and bc.customer_id is null) --in HTG, not in BC
+			then '0'
+		when (bc.customer_id is not null and htg.customer_id is not null) --in both
+			then case 
+					when bc.join_date>isnull(htg.join_date, '1900-12-01') 
+						and emp.customer_id is null --is therefore not an employee
+						then '1'
+					else '0'
+				end 
+		else '0'
+	end as PointsEligible
+into tmpLoyalty
+from customer c with (nolock)
+left join #bc bc on c.customer_id=bc.customer_id
+left join #htg htg on c.customer_id=htg.customer_id
+left join #emp emp on c.customer_id=emp.customer_id
+left join #OD od on c.customer_id=od.customer_id
+
+
+
+/*
+IF (Object_ID('tempdb..#emp') IS NOT NULL) DROP TABLE #emp
+select e.customer_id 
+into #emp
+from email e with (nolock)
+where e.email_address like '%@buildabear.%'
+group by customer_id
+
+
+IF (Object_ID('tempdb..#x') IS NOT NULL) DROP TABLE #x
+select 
+	clp.customer_id,
+	clp.join_date MembershipDate,
+	clp.current_membership_type_code MembershipType, 
+	c.title as EmployeeTitle, 
+	sum(
+		case 
+			when isnull(clp.loyalty_plan_id,0) = 1 
+				then 1 
+			else 0 
+		end 
+		) as LoyaltyType
+into #x
+from customer c with (nolock)
+left join customer_loyalty_plan clp with (nolock) 
+	on c.customer_id = clp.customer_id
+	and clp.termination_date IS NULL 
+group by 
+	clp.customer_id,
+	clp.join_date,
+	clp.current_membership_type_code,
+	c.title
+
+
+IF (Object_ID('tempdb..#xx') IS NOT NULL) DROP TABLE #xx
+select 
+	x.customer_id,
+	sum(
+		case 
+			when isnull(LOWER(c.title), 'X') NOT LIKE '%emp%' and e.customer_id is null
+				then x.LoyaltyType 
+			else 0 
+		end 
+	) as PointsEligible
+into #xx
+from customer c with (Nolock)
+join #x x on c.customer_id=x.customer_id
+left join #emp e on c.customer_id=e.customer_id
+group by x.customer_id
+
+IF (Object_ID('crm..tmpLoyalty') IS NOT NULL) DROP TABLE tmpLoyalty
+select
+	xx.customer_id,
+	x.MembershipDate,
+	x.MembershipType,
+	xx.PointsEligible
+into tmpLoyalty
+from #xx xx
+left join #x x 
+	on xx.customer_id=x.customer_id
+	and xx.PointsEligible = x.LoyaltyType
+*/
+
+/*
+IF (Object_ID('tempdb..#x') IS NOT NULL) DROP TABLE #x
+select 
+	clp.customer_id,
+	clp.join_date MembershipDate,
+	clp.current_membership_type_code MembershipType, 
+	c.title EmployeeTitle, 
+	sum(
+		case 
+			when isnull(clp.loyalty_plan_id,0) = 1 
+				then 1 
+			else 0 
+		end 
+		) as LoyaltyType
+into #x
+from customer c with (nolock)
+left join customer_loyalty_plan clp with (nolock) 
+	on c.customer_id = clp.customer_id
+	and clp.termination_date IS NULL 
+group by 
+	clp.customer_id,
+	clp.join_date,
+	clp.current_membership_type_code,
+	c.title 
+
+IF (Object_ID('tempdb..#xx') IS NOT NULL) DROP TABLE #xx
+select 
+	x.customer_id,
+	sum(
+		case 
+			when isnull(LOWER(c.title), 'X') NOT LIKE '%emp%' 
+				then x.LoyaltyType 
+			else 0 
+		end 
+	) as PointsEligible
+into #xx
+from customer c with (Nolock)
+join #x x on c.customer_id=x.customer_id
+group by x.customer_id
+
+IF (Object_ID('crm..tmpLoyalty') IS NOT NULL) DROP TABLE tmpLoyalty
+select
+	x.customer_id,
+	x.MembershipDate,
+	x.MembershipType,
+	xx.PointsEligible
+into tmpLoyalty
+from #xx xx
+left join #x x 
+	on xx.customer_id=x.customer_id
+	and xx.PointsEligible = x.LoyaltyType
+
+*/
+/*
+
+IF (Object_ID('crm..tmpLoyalty') IS NOT NULL) DROP TABLE tmpLoyalty
+select 
+	clp.customer_id,
+	clp.join_date MembershipDate,
+	clp.current_membership_type_code MembershipType, 
+	c.title EmployeeTitle, 
+	sum(
+		case 
+			when isnull(clp.loyalty_plan_id,0) = 1 
+				then 1 
+			else 0 
+		end 
+		) as LoyaltyType
+into tmpLoyalty
+from customer c with (nolock)
+left join customer_loyalty_plan clp with (nolock) 
+	on c.customer_id = clp.customer_id
+	and clp.termination_date IS NULL 
+group by 
+	clp.customer_id,
+	clp.join_date,
+	clp.current_membership_type_code,
+	c.title 
+
+*/
+```
+
+### Truncate Stage
+
+**Path:** `Package\ETL Sequence\CRM Customer ETL\Truncate Stage`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE CRMCustomerDimStage 
+```
+
+### Calculate Visit Count
+
+**Path:** `Package\ETL Sequence\CRM Transactions ETL\Calculate Visit Count`  
+**Connection:** DW (papamart/dw)  
+
+```sql
+exec spCRMTransactionFactCalculateVisitCount
+---i'm not sure about this proc... i don't think we need it in the current reporting paradigm but i'll keep it here for good luck. 
+--i have new proc to calculate transaction sequence and visit sequence so that proc will run.. 
+```
+
+### Merge CRMTransactionFact
+
+**Path:** `Package\ETL Sequence\CRM Transactions ETL\Merge CRMTransactionFact`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec spCRMTransactionFactMerge
+```
+
+### MergeCRMTransactionFact_EnterpriseSellingTransactions
+
+**Path:** `Package\ETL Sequence\CRM Transactions ETL\MergeCRMTransactionFact_EnterpriseSellingTransactions`  
+**Connection:** DW (papamart/dw)  
+
+```sql
+exec spMergeCRMTransactionFact_EnterpriseSellingTransactions 
+```
+
+### Set LifetimeTransactionSequence
+
+**Path:** `Package\ETL Sequence\CRM Transactions ETL\Set LifetimeTransactionSequence`  
+**Connection:** DW (papamart/dw)  
+
+```sql
+exec spMergeCRMTransactionFactSequence
+```
+
+### Truncate Stage
+
+**Path:** `Package\ETL Sequence\CRM Transactions ETL\Truncate Stage`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE CRMTransactionFactPreStage 
+TRUNCATE TABLE CRMTransactionFactStage 
+
+```
+
+### Merge AnimailID
+
+**Path:** `Package\ETL Sequence\NameMe Transactions ETL\Merge AnimailID`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec spMergeAnimalID
+```
+
+### Merge NameMeTransactionFact
+
+**Path:** `Package\ETL Sequence\NameMe Transactions ETL\Merge NameMeTransactionFact`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec dwstaging.dbo.spNameMeTransactionFactMerge
+```
+
+### POSAnimalIDStaging
+
+**Path:** `Package\ETL Sequence\NameMe Transactions ETL\POSAnimalIDStaging`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+truncate table POSAnimalIDStaging
+```
+
+### Truncate Staging
+
+**Path:** `Package\Truncate Staging`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE CRMCustomerDimStage 
+TRUNCATE TABLE CRMTransactionFactPreStage 
+TRUNCATE TABLE CRMTransactionFactStage 
+TRUNCATE TABLE NameMeTransactionFactStage 
+TRUNCATE TABLE POSAnimalIDStaging
+
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select store_key, store_id from store_dim  where store_id >0 |
-|  | select * from [dbo].[date_dim] |
-|  | select * from [dbo].[store_dim] |
-|  | select  	cast(l.location_code as varchar(4)) as location_code, 	cast(replace(j.jurisdiction_code, 'HOME', 'US') as varchar(2)) as jurisdiction_code from location l with (nolock) join jurisdiction j with (nolock) on l.jurisdiction_id = j.jurisdiction_id |
-|  |  select  max(ID) as ID from tblcustomerrecipient with (nolock) where dRStartTime > '1/1/2003' and pull_storeid <> 0 and dREndTime between '3/17/2024' and '6/25/2024' group by Pull_StoreID, sRBarCodeNumber, dREndTime  |
-|  |  select transaction_id, animal_id from POSAnimalID WITH (nolock) where TransactionDate between  '3/17/2024' and '6/25/2024' |
-|  | select  	--cast(right(sku,6) as varchar(6)) as SKULookUp,  	cast(style_code as varchar(6)) as SKULookup, 	cast(jurisdiction_code as varchar(2)) as jurisdiction_code,  	product_key  from product_dim with (nolock) where concept = 'Bab Workshop' |
-|  | select * from [dbo].[store_dim] |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| vwDW_CustomerDim |  | OLEDBSource | Customer DataFlow | CRM |  |
+| vwDW_CRMTransactionFactPreStage |  | OLEDBSource | CRM Transactions DataFlow | CRM |  |
+| vwDW_CRMTransactionFact |  | OLEDBSource | Insert CRMTransactionFactStage | DWStaging |  |
+| vwDW_NameMeTransactionFact |  | OLEDBSource | NameMe Transactions DataFlow | Kodiak.BABW |  |
+| vwDW_POSAnimalIDs |  | OLEDBSource | Stage POS Data From AW | auditworks |  |
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [CRMCustomerDimStage] |
-|  | [dbo].[CRMTransactionFactPreStage] |
-|  | [dbo].[CRMTransactionFactStage] |
-|  | [dbo].[vwDW_CRMTransactionFact] |
-|  | [dbo].[NameMeTransactionFactNoMatchLocLookUp] |
-|  | [dbo].[NameMeTransactionFactStage] |
-|  | [dbo].[POSAnimalIDStaging] |
-|  | [dbo].[vwDW_POSAnimalIDs] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| CRMCustomerDimStage |  | OLEDBDestination | Customer DataFlow | DWStaging |  |
+| CRMTransactionFactPreStage |  | OLEDBDestination | CRM Transactions DataFlow | DWStaging |  |
+| CRMTransactionFactStage |  | OLEDBDestination | Insert CRMTransactionFactStage | DWStaging |  |
+| NameMeTransactionFactNoMatchLocLookUp |  | OLEDBDestination | NameMe Transactions DataFlow | DWStaging |  |
+| NameMeTransactionFactStage |  | OLEDBDestination | NameMe Transactions DataFlow | DWStaging |  |
+| POSAnimalIDStaging |  | OLEDBDestination | Stage POS Data From AW | DWStaging |  |

@@ -1,51 +1,77 @@
-﻿# SSIS Package: WMS_WarehouseMaster
+# SSIS Package: WMS_WarehouseMaster
 
 **Project:** WMS_WarehouseMaster  
 **Folder:** WMS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        Dynamics_AX_Connection_Manager_conn(["Dynamics AX Connection Manager [DynamicsAX]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        WMS_WarehouseMaster_task["WMS_WarehouseMaster"]
-        SEQ___WarehouseMaster_task["SEQ - WarehouseMaster"]
-        WMS_WarehouseMaster_task --> SEQ___WarehouseMaster_task
-        Merge_WarehouseMaster_task["Merge WarehouseMaster"]
-        SEQ___WarehouseMaster_task --> Merge_WarehouseMaster_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_WarehouseMaster_task --> Truncate_Stage_task
-        WarehouseMaster_task["WarehouseMaster"]
-        Truncate_Stage_task --> WarehouseMaster_task
-        Send_Mail_Task_task["Send Mail Task"]
-        WarehouseMaster_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| Dynamics AX Connection Manager | DynamicsAX |
-| IntegrationStaging | OLEDB |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| Dynamics AX Connection Manager | DynamicsAX |  |  |  |
+| IntegrationStaging | OLEDB | stl-ssis-p-01 | IntegrationStaging | Data Source=stl-ssis-p-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP | SMTP |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WMS_WarehouseMaster | Microsoft.Package |
-| SEQ - WarehouseMaster | STOCK:SEQUENCE |
-| Merge WarehouseMaster | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| WarehouseMaster | Microsoft.Pipeline |
-| Send Mail Task | Microsoft.SendMailTask |
+| WMS_WarehouseMaster | Package |
+| SEQ - WarehouseMaster | SEQUENCE |
+| Merge WarehouseMaster | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| WarehouseMaster | Pipeline |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- SEQ - WarehouseMaster [SEQUENCE]
+  - Merge WarehouseMaster [ExecuteSQLTask]
+  - Truncate Stage [ExecuteSQLTask]
+  - WarehouseMaster [Pipeline]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_SEQ___WarehouseMaster["SEQ - WarehouseMaster"]
+    n_Package_SEQ___WarehouseMaster_Merge_WarehouseMaster["Merge WarehouseMaster"]
+    n_Package_SEQ___WarehouseMaster_Truncate_Stage["Truncate Stage"]
+    n_Package_SEQ___WarehouseMaster_WarehouseMaster["WarehouseMaster"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_SEQ___WarehouseMaster_Truncate_Stage --> n_Package_SEQ___WarehouseMaster_WarehouseMaster
+    n_Package_SEQ___WarehouseMaster_WarehouseMaster --> n_Package_SEQ___WarehouseMaster_Merge_WarehouseMaster
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+
+## Execute SQL Tasks
+
+### Merge WarehouseMaster
+
+**Path:** `Package\SEQ - WarehouseMaster\Merge WarehouseMaster`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+exec ERP.spMergeWarehouseMaster
+```
+
+### Truncate Stage
+
+**Path:** `Package\SEQ - WarehouseMaster\Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE ERP.WarehouseMasterStage
+TRUNCATE TABLE wms.WarehouseMasterFail
+```
 
 ## Data Flow: Sources
 
@@ -53,8 +79,7 @@ _None detected._
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [ERP].[WarehouseMasterStage] |
-|  | [WMS].[WarehouseMasterFail] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| WarehouseMaster |  | OLEDBDestination | WarehouseMaster | IntegrationStaging |  |
+| WarehouseMasterFail |  | OLEDBDestination | WarehouseMaster | IntegrationStaging |  |

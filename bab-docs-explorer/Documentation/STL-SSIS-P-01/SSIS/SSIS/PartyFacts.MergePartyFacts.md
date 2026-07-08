@@ -1,70 +1,156 @@
-﻿# SSIS Package: MergePartyFacts
+# SSIS Package: MergePartyFacts
 
 **Project:** PartyFacts  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        BABWPartyPlanner_conn(["BABWPartyPlanner [OLEDB]"])
-        dw_conn(["dw [OLEDB]"])
-        DWStaging_conn(["DWStaging [OLEDB]"])
-        PartyRequest_conn(["PartyRequest [OLEDB]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-    end
-    subgraph ControlFlow
-        MergePartyFacts_task["MergePartyFacts"]
-        Package_Sequence_task["Package Sequence"]
-        MergePartyFacts_task --> Package_Sequence_task
-        Get_Todays_DateKey_task["Get Todays DateKey"]
-        Package_Sequence_task --> Get_Todays_DateKey_task
-        Merge_Staging_To_Facts_task["Merge Staging To Facts"]
-        Get_Todays_DateKey_task --> Merge_Staging_To_Facts_task
-        Stage_Incompleted_Parties_task["Stage Incompleted Parties"]
-        Merge_Staging_To_Facts_task --> Stage_Incompleted_Parties_task
-        Truncate_Staging_task["Truncate Staging"]
-        Stage_Incompleted_Parties_task --> Truncate_Staging_task
-        Send_Email_onError_task["Send Email onError"]
-        Truncate_Staging_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| BABWPartyPlanner | OLEDB |
-| dw | OLEDB |
-| DWStaging | OLEDB |
-| PartyRequest | OLEDB |
-| SMTP_EMAIL | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| BABWPartyPlanner | OLEDB | bearcluster01.sql.buildabear.com | BABWPartyPlanner | Data Source=bearcluster01.sql.buildabear.com; Initial Catalog=BABWPartyPlanner; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| PartyRequest | OLEDB | kodiak | PartyRequest | Data Source=kodiak; Initial Catalog=PartyRequest; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP_EMAIL | SMTP |  |  |  |
+| dw | OLEDB | papamart | dw | Data Source=papamart; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| MergePartyFacts | Microsoft.Package |
-| Package Sequence | STOCK:SEQUENCE |
-| Get Todays DateKey | Microsoft.ExecuteSQLTask |
-| Merge Staging To Facts | Microsoft.ExecuteSQLTask |
-| Stage Incompleted Parties | Microsoft.Pipeline |
-| Truncate Staging | Microsoft.ExecuteSQLTask |
-| Send Email onError | Microsoft.SendMailTask |
+| MergePartyFacts | Package |
+| Package Sequence | SEQUENCE |
+| Get Todays DateKey | ExecuteSQLTask |
+| Merge Staging To Facts | ExecuteSQLTask |
+| Stage Incompleted Parties | Pipeline |
+| Truncate Staging | ExecuteSQLTask |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- Package Sequence [SEQUENCE]
+  - Get Todays DateKey [ExecuteSQLTask]
+  - Merge Staging To Facts [ExecuteSQLTask]
+  - Stage Incompleted Parties [Pipeline]
+  - Truncate Staging [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Package_Sequence["Package Sequence"]
+    n_Package_Package_Sequence_Get_Todays_DateKey["Get Todays DateKey"]
+    n_Package_Package_Sequence_Merge_Staging_To_Facts["Merge Staging To Facts"]
+    n_Package_Package_Sequence_Stage_Incompleted_Parties["Stage Incompleted Parties"]
+    n_Package_Package_Sequence_Truncate_Staging["Truncate Staging"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_Package_Sequence_Truncate_Staging --> n_Package_Package_Sequence_Stage_Incompleted_Parties
+    n_Package_Package_Sequence_Get_Todays_DateKey --> n_Package_Package_Sequence_Truncate_Staging
+    n_Package_Package_Sequence_Stage_Incompleted_Parties --> n_Package_Package_Sequence_Merge_Staging_To_Facts
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | TodayDateKey | No |
+| User | sqlPullIncompletedParties | Yes |
+
+### Expression-bound variable values
+
+#### User::sqlPullIncompletedParties
+
+**Expression:**
+
+```sql
+"WITH ValidPMR AS (
+	 SELECT MAX(PartyID) as PMRNumber, 
+			CAST(CAST(EventID AS FLOAT) AS INT) AS EventID
+	 FROM PartyRequest.dbo.Party
+	 WHERE (ISNUMERIC(EventID) = 1) 
+	 AND (EventID <> '1111111111111111111111111111111111')
+	 GROUP BY CAST(CAST(EventID AS FLOAT) AS INT)
+)
+
+
+SELECT party.*,
+	   pmr.PMRNumber
+FROM BABWPartyPlanner.dbo.vwDWPartyFacts party
+LEFT JOIN ValidPMR pmr
+	ON party.PartyID = pmr.EventID
+WHERE party.ExecuteDateKey > "  +  @[User::TodayDateKey]
+```
+
+**Evaluated value:**
+
+```sql
+WITH ValidPMR AS (
+	 SELECT MAX(PartyID) as PMRNumber, 
+			CAST(CAST(EventID AS FLOAT) AS INT) AS EventID
+	 FROM PartyRequest.dbo.Party
+	 WHERE (ISNUMERIC(EventID) = 1) 
+	 AND (EventID <> '1111111111111111111111111111111111')
+	 GROUP BY CAST(CAST(EventID AS FLOAT) AS INT)
+)
+
+
+SELECT party.*,
+	   pmr.PMRNumber
+FROM BABWPartyPlanner.dbo.vwDWPartyFacts party
+LEFT JOIN ValidPMR pmr
+	ON party.PartyID = pmr.EventID
+WHERE party.ExecuteDateKey > 1234
+```
+
+## Execute SQL Tasks
+
+### Get Todays DateKey
+
+**Path:** `Package\Package Sequence\Get Todays DateKey`  
+**Connection:** dw (papamart/dw)  
+
+```sql
+SELECT date_key FROM papamart.dw.dbo.date_dim WHERE actual_date = CAST(GETDATE() as Date)
+```
+
+### Merge Staging To Facts
+
+**Path:** `Package\Package Sequence\Merge Staging To Facts`  
+**Connection:** dw (papamart/dw)  
+
+```sql
+exec spPartyFactsMergeFromStaging
+```
+
+### Truncate Staging
+
+**Path:** `Package\Package Sequence\Truncate Staging`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE PartyFacts_Staging;
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select * from vwDWPartyFacts where ExecuteDateKey > 1234 |
-|  | SELECT  	MAX(PartyID) as PMRNumber,  	CAST(CAST(EventID AS FLOAT) AS INT) AS EventID FROM KODIAK.PartyRequest.dbo.Party WHERE 1=1 and (ISNUMERIC(EventID) = 1)  and  EventID not like '%.%' AND (EventID <> '1111111111111111111111111111111111') and cast(cast(EventID as float) as bigint) <= 2147483647 --biggest int GROUP BY CAST(CAST(EventID AS FLOAT) AS INT) |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Incompleted Parties |  | OLEDBSource | Stage Incompleted Parties | BABWPartyPlanner | SqlCommand |
+
+#### Incompleted Parties — SqlCommand
+
+```sql
+select *
+from vwDWPartyFacts
+where ExecuteDateKey > 1234
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[vwDWPartyFacts] |
-|  | [dbo].[PartyFacts_Staging] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Staging |  | OLEDBDestination | Stage Incompleted Parties | DWStaging |  |

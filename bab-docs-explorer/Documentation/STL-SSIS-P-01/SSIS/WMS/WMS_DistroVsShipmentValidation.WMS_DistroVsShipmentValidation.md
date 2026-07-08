@@ -1,63 +1,195 @@
-﻿# SSIS Package: WMS_DistroVsShipmentValidation
+# SSIS Package: WMS_DistroVsShipmentValidation
 
 **Project:** WMS_DistroVsShipmentValidation  
 **Folder:** WMS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        ME_01_conn(["ME_01 [OLEDB]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        WMS_DistroVsShipmentValidation_task["WMS_DistroVsShipmentValidation"]
-        Sequence_Container_task["Sequence Container"]
-        WMS_DistroVsShipmentValidation_task --> Sequence_Container_task
-        Distros_vs_Shipments_task["Distros vs Shipments"]
-        Sequence_Container_task --> Distros_vs_Shipments_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Distros_vs_Shipments_task --> Send_Mail_Task_task
-        Truncate_Stage_task["Truncate Stage"]
-        Send_Mail_Task_task --> Truncate_Stage_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Truncate_Stage_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| IntegrationStaging | OLEDB |
-| ME_01 | OLEDB |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| ME_01 | OLEDB | bedrockdb02 | me_01 | Data Source=bedrockdb02; Initial Catalog=me_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP | SMTP |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WMS_DistroVsShipmentValidation | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| Distros vs Shipments | Microsoft.Pipeline |
-| Send Mail Task | Microsoft.SendMailTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| WMS_DistroVsShipmentValidation | Package |
+| Sequence Container | SEQUENCE |
+| Distros vs Shipments | Pipeline |
+| Send Mail Task | SendMailTask |
+| Truncate Stage | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- Sequence Container [SEQUENCE]
+  - Distros vs Shipments [Pipeline]
+  - Send Mail Task [SendMailTask]
+  - Truncate Stage [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_Distros_vs_Shipments["Distros vs Shipments"]
+    n_Package_Sequence_Container_Send_Mail_Task["Send Mail Task"]
+    n_Package_Sequence_Container_Truncate_Stage["Truncate Stage"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_Sequence_Container_Truncate_Stage --> n_Package_Sequence_Container_Distros_vs_Shipments
+    n_Package_Sequence_Container_Distros_vs_Shipments --> n_Package_Sequence_Container_Send_Mail_Task
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | EndDate | Yes |
+| User | EndDateAsDATE | Yes |
+| User | GetDate | Yes |
+| User | GetDateAsDATE | Yes |
+| User | StartDate | Yes |
+| User | StartDateAsDATE | Yes |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+202162918145330
+```
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+6/29/2021
+```
+
+#### User::EndDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::EndDate])  + "-" + 
+(DT_WSTR, 2) datepart("mm", @[User::EndDate])  + "-" + 
+(DT_WSTR, 2) datepart("dd",  @[User::EndDate])
+```
+
+**Evaluated value:**
+
+```sql
+2021-6-29
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+6/29/2021
+```
+
+#### User::GetDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::GetDate])  + "-" + 
+(DT_WSTR, 2) datepart("mm", @[User::GetDate])  + "-" + 
+(DT_WSTR, 2) datepart("dd",  @[User::GetDate])
+```
+
+**Evaluated value:**
+
+```sql
+2021-6-29
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+6/28/2021
+```
+
+#### User::StartDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDate])  + "-" + 
+(DT_WSTR, 2) datepart("mm", @[User::StartDate])  + "-" + 
+(DT_WSTR, 2) datepart("dd",  @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+2021-6-28
+```
+
+## Execute SQL Tasks
+
+### Truncate Stage
+
+**Path:** `Package\Sequence Container\Truncate Stage`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+Truncate Table WMS.AptosDistrosWithoutShipments
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select  	cast(sh.document_no as varchar) as ShipmentNumber, 	cast(ssd.distribution_no as varchar) as Distro, 	cast(s.style_code as varchar) as Style, cast('YES' as nvarchar(3)) as AptosShipmentDistroItemLogged from store_shipment sh with (nolock) join store_shipment_detail ssd with (nolock) 	on sh.store_shipment_id=ssd.store_shipment_id  join style s with (nolock) on ssd.style_id=s.style_id group  |
-|  | select  	cast(sh.document_no as varchar) as ShipmentNumber, 	CAST('YES' as nvarchar(3)) as AptosShipmentLogged from store_shipment sh with (nolock) join store_shipment_detail ssd with (nolock) 	on sh.store_shipment_id=ssd.store_shipment_id  join style s with (nolock) on ssd.style_id=s.style_id group by  	sh.document_no |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| vwAptosDistrosVsShipments |  | OLEDBSource | Distros vs Shipments | IntegrationStaging |  |
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WMS].[AptosDistrosWithoutShipments] |
-|  | [WMS].[vwAptosDistrosVsShipments] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| AptosDistrosWithoutShipments |  | OLEDBDestination | Distros vs Shipments | IntegrationStaging |  |

@@ -1,169 +1,604 @@
-﻿# SSIS Package: EmailFactsETL
+# SSIS Package: EmailFactsETL
 
 **Project:** EmailFactsETL_once  
 **Folder:** CRM  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        DW_conn(["DW [OLEDB]"])
-        DWStaging_conn(["DWStaging [OLEDB]"])
-        EmailRevenue_conn(["EmailRevenue [FLATFILE]"])
-        EmailRevenue__extra_columns__conn(["EmailRevenue (extra columns) [FLATFILE]"])
-        ESPStaging_conn(["ESPStaging [OLEDB]"])
-        ffcm_conn(["ffcm [FLATFILE]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-    end
-    subgraph ControlFlow
-        EmailFactsETL_task["EmailFactsETL"]
-        blank_file_alert_task["blank file alert"]
-        EmailFactsETL_task --> blank_file_alert_task
-        Email_Data_Sequence_task["Email Data Sequence"]
-        blank_file_alert_task --> Email_Data_Sequence_task
-        EmailBounceStage_task["EmailBounceStage"]
-        Email_Data_Sequence_task --> EmailBounceStage_task
-        EmailClickStage_task["EmailClickStage"]
-        EmailBounceStage_task --> EmailClickStage_task
-        EmailOpenStage_task["EmailOpenStage"]
-        EmailClickStage_task --> EmailOpenStage_task
-        EmailSendJobs_task["EmailSendJobs"]
-        EmailOpenStage_task --> EmailSendJobs_task
-        EmailSentStage_task["EmailSentStage"]
-        EmailSendJobs_task --> EmailSentStage_task
-        EmailSentStage__backup__task["EmailSentStage (backup)"]
-        EmailSentStage_task --> EmailSentStage__backup__task
-        EmailUnSubStage_task["EmailUnSubStage"]
-        EmailSentStage__backup__task --> EmailUnSubStage_task
-        Merge_EmailEventFact_task["Merge EmailEventFact"]
-        EmailUnSubStage_task --> Merge_EmailEventFact_task
-        Truncate_Stage_task["Truncate Stage"]
-        Merge_EmailEventFact_task --> Truncate_Stage_task
-        EmailRevenueNew_task["EmailRevenueNew"]
-        Truncate_Stage_task --> EmailRevenueNew_task
-        Data_Flow_task["Data Flow"]
-        EmailRevenueNew_task --> Data_Flow_task
-        Data_Flow_WIP_task["Data Flow WIP"]
-        Data_Flow_task --> Data_Flow_WIP_task
-        File_System_Task_task["File System Task"]
-        Data_Flow_WIP_task --> File_System_Task_task
-        Merge_EmailRevenueNew_task["Merge EmailRevenueNew"]
-        File_System_Task_task --> Merge_EmailRevenueNew_task
-        remove_blank_rows_task["remove blank rows"]
-        Merge_EmailRevenueNew_task --> remove_blank_rows_task
-        Truncate_Stage_task["Truncate Stage"]
-        remove_blank_rows_task --> Truncate_Stage_task
-        Merge_Sequence_task["Merge Sequence"]
-        Truncate_Stage_task --> Merge_Sequence_task
-        DataFlow___EmailFactRollupStage_task["DataFlow - EmailFactRollupStage"]
-        Merge_Sequence_task --> DataFlow___EmailFactRollupStage_task
-        EmailFactStage_task["EmailFactStage"]
-        DataFlow___EmailFactRollupStage_task --> EmailFactStage_task
-        Merge_EmailFact2022_task["Merge EmailFact2022"]
-        EmailFactStage_task --> Merge_EmailFact2022_task
-        MergeEmailFactRollup_task["MergeEmailFactRollup"]
-        Merge_EmailFact2022_task --> MergeEmailFactRollup_task
-        no_file_alert_task["no file alert"]
-        MergeEmailFactRollup_task --> no_file_alert_task
-        one_time_clickCount_update_task["one time clickCount update"]
-        no_file_alert_task --> one_time_clickCount_update_task
-        EmailClickStage_task["EmailClickStage"]
-        one_time_clickCount_update_task --> EmailClickStage_task
-        Truncate_Stage_task["Truncate Stage"]
-        EmailClickStage_task --> Truncate_Stage_task
-        update_EmailFacts_task["update EmailFacts"]
-        Truncate_Stage_task --> update_EmailFacts_task
-        Send_Mail_Task_task["Send Mail Task"]
-        update_EmailFacts_task --> Send_Mail_Task_task
-        Send_Email_onError_task["Send Email onError"]
-        Send_Mail_Task_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| DW | OLEDB |
-| DWStaging | OLEDB |
-| EmailRevenue | FLATFILE |
-| EmailRevenue (extra columns) | FLATFILE |
-| ESPStaging | OLEDB |
-| ffcm | FLATFILE |
-| IntegrationStaging | OLEDB |
-| SMTP_EMAIL | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| DW | OLEDB | papamart | dw | Data Source=papamart; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| ESPStaging | OLEDB | stl-sql-p-04 | ESPStaging | Data Source=stl-sql-p-04; Initial Catalog=ESPStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| EmailRevenue | FLATFILE |  |  |  |
+| EmailRevenue (extra columns) | FLATFILE |  |  |  |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP_EMAIL | SMTP |  |  |  |
+| ffcm | FLATFILE |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| EmailFactsETL | Microsoft.Package |
-| blank file alert | Microsoft.SendMailTask |
-| Email Data Sequence | STOCK:SEQUENCE |
-| EmailBounceStage | Microsoft.Pipeline |
-| EmailClickStage | Microsoft.Pipeline |
-| EmailOpenStage | Microsoft.Pipeline |
-| EmailSendJobs | Microsoft.Pipeline |
-| EmailSentStage | Microsoft.Pipeline |
-| EmailSentStage (backup) | Microsoft.Pipeline |
-| EmailUnSubStage | Microsoft.Pipeline |
-| Merge EmailEventFact | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| EmailRevenueNew | STOCK:FOREACHLOOP |
-| Data Flow | Microsoft.Pipeline |
-| Data Flow WIP | Microsoft.Pipeline |
-| File System Task | Microsoft.FileSystemTask |
-| Merge EmailRevenueNew | Microsoft.ExecuteSQLTask |
-| remove blank rows | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Merge Sequence | STOCK:SEQUENCE |
-| DataFlow - EmailFactRollupStage | Microsoft.Pipeline |
-| EmailFactStage | Microsoft.Pipeline |
-| Merge EmailFact2022 | Microsoft.ExecuteSQLTask |
-| MergeEmailFactRollup | Microsoft.ExecuteSQLTask |
-| no file alert | Microsoft.SendMailTask |
-| one time clickCount update | STOCK:SEQUENCE |
-| EmailClickStage | Microsoft.Pipeline |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| update EmailFacts | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
-| Send Email onError | Microsoft.SendMailTask |
+| EmailFactsETL | Package |
+| blank file alert | SendMailTask |
+| Email Data Sequence | SEQUENCE |
+| EmailBounceStage | Pipeline |
+| EmailClickStage | Pipeline |
+| EmailOpenStage | Pipeline |
+| EmailSendJobs | Pipeline |
+| EmailSentStage | Pipeline |
+| EmailSentStage (backup) | Pipeline |
+| EmailUnSubStage | Pipeline |
+| Merge EmailEventFact | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| EmailRevenueNew | FOREACHLOOP |
+| Data Flow | Pipeline |
+| Data Flow WIP | Pipeline |
+| File System Task | FileSystemTask |
+| Merge EmailRevenueNew | ExecuteSQLTask |
+| remove blank rows | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| Merge Sequence | SEQUENCE |
+| DataFlow - EmailFactRollupStage | Pipeline |
+| EmailFactStage | Pipeline |
+| Merge EmailFact2022 | ExecuteSQLTask |
+| MergeEmailFactRollup | ExecuteSQLTask |
+| no file alert | SendMailTask |
+| one time clickCount update | SEQUENCE |
+| EmailClickStage | Pipeline |
+| Truncate Stage | ExecuteSQLTask |
+| update EmailFacts | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- Email Data Sequence [SEQUENCE]
+  - EmailBounceStage [Pipeline]
+  - EmailClickStage [Pipeline]
+  - EmailOpenStage [Pipeline]
+  - EmailSendJobs [Pipeline]
+  - EmailSentStage [Pipeline]
+  - EmailSentStage (backup) [Pipeline]
+  - EmailUnSubStage [Pipeline]
+  - Merge EmailEventFact [ExecuteSQLTask]
+  - Truncate Stage [ExecuteSQLTask]
+- EmailRevenueNew [FOREACHLOOP]
+  - Data Flow [Pipeline]
+  - Data Flow WIP [Pipeline]
+  - File System Task [FileSystemTask]
+  - Merge EmailRevenueNew [ExecuteSQLTask]
+  - Truncate Stage [ExecuteSQLTask]
+  - remove blank rows [ExecuteSQLTask]
+- Merge Sequence [SEQUENCE]
+  - DataFlow - EmailFactRollupStage [Pipeline]
+  - EmailFactStage [Pipeline]
+  - Merge EmailFact2022 [ExecuteSQLTask]
+  - MergeEmailFactRollup [ExecuteSQLTask]
+- Send Mail Task [SendMailTask]
+- blank file alert [SendMailTask]
+- no file alert [SendMailTask]
+- one time clickCount update [SEQUENCE]
+  - EmailClickStage [Pipeline]
+  - Truncate Stage [ExecuteSQLTask]
+  - update EmailFacts [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_blank_file_alert["blank file alert"]
+    n_Package_Email_Data_Sequence["Email Data Sequence"]
+    n_Package_Email_Data_Sequence_EmailBounceStage["EmailBounceStage"]
+    n_Package_Email_Data_Sequence_EmailClickStage["EmailClickStage"]
+    n_Package_Email_Data_Sequence_EmailOpenStage["EmailOpenStage"]
+    n_Package_Email_Data_Sequence_EmailSendJobs["EmailSendJobs"]
+    n_Package_Email_Data_Sequence_EmailSentStage["EmailSentStage"]
+    n_Package_Email_Data_Sequence_EmailSentStage__backup_["EmailSentStage (backup)"]
+    n_Package_Email_Data_Sequence_EmailUnSubStage["EmailUnSubStage"]
+    n_Package_Email_Data_Sequence_Merge_EmailEventFact["Merge EmailEventFact"]
+    n_Package_Email_Data_Sequence_Truncate_Stage["Truncate Stage"]
+    n_Package_EmailRevenueNew["EmailRevenueNew"]
+    n_Package_EmailRevenueNew_Data_Flow["Data Flow"]
+    n_Package_EmailRevenueNew_Data_Flow_WIP["Data Flow WIP"]
+    n_Package_EmailRevenueNew_File_System_Task["File System Task"]
+    n_Package_EmailRevenueNew_Merge_EmailRevenueNew["Merge EmailRevenueNew"]
+    n_Package_EmailRevenueNew_remove_blank_rows["remove blank rows"]
+    n_Package_EmailRevenueNew_Truncate_Stage["Truncate Stage"]
+    n_Package_Merge_Sequence["Merge Sequence"]
+    n_Package_Merge_Sequence_DataFlow___EmailFactRollupStage["DataFlow - EmailFactRollupStage"]
+    n_Package_Merge_Sequence_EmailFactStage["EmailFactStage"]
+    n_Package_Merge_Sequence_Merge_EmailFact2022["Merge EmailFact2022"]
+    n_Package_Merge_Sequence_MergeEmailFactRollup["MergeEmailFactRollup"]
+    n_Package_no_file_alert["no file alert"]
+    n_Package_one_time_clickCount_update["one time clickCount update"]
+    n_Package_one_time_clickCount_update_EmailClickStage["EmailClickStage"]
+    n_Package_one_time_clickCount_update_Truncate_Stage["Truncate Stage"]
+    n_Package_one_time_clickCount_update_update_EmailFacts["update EmailFacts"]
+    n_Package_Send_Mail_Task["Send Mail Task"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_Email_Data_Sequence_EmailSendJobs --> n_Package_Email_Data_Sequence_EmailSentStage
+    n_Package_Email_Data_Sequence_EmailSentStage --> n_Package_Email_Data_Sequence_EmailBounceStage
+    n_Package_Email_Data_Sequence_EmailBounceStage --> n_Package_Email_Data_Sequence_EmailUnSubStage
+    n_Package_Email_Data_Sequence_EmailUnSubStage --> n_Package_Email_Data_Sequence_EmailClickStage
+    n_Package_Email_Data_Sequence_EmailClickStage --> n_Package_Email_Data_Sequence_EmailOpenStage
+    n_Package_Email_Data_Sequence_Truncate_Stage --> n_Package_Email_Data_Sequence_EmailSendJobs
+    n_Package_Email_Data_Sequence_EmailSendJobs --> n_Package_Email_Data_Sequence_Merge_EmailEventFact
+    n_Package_EmailRevenueNew_Truncate_Stage --> n_Package_EmailRevenueNew_Data_Flow
+    n_Package_EmailRevenueNew_Data_Flow --> n_Package_EmailRevenueNew_remove_blank_rows
+    n_Package_EmailRevenueNew_File_System_Task --> n_Package_EmailRevenueNew_Merge_EmailRevenueNew
+    n_Package_EmailRevenueNew_remove_blank_rows --> n_Package_EmailRevenueNew_File_System_Task
+    n_Package_Merge_Sequence_Merge_EmailFact2022 --> n_Package_Merge_Sequence_DataFlow___EmailFactRollupStage
+    n_Package_Merge_Sequence_DataFlow___EmailFactRollupStage --> n_Package_Merge_Sequence_MergeEmailFactRollup
+    n_Package_Merge_Sequence_EmailFactStage --> n_Package_Merge_Sequence_Merge_EmailFact2022
+    n_Package_one_time_clickCount_update_Truncate_Stage --> n_Package_one_time_clickCount_update_EmailClickStage
+    n_Package_one_time_clickCount_update_EmailClickStage --> n_Package_one_time_clickCount_update_update_EmailFacts
+    n_Package_EmailRevenueNew --> n_Package_no_file_alert
+    n_Package_Email_Data_Sequence --> n_Package_Merge_Sequence
+    n_Package_Merge_Sequence --> n_Package_Send_Mail_Task
+    n_Package_Send_Mail_Task --> n_Package_blank_file_alert
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | EmailRevenueArchive | No |
+| User | EmailRevenueFileInLoop | No |
+| User | EmailRevenueNewArchive | No |
+| User | EndDate | Yes |
+| User | EndDateAsDATE | Yes |
+| User | GetDate | Yes |
+| User | GetDateAsDATE | Yes |
+| User | StartDate | Yes |
+| User | StartDateAsDATE | Yes |
+| User | varBounceDate | No |
+| User | varClickDate | No |
+| User | varClientID | No |
+| User | varEmailAddress | No |
+| User | varFileExists | No |
+| User | varOpenDate | No |
+| User | varRecordCount | No |
+| User | varSendDate | No |
+| User | varSendID | No |
+| User | varSubScriberKey | No |
+| User | varUnSubDate | No |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+20221027171459597
+```
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+10/27/2022
+```
+
+#### User::EndDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::EndDate])  + "-" + 
+(DT_WSTR, 2) datepart("mm", @[User::EndDate])  + "-" + 
+(DT_WSTR, 2) datepart("dd",  @[User::EndDate])
+```
+
+**Evaluated value:**
+
+```sql
+2022-10-27
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+10/27/2022
+```
+
+#### User::GetDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::GetDate])  + "-" + 
+(DT_WSTR, 2) datepart("mm", @[User::GetDate])  + "-" + 
+(DT_WSTR, 2) datepart("dd",  @[User::GetDate])
+```
+
+**Evaluated value:**
+
+```sql
+2022-10-27
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+10/16/2022
+```
+
+#### User::StartDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDate])  + "-" + 
+(DT_WSTR, 2) datepart("mm", @[User::StartDate])  + "-" + 
+(DT_WSTR, 2) datepart("dd",  @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+2022-10-16
+```
+
+## Execute SQL Tasks
+
+### Merge EmailEventFact
+
+**Path:** `Package\Email Data Sequence\Merge EmailEventFact`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec spMergeEmailEventFact
+```
+
+### Truncate Stage
+
+**Path:** `Package\Email Data Sequence\Truncate Stage`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE EmailSendJobs
+TRUNCATE TABLE EmailSentStage
+
+TRUNCATE TABLE EmailBounceStage
+TRUNCATE TABLE EmailUnSubStage
+TRUNCATE TABLE EmailClickStage
+TRUNCATE TABLE EmailOpenStage
+
+TRUNCATE TABLE EmailFactStage
+TRUNCATE TABLE EmailFactRollupStage
+
+
+```
+
+### Merge EmailRevenueNew
+
+**Path:** `Package\EmailRevenueNew\Merge EmailRevenueNew`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec spMergeEmailRevenueNew
+```
+
+### Truncate Stage
+
+**Path:** `Package\EmailRevenueNew\Truncate Stage`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE EmailRevenueNewStage
+```
+
+### remove blank rows
+
+**Path:** `Package\EmailRevenueNew\remove blank rows`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+delete from [dbo].[EmailRevenueNewStage] where ["EventType"] = ''
+delete from [dbo].[EmailRevenueNewStage] where  ["FrequencyCount1m"] = ''
+delete from [dbo].[EmailRevenueNewStage] where ["FrequencyCount3m"] = '' 
+delete from [dbo].[EmailRevenueNewStage] where  ["FrequencyCount6m"] = '' 
+delete from [dbo].[EmailRevenueNewStage] where  ["FrequencyCount12m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["FrequencyCount18m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["FrequencyCountTTL"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["RecencyCount1m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["RecencyCount3m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["RecencyCount6m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["RecencyCount12m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["RecencyCountTTL"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["MonetarySum1m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["MonetarySum6m"] = '' 	
+delete from [dbo].[EmailRevenueNewStage] where  ["MonetarySumTTL"] = '' 
+
+
+```
+
+### Merge EmailFact2022
+
+**Path:** `Package\Merge Sequence\Merge EmailFact2022`  
+**Connection:** DW (papamart/dw)  
+
+```sql
+exec spMergeEmailFacts2022
+```
+
+### MergeEmailFactRollup
+
+**Path:** `Package\Merge Sequence\MergeEmailFactRollup`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+exec spMergeEmailFactRollup
+```
+
+### Truncate Stage
+
+**Path:** `Package\one time clickCount update\Truncate Stage`  
+**Connection:** DWStaging (papamart/DWStaging)  
+
+```sql
+TRUNCATE TABLE EmailClickStage
+
+
+```
+
+### update EmailFacts
+
+**Path:** `Package\one time clickCount update\update EmailFacts`  
+**Connection:** DW (papamart/dw)  
+
+```sql
+update ef 
+set ef.clickCount = ec.clickCount
+from papamart.dw.dbo.EmailFact2019 ef 
+join papamart.dwstaging.dbo.EmailClickStage ec on ef.ClientID = ec.ClientID and ef.SendID = ec.SendID and ef.EmailAddress = ec.EmailAddress
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select  	ClientID, 	SendID, --SubscriberKey, lower(upper(EmailAddress)) as EmailAddress, min(EventDate) as BounceDate from ET_Bounce s with (nolock) where cast(EventDate as date) >= ?  group by ClientID, 	SendID, --SubscriberKey, 	lower(upper(EmailAddress)) |
-|  | select  	ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) as EmailAddress, count(*) as clickCount, min(EventDate) as ClickDate from ET_Clicks with (nolock) where cast(EventDate as date) >= ? group by ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) |
-|  | select  	ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) as EmailAddress, min(EventDate) OpenDate from ET_Opens with (nolock) where cast(EventDate as date) >= ? group by   	ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) |
-|  | select   	ClientID, 	SendID, 	Subject, 	EmailName, 	min(SentTime) EventDate from ET_SendJobs with (nolock) where cast(SentTime as date) between ? and ? group by ClientID, 	SendID, 	Subject, 	EmailName |
-|  | select   	ClientID, 	SendID, 	SubscriberID, 	--SubscriberKey, 	lower(upper(EmailAddress)) as EmailAddress, 	min(s.EventDate) SendDate from ET_Sent s with (nolock) where cast(EventDate as date) between ? and ? --where cast(EventDate as date) between '02/17/2022' and '02/19/2022' --and EmailAddress = 'gweniek@icloud.com' group by  	ClientID, 	SendID, 	SubscriberID, 	--SubscriberKey, 	lower(upper(Ema |
-|  | select  	 --JobID as SendID, 	 cast(right(JobID, 7) as int) as SendID,  --SubID as SubscriberID, EmailAddress, 	case when FrequencyCount1m = '' then 0 else cast(FrequencyCount1m as int) end as FrequencyCount1m,	 	case when FrequencyCount3m = '' then 0 else cast(FrequencyCount3m as int) end as FrequencyCount3m, 	case when FrequencyCount6m = '' then 0 else cast(FrequencyCount6m as int) end as Freque |
-|  | select   	ClientID, 	SendID, 	SubscriberID, 	--SubscriberKey, 	lower(upper(EmailAddress)) as EmailAddress, 	min(s.EventDate) SendDate from ET_Sent s with (nolock) where cast(EventDate as date) between ? and ? group by  	ClientID, 	SendID, 	SubscriberID, 	--SubscriberKey, 	lower(upper(EmailAddress)) |
-|  | select  	JobID as SendID, 	SubID as SubscriberID, 	FrequencyCount24m,	 	RecencyCount24m,	 	FrequencyCount1m,	 	FrequencyCount3m,	 	FrequencyCount6m,	 	FrequencyCount12m,	 	FrequencyCount18m,	 	FrequencyCountTTL,	 	RecencyCount1m,	 	RecencyCount3m,	 	RecencyCount6m,	 	RecencyCount12m,	 	RecencyCountTTL,	 	MonetarySum1m,	 	MonetarySum3m,	 	MonetarySum6m,	 	MonetarySum12m,	 	MonetarySum18m,	 	Monetar |
-|  | select  	ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) as EmailAddress, min(EventDate) as UnSubDate from ET_Unsubs with (nolock) where cast(EventDate as date) >= ?  group by ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) |
-|  | select  	EmailAddress, 	max(SendDate) LastSendDate, 	max(ClickDate) LastClickDate, 	max(OpenDate) LastOpenDate, 	max(BounceDate) LastBounceDate, 	max(UnSubDate) LastUnSubscribeDate from EmailFact2022 with (nolock) group by  	EmailAddress |
-|  | select *  from vwEmailFact with (nolock) |
-|  | select  	ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) as EmailAddress, count(*) as clickCount, min(EventDate) as ClickDate from ET_Clicks with (nolock) where cast(EventDate as date) >= '2019-1-1' and cast(EventDate as date) <= '2019-6-29' group by ClientID, 	SendID, 	--SubscriberKey, 	lower(upper(EmailAddress)) |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| ET_Bounce |  | OLEDBSource | EmailBounceStage | ESPStaging | SqlCommand |
+| ET_Clicks |  | OLEDBSource | EmailClickStage | ESPStaging | SqlCommand |
+| ET_Open |  | OLEDBSource | EmailOpenStage | ESPStaging | SqlCommand |
+| ET_SendJobs |  | OLEDBSource | EmailSendJobs | ESPStaging | SqlCommand |
+| ET_Sent |  | OLEDBSource | EmailSentStage | ESPStaging | SqlCommand |
+| ET_Sent |  | OLEDBSource | EmailSentStage (backup) | ESPStaging | SqlCommand |
+| ET_Unsub |  | OLEDBSource | EmailUnSubStage | ESPStaging | SqlCommand |
+| Flat File Source |  | FlatFileSource | Data Flow | ffcm |  |
+| Flat File Source |  | FlatFileSource | Data Flow WIP | ffcm |  |
+| EmailFact2022 |  | OLEDBSource | DataFlow - EmailFactRollupStage | DW | SqlCommand |
+| vwEmailFact |  | OLEDBSource | EmailFactStage | DWStaging | SqlCommand |
+| ET_Clicks |  | OLEDBSource | EmailClickStage | ESPStaging | SqlCommand |
+
+#### ET_Bounce — SqlCommand
+
+```sql
+select 
+	ClientID,
+	SendID,
+--SubscriberKey,
+lower(upper(EmailAddress)) as EmailAddress,
+min(EventDate) as BounceDate
+from ET_Bounce s with (nolock)
+where cast(EventDate as date) >= ? 
+group by ClientID,
+	SendID,
+--SubscriberKey,
+	lower(upper(EmailAddress))
+```
+
+#### ET_Clicks — SqlCommand
+
+```sql
+select 
+	ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress)) as EmailAddress,
+count(*) as clickCount,
+min(EventDate) as ClickDate
+from ET_Clicks with (nolock)
+where cast(EventDate as date) >= ?
+group by ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress))
+```
+
+#### ET_Open — SqlCommand
+
+```sql
+select 
+	ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress)) as EmailAddress,
+min(EventDate) OpenDate
+from ET_Opens with (nolock)
+where cast(EventDate as date) >= ?
+group by  
+	ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress))
+```
+
+#### ET_SendJobs — SqlCommand
+
+```sql
+select  
+	ClientID,
+	SendID,
+	Subject,
+	EmailName,
+	min(SentTime) EventDate
+from ET_SendJobs with (nolock)
+where cast(SentTime as date) between ? and ?
+group by ClientID,
+	SendID,
+	Subject,
+	EmailName
+```
+
+#### ET_Sent — SqlCommand
+
+```sql
+select  
+	ClientID,
+	SendID,
+	SubscriberID,
+	--SubscriberKey,
+	lower(upper(EmailAddress)) as EmailAddress,
+	min(s.EventDate) SendDate
+from ET_Sent s with (nolock)
+where cast(EventDate as date) between ? and ?
+--where cast(EventDate as date) between '02/17/2022' and '02/19/2022'
+--and EmailAddress = 'gweniek@icloud.com'
+group by 
+	ClientID,
+	SendID,
+	SubscriberID,
+	--SubscriberKey,
+	lower(upper(EmailAddress))
+```
+
+#### ET_Sent — SqlCommand
+
+```sql
+select  
+	ClientID,
+	SendID,
+	SubscriberID,
+	--SubscriberKey,
+	lower(upper(EmailAddress)) as EmailAddress,
+	min(s.EventDate) SendDate
+from ET_Sent s with (nolock)
+where cast(EventDate as date) between ? and ?
+group by 
+	ClientID,
+	SendID,
+	SubscriberID,
+	--SubscriberKey,
+	lower(upper(EmailAddress))
+```
+
+#### ET_Unsub — SqlCommand
+
+```sql
+select 
+	ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress)) as EmailAddress,
+min(EventDate) as UnSubDate
+from ET_Unsubs with (nolock)
+where cast(EventDate as date) >= ? 
+group by ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress))
+```
+
+#### EmailFact2022 — SqlCommand
+
+```sql
+select 
+	EmailAddress,
+	max(SendDate) LastSendDate,
+	max(ClickDate) LastClickDate,
+	max(OpenDate) LastOpenDate,
+	max(BounceDate) LastBounceDate,
+	max(UnSubDate) LastUnSubscribeDate
+from EmailFact2022 with (nolock)
+group by 
+	EmailAddress
+```
+
+#### vwEmailFact — SqlCommand
+
+```sql
+select * 
+from vwEmailFact with (nolock)
+```
+
+#### ET_Clicks — SqlCommand
+
+```sql
+select 
+	ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress)) as EmailAddress,
+count(*) as clickCount,
+min(EventDate) as ClickDate
+from ET_Clicks with (nolock)
+where cast(EventDate as date) >= '2019-1-1'
+and cast(EventDate as date) <= '2019-6-29'
+group by ClientID,
+	SendID,
+	--SubscriberKey,
+	lower(upper(EmailAddress))
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [EmailBounceStage] |
-|  | [EmailClickStage] |
-|  | [EmailOpenStage] |
-|  | [EmailSendJobs] |
-|  | [dbo].[EmailSentStage] |
-|  | [dbo].[EmailSentStage] |
-|  | [dbo].[EmailUnSubStage] |
-|  | [dbo].[EmailRevenueNewStage] |
-|  | [dbo].[EmailRevenueNewStage] |
-|  | [dbo].[EmailFactRollupStage] |
-|  | [dbo].[EmailFactStage] |
-|  | [dbo].[vwEmailFact2] |
-|  | [EmailClickStage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| EmailBounceStage |  | OLEDBDestination | EmailBounceStage | DWStaging |  |
+| EmailClickStage |  | OLEDBDestination | EmailClickStage | DWStaging |  |
+| EmailOpenStage |  | OLEDBDestination | EmailOpenStage | DWStaging |  |
+| EmailSendJobs |  | OLEDBDestination | EmailSendJobs | DWStaging |  |
+| EmailSentStage |  | OLEDBDestination | EmailSentStage | DWStaging |  |
+| EmailSentStage |  | OLEDBDestination | EmailSentStage (backup) | DWStaging |  |
+| EmailUnSub |  | OLEDBDestination | EmailUnSubStage | DWStaging |  |
+| OLE DB Destination |  | OLEDBDestination | Data Flow | DWStaging |  |
+| OLE DB Destination |  | OLEDBDestination | Data Flow WIP | DWStaging |  |
+| EmailFactRollupStage |  | OLEDBDestination | DataFlow - EmailFactRollupStage | DWStaging |  |
+| EmailFactStage |  | OLEDBDestination | EmailFactStage | DWStaging |  |
+| EmailClickStage |  | OLEDBDestination | EmailClickStage | DWStaging |  |

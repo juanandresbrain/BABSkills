@@ -1,59 +1,90 @@
-﻿# SSIS Package: WEB_ManageD365ShipMessages
+# SSIS Package: WEB_ManageD365ShipMessages
 
 **Project:** WEB_ManageD365ShipMessages  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        Azure_Service_Bus_Connection_Manager_conn(["Azure Service Bus Connection Manager [Azure Service Bus (KingswaySoft)]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-    end
-    subgraph ControlFlow
-        WEB_ManageD365ShipMessages_task["WEB_ManageD365ShipMessages"]
-        Sequence_Container_task["Sequence Container"]
-        WEB_ManageD365ShipMessages_task --> Sequence_Container_task
-        DFT___Import_new_shipped_messages_task["DFT - Import new shipped messages"]
-        Sequence_Container_task --> DFT___Import_new_shipped_messages_task
-        DFT___Process_new_shipped_messages_task["DFT - Process new shipped messages"]
-        DFT___Import_new_shipped_messages_task --> DFT___Process_new_shipped_messages_task
-        SQL___Set_MessageTypeId_task["SQL - Set MessageTypeId"]
-        DFT___Process_new_shipped_messages_task --> SQL___Set_MessageTypeId_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| Azure Service Bus Connection Manager | Azure Service Bus (KingswaySoft) |
-| IntegrationStaging | OLEDB |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| Azure Service Bus Connection Manager | Azure Service Bus (KingswaySoft) |  |  |  |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WEB_ManageD365ShipMessages | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| DFT - Import new shipped messages | Microsoft.Pipeline |
-| DFT - Process new shipped messages | Microsoft.Pipeline |
-| SQL - Set MessageTypeId | Microsoft.ExecuteSQLTask |
+| WEB_ManageD365ShipMessages | Package |
+| Sequence Container | SEQUENCE |
+| DFT - Import new shipped messages | Pipeline |
+| DFT - Process new shipped messages | Pipeline |
+| SQL - Set MessageTypeId | ExecuteSQLTask |
+
+## Control Flow Outline
+
+```text
+- SQL - Set MessageTypeId [ExecuteSQLTask]
+- Sequence Container [SEQUENCE]
+  - DFT - Import new shipped messages [Pipeline]
+  - DFT - Process new shipped messages [Pipeline]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_DFT___Import_new_shipped_messages["DFT - Import new shipped messages"]
+    n_Package_Sequence_Container_DFT___Process_new_shipped_messages["DFT - Process new shipped messages"]
+    n_Package_SQL___Set_MessageTypeId["SQL - Set MessageTypeId"]
+    n_Package_Sequence_Container_DFT___Import_new_shipped_messages --> n_Package_Sequence_Container_DFT___Process_new_shipped_messages
+    n_Package_SQL___Set_MessageTypeId --> n_Package_Sequence_Container
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| Package | messageAgeInMinutes | No |
+| User | MessageTypeId | No |
+
+## Execute SQL Tasks
+
+### SQL - Set MessageTypeId
+
+**Path:** `Package\SQL - Set MessageTypeId`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+SELECT [MessageTypeId]
+FROM [IntegrationStaging].[WMS].[WMServiceBusMessageType]
+  WHERE [Description] = 'outboundso-ship'
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select * from [WMS].[WMServiceBusMessage] |
-|  | select * from [WMS].[SalesOrderStatusUpdateShipped] |
-|  | SELECT [ServiceBusMessageId]       ,[MessageId]       ,[Message]       ,[Sequence]       ,[MessageTypeId]       ,[EnqueuedTimeUTC]   FROM [IntegrationStaging].[WMS].[WMServiceBusMessage] WITH(NOLOCK)   WHERE ServiceBusMessageId IN (SELECT MAX(ServiceBusMessageID) FROM [IntegrationStaging].[WMS].[WMServiceBusMessage] WITH(NOLOCK) WHERE MessageTypeId = ? AND DATEDIFF(MINUTE, EnqueuedTimeUTC, GETUTCD |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| WMServiceBusMessage |  | OLEDBSource | DFT - Process new shipped messages | IntegrationStaging | SqlCommand |
+
+#### WMServiceBusMessage — SqlCommand
+
+```sql
+SELECT [ServiceBusMessageId]
+      ,[MessageId]
+      ,[Message]
+      ,[Sequence]
+      ,[MessageTypeId]
+      ,[EnqueuedTimeUTC]
+  FROM [IntegrationStaging].[WMS].[WMServiceBusMessage] WITH(NOLOCK)
+  WHERE ServiceBusMessageId IN (SELECT MAX(ServiceBusMessageID) FROM [IntegrationStaging].[WMS].[WMServiceBusMessage] WITH(NOLOCK) WHERE MessageTypeId = ? AND DATEDIFF(MINUTE, EnqueuedTimeUTC, GETUTCDATE()) < ? 
+GROUP BY MessageId)
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WMS].[WMServiceBusMessage] |
-|  | [WMS].[SalesOrderStatusUpdateShipped] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| WMServiceBusMessage |  | OLEDBDestination | DFT - Import new shipped messages | IntegrationStaging |  |
+| SalesOrderStatusUpdateShipped |  | OLEDBDestination | DFT - Process new shipped messages | IntegrationStaging |  |

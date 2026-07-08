@@ -1,92 +1,269 @@
-﻿# SSIS Package: DW_SalesDimExtracts_StoreDim
+# SSIS Package: DW_SalesDimExtracts_StoreDim
 
 **Project:** DW_SalesDimExtracts_StoreDim  
 **Folder:** DW  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        ASNCorrections_conn(["ASNCorrections [FLATFILE]"])
-        DW_conn(["DW [OLEDB]"])
-        DWStaging_conn(["DWStaging [OLEDB]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        Kodiak_conn(["Kodiak [OLEDB]"])
-        ME_01_conn(["ME_01 [OLEDB]"])
-        papamart_DWStaging_conn(["papamart.DWStaging [OLEDB]"])
-        ProductInventory_conn(["ProductInventory [FLATFILE]"])
-        SendLog_conn(["SendLog [FLATFILE]"])
-        SendLogPIPE_csv_conn(["SendLogPIPE.csv [FILE]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        DW_SalesDimExtracts_StoreDim_task["DW_SalesDimExtracts_StoreDim"]
-        audit_count_task["audit count"]
-        DW_SalesDimExtracts_StoreDim_task --> audit_count_task
-        auditDestCount_task["auditDestCount"]
-        audit_count_task --> auditDestCount_task
-        auditInvalidCount_task["auditInvalidCount"]
-        auditDestCount_task --> auditInvalidCount_task
-        auditSrcCount_task["auditSrcCount"]
-        auditInvalidCount_task --> auditSrcCount_task
-        Send_Mail_Task_task["Send Mail Task"]
-        auditSrcCount_task --> Send_Mail_Task_task
-        Process_task["Process"]
-        Send_Mail_Task_task --> Process_task
-        populate_StoreDim_Stage_task["populate StoreDim_Stage"]
-        Process_task --> populate_StoreDim_Stage_task
-        spMergeStoreDim_task["spMergeStoreDim"]
-        populate_StoreDim_Stage_task --> spMergeStoreDim_task
-        truncate_stage_task["truncate stage"]
-        spMergeStoreDim_task --> truncate_stage_task
-        Send_Mail_Task_task["Send Mail Task"]
-        truncate_stage_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| ASNCorrections | FLATFILE |
-| DW | OLEDB |
-| DWStaging | OLEDB |
-| IntegrationStaging | OLEDB |
-| Kodiak | OLEDB |
-| ME_01 | OLEDB |
-| papamart.DWStaging | OLEDB |
-| ProductInventory | FLATFILE |
-| SendLog | FLATFILE |
-| SendLogPIPE.csv | FILE |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| ASNCorrections | FLATFILE |  |  |  |
+| DW | OLEDB | papamarttest | dw | Data Source=papamarttest; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DWStaging | OLEDB | papamarttest | DWStaging | Data Source=papamarttest; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| IntegrationStaging | OLEDB | STL-SSIS-T-01 | IntegrationStaging | Data Source=STL-SSIS-T-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| Kodiak | OLEDB | kodiaktest | BABWMstrData | Data Source=kodiaktest; Initial Catalog=BABWMstrData; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| ME_01 | OLEDB | bedrocktestdb02 | me_01 | Data Source=bedrocktestdb02; Initial Catalog=me_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| ProductInventory | FLATFILE |  |  |  |
+| SMTP | SMTP |  |  |  |
+| SendLog | FLATFILE |  |  |  |
+| SendLogPIPE.csv | FILE |  |  |  |
+| papamart.DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| DW_SalesDimExtracts_StoreDim | Microsoft.Package |
-| audit count | STOCK:SEQUENCE |
-| auditDestCount | Microsoft.ExecuteSQLTask |
-| auditInvalidCount | Microsoft.ExecuteSQLTask |
-| auditSrcCount | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
-| Process | STOCK:SEQUENCE |
-| populate StoreDim_Stage | Microsoft.Pipeline |
-| spMergeStoreDim | Microsoft.ExecuteSQLTask |
-| truncate stage | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| DW_SalesDimExtracts_StoreDim | Package |
+| audit count | SEQUENCE |
+| auditDestCount | ExecuteSQLTask |
+| auditInvalidCount | ExecuteSQLTask |
+| auditSrcCount | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+| Process | SEQUENCE |
+| populate StoreDim_Stage | Pipeline |
+| spMergeStoreDim | ExecuteSQLTask |
+| truncate stage | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- Process [SEQUENCE]
+  - populate StoreDim_Stage [Pipeline]
+  - spMergeStoreDim [ExecuteSQLTask]
+  - truncate stage [ExecuteSQLTask]
+- audit count [SEQUENCE]
+  - Send Mail Task [SendMailTask]
+  - auditDestCount [ExecuteSQLTask]
+  - auditInvalidCount [ExecuteSQLTask]
+  - auditSrcCount [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_audit_count["audit count"]
+    n_Package_audit_count_auditDestCount["auditDestCount"]
+    n_Package_audit_count_auditInvalidCount["auditInvalidCount"]
+    n_Package_audit_count_auditSrcCount["auditSrcCount"]
+    n_Package_audit_count_Send_Mail_Task["Send Mail Task"]
+    n_Package_Process["Process"]
+    n_Package_Process_populate_StoreDim_Stage["populate StoreDim_Stage"]
+    n_Package_Process_spMergeStoreDim["spMergeStoreDim"]
+    n_Package_Process_truncate_stage["truncate stage"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_audit_count_auditDestCount --> n_Package_audit_count_auditSrcCount
+    n_Package_audit_count_auditSrcCount --> n_Package_audit_count_auditInvalidCount
+    n_Package_audit_count_auditInvalidCount --> n_Package_audit_count_Send_Mail_Task
+    n_Package_Process_truncate_stage --> n_Package_Process_populate_StoreDim_Stage
+    n_Package_Process_populate_StoreDim_Stage --> n_Package_Process_spMergeStoreDim
+    n_Package_Process --> n_Package_audit_count
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | EndDate | Yes |
+| User | EndDateAsDATE | Yes |
+| User | GetDate | Yes |
+| User | GetDateAsDATE | Yes |
+| User | StartDate | Yes |
+| User | StartDateAsDATE | Yes |
+| User | auditDestCount | No |
+| User | auditInvalidCount | No |
+| User | auditSrcCount | No |
+| User | errorEmailActive | No |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+202111291724740
+```
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+11/2/2021
+```
+
+#### User::EndDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::EndDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::EndDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::EndDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2021-11-02
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+11/2/2021
+```
+
+#### User::GetDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::GetDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::GetDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::GetDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2021-11-02
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+11/1/2021
+```
+
+#### User::StartDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::StartDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::StartDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2021-11-01
+```
+
+## Execute SQL Tasks
+
+### spMergeStoreDim
+
+**Path:** `Package\Process\spMergeStoreDim`  
+**Connection:** DWStaging (papamarttest/DWStaging)  
+
+```sql
+exec [dbo].[spMergeStoreDim]
+```
+
+### truncate stage
+
+**Path:** `Package\Process\truncate stage`  
+**Connection:** DWStaging (papamarttest/DWStaging)  
+
+```sql
+truncate table [dbo].[StoreDim_Stage]
+
+```
+
+### auditDestCount
+
+**Path:** `Package\audit count\auditDestCount`  
+**Connection:** DW (papamarttest/dw)  
+
+```sql
+SELECT COUNT(*) AS auditDestCount FROM dbo.store_dim WHERE store_id > 0 AND store_id NOT IN (10056,10063)
+```
+
+### auditInvalidCount
+
+**Path:** `Package\audit count\auditInvalidCount`  
+**Connection:** DW (papamarttest/dw)  
+
+```sql
+SELECT dbo.fnDW_AuditRowCounts (?,?) AS auditCountFlag
+```
+
+### auditSrcCount
+
+**Path:** `Package\audit count\auditSrcCount`  
+**Connection:** ME_01 (bedrocktestdb02/me_01)  
+
+```sql
+SELECT COUNT(*) AS auditSrcCount FROM dbo.vwDW_Store_Dim WHERE store_id > 0 AND store_id NOT IN (10056,10063)
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | EXEC dbo.spDW_DataWarehouseSource_From_MDM_and_Merch |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| spDW_DataWarehouseSource_From_MDM_and_Merch |  | OLEDBSource | populate StoreDim_Stage | Kodiak | SqlCommand |
+
+#### spDW_DataWarehouseSource_From_MDM_and_Merch — SqlCommand
+
+```sql
+EXEC dbo.spDW_DataWarehouseSource_From_MDM_and_Merch
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[StoreDim_Stage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| StoreDim_Stage |  | OLEDBDestination | populate StoreDim_Stage | DWStaging |  |

@@ -1,61 +1,116 @@
-﻿# SSIS Package: ERP_PO_Export_To_DBSchenker_OnDemand
+# SSIS Package: ERP_PO_Export_To_DBSchenker_OnDemand
 
 **Project:** ERP_PurchaseOrderFromD365  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        me_01_conn(["me_01 [OLEDB]"])
-    end
-    subgraph ControlFlow
-        ERP_PO_Export_To_DBSchenker_OnDemand_task["ERP_PO_Export_To_DBSchenker_OnDemand"]
-        Stage_for_DB_Schenker_Sequence_task["Stage for DB Schenker Sequence"]
-        ERP_PO_Export_To_DBSchenker_OnDemand_task --> Stage_for_DB_Schenker_Sequence_task
-        Export_to_FTP_task["Export to FTP"]
-        Stage_for_DB_Schenker_Sequence_task --> Export_to_FTP_task
-        Stage_PO_to_Merch_task["Stage PO to Merch"]
-        Export_to_FTP_task --> Stage_PO_to_Merch_task
-        Truncate_DBS_Stage_task["Truncate DBS Stage"]
-        Stage_PO_to_Merch_task --> Truncate_DBS_Stage_task
-        Truncate_DBS_Stage_On_Merch_task["Truncate DBS Stage On Merch"]
-        Truncate_DBS_Stage_task --> Truncate_DBS_Stage_On_Merch_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| IntegrationStaging | OLEDB |
-| me_01 | OLEDB |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| me_01 | OLEDB | BEDROCKDB02 | me_01 | Data Source=BEDROCKDB02; Initial Catalog=me_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| ERP_PO_Export_To_DBSchenker_OnDemand | Microsoft.Package |
-| Stage for DB Schenker Sequence | STOCK:SEQUENCE |
-| Export to FTP | Microsoft.ExecuteSQLTask |
-| Stage PO to Merch | Microsoft.Pipeline |
-| Truncate DBS Stage | Microsoft.ExecuteSQLTask |
-| Truncate DBS Stage On Merch | Microsoft.ExecuteSQLTask |
+| ERP_PO_Export_To_DBSchenker_OnDemand | Package |
+| Stage for DB Schenker Sequence | SEQUENCE |
+| Export to FTP | ExecuteSQLTask |
+| Stage PO to Merch | Pipeline |
+| Truncate DBS Stage | ExecuteSQLTask |
+| Truncate DBS Stage On Merch | ExecuteSQLTask |
+
+## Control Flow Outline
+
+```text
+- Stage for DB Schenker Sequence [SEQUENCE]
+  - Export to FTP [ExecuteSQLTask]
+  - Stage PO to Merch [Pipeline]
+  - Truncate DBS Stage [ExecuteSQLTask]
+  - Truncate DBS Stage On Merch [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Stage_for_DB_Schenker_Sequence["Stage for DB Schenker Sequence"]
+    n_Package_Stage_for_DB_Schenker_Sequence_Export_to_FTP["Export to FTP"]
+    n_Package_Stage_for_DB_Schenker_Sequence_Stage_PO_to_Merch["Stage PO to Merch"]
+    n_Package_Stage_for_DB_Schenker_Sequence_Truncate_DBS_Stage["Truncate DBS Stage"]
+    n_Package_Stage_for_DB_Schenker_Sequence_Truncate_DBS_Stage_On_Merch["Truncate DBS Stage On Merch"]
+    n_Package_Stage_for_DB_Schenker_Sequence_Truncate_DBS_Stage --> n_Package_Stage_for_DB_Schenker_Sequence_Truncate_DBS_Stage_On_Merch
+    n_Package_Stage_for_DB_Schenker_Sequence_Truncate_DBS_Stage_On_Merch --> n_Package_Stage_for_DB_Schenker_Sequence_Stage_PO_to_Merch
+    n_Package_Stage_for_DB_Schenker_Sequence_Stage_PO_to_Merch --> n_Package_Stage_for_DB_Schenker_Sequence_Export_to_FTP
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| User | PoNumbers | No |
+| User | PoView | Yes |
+
+### Expression-bound variable values
+
+#### User::PoView
+
+**Expression:**
+
+```sql
+"select *
+from [ERP].[vwPurchaseOrderDBSchenkerONDemand]
+where PurchaseOrder in " +  @[User::PoNumbers]
+```
+
+**Evaluated value:**
+
+```sql
+select *
+from [ERP].[vwPurchaseOrderDBSchenkerONDemand]
+where PurchaseOrder in ('PO110008073')
+```
+
+## Execute SQL Tasks
+
+### Export to FTP
+
+**Path:** `Package\Stage for DB Schenker Sequence\Export to FTP`  
+**Connection:** me_01 (BEDROCKDB02/me_01)  
+
+```sql
+exec spMerchandisingDBSchenkerPOExport_7_Export_OnDemandExportFromDynamicsOnly
+```
+
+### Truncate DBS Stage
+
+**Path:** `Package\Stage for DB Schenker Sequence\Truncate DBS Stage`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE ERP.PurchaseOrderToDBSchenkerStage
+
+```
+
+### Truncate DBS Stage On Merch
+
+**Path:** `Package\Stage for DB Schenker Sequence\Truncate DBS Stage On Merch`  
+**Connection:** me_01 (BEDROCKDB02/me_01)  
+
+```sql
+truncate table tmpHoldDBSchenkerPO_FromD365
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | update ERP.PurchaseOrderHeader set Exported_DBS = getdate()  where Exported_DBS is NULL  and cast(PurchaseOrderNumber as nvarchar) = ? |
-|  | update ERP.PurchaseOrderLines set Exported_DBS = getdate()  where Exported_DBS is NULL  and cast(PurchaseOrderNumber as nvarchar) = ?  and LineNumber = ? |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| vwPurchaseOrderDBSchenker |  | OLEDBSource | Stage PO to Merch | IntegrationStaging |  |
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[tmpHoldDBSchenkerPO_FromD365] |
-|  | [ERP].[vwPurchaseOrderDBSchenker] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| tmpHoldDBSchenkerPO_FromD365 |  | OLEDBDestination | Stage PO to Merch | me_01 |  |

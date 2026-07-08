@@ -1,93 +1,135 @@
-﻿# SSIS Package: PFTOpentoBuy
+# SSIS Package: PFTOpentoBuy
 
 **Project:** ERPSuppliesProcessing  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        Inventory_Movement_Journal_Entries_conn(["Inventory Movement Journal Entries [FLATFILE]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-        SQL_LOG_conn(["SQL_LOG [OLEDB]"])
-        Warehouse_on_Hand_conn(["Warehouse on Hand [FLATFILE]"])
-    end
-    subgraph ControlFlow
-        PFTOpentoBuy_task["PFTOpentoBuy"]
-        Sequence_Container_task["Sequence Container"]
-        PFTOpentoBuy_task --> Sequence_Container_task
-        FLC___Get_Inventory_Movement_from_dynsnc_task["FLC - Get Inventory Movement from dynsnc"]
-        Sequence_Container_task --> FLC___Get_Inventory_Movement_from_dynsnc_task
-        Move_Files_to_Stage_task["Move Files to Stage"]
-        FLC___Get_Inventory_Movement_from_dynsnc_task --> Move_Files_to_Stage_task
-        FLC___Get_Warehouse_On_Hand_from_dynsnc_task["FLC - Get Warehouse On Hand from dynsnc"]
-        Move_Files_to_Stage_task --> FLC___Get_Warehouse_On_Hand_from_dynsnc_task
-        Move_Files_to_Stage_task["Move Files to Stage"]
-        FLC___Get_Warehouse_On_Hand_from_dynsnc_task --> Move_Files_to_Stage_task
-        FLC___Process_Inventory_Movement_from_dynsnc_task["FLC - Process Inventory Movement from dynsnc"]
-        Move_Files_to_Stage_task --> FLC___Process_Inventory_Movement_from_dynsnc_task
-        DFT___Get_ERP_Supply_Movement_Data_task["DFT - Get ERP Supply Movement Data"]
-        FLC___Process_Inventory_Movement_from_dynsnc_task --> DFT___Get_ERP_Supply_Movement_Data_task
-        Move_Files_to_Archive_task["Move Files to Archive"]
-        DFT___Get_ERP_Supply_Movement_Data_task --> Move_Files_to_Archive_task
-        FLC___Process_Warehouse_On_Hand_from_dynsnc_task["FLC - Process Warehouse On Hand from dynsnc"]
-        Move_Files_to_Archive_task --> FLC___Process_Warehouse_On_Hand_from_dynsnc_task
-        DFT___Get_Warehouse_On_Hand_Data_task["DFT - Get Warehouse On Hand Data"]
-        FLC___Process_Warehouse_On_Hand_from_dynsnc_task --> DFT___Get_Warehouse_On_Hand_Data_task
-        Move_Files_to_Archive_task["Move Files to Archive"]
-        DFT___Get_Warehouse_On_Hand_Data_task --> Move_Files_to_Archive_task
-        Script_Task_task["Script Task"]
-        Move_Files_to_Archive_task --> Script_Task_task
-        Send_Email_onError_task["Send Email onError"]
-        Script_Task_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| Inventory Movement Journal Entries | FLATFILE |
-| SMTP_EMAIL | SMTP |
-| SQL_LOG | OLEDB |
-| Warehouse on Hand | FLATFILE |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| Inventory Movement Journal Entries | FLATFILE |  |  |  |
+| SMTP_EMAIL | SMTP |  |  |  |
+| SQL_LOG | OLEDB | stl-ssis-p-01 | msdb | Data Source=stl-ssis-p-01; Initial Catalog=msdb; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| Warehouse on Hand | FLATFILE |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| PFTOpentoBuy | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| FLC - Get Inventory Movement from dynsnc | STOCK:FOREACHLOOP |
-| Move Files to Stage | Microsoft.FileSystemTask |
-| FLC - Get Warehouse On Hand from dynsnc | STOCK:FOREACHLOOP |
-| Move Files to Stage | Microsoft.FileSystemTask |
-| FLC - Process Inventory Movement from dynsnc | STOCK:FOREACHLOOP |
-| DFT - Get ERP Supply Movement Data | Microsoft.Pipeline |
-| Move Files to Archive | Microsoft.FileSystemTask |
-| FLC - Process Warehouse On Hand from dynsnc | STOCK:FOREACHLOOP |
-| DFT - Get Warehouse On Hand Data | Microsoft.Pipeline |
-| Move Files to Archive | Microsoft.FileSystemTask |
-| Script Task | Microsoft.ScriptTask |
-| Send Email onError | Microsoft.SendMailTask |
+| PFTOpentoBuy | Package |
+| Sequence Container | SEQUENCE |
+| FLC - Get Inventory Movement from dynsnc | FOREACHLOOP |
+| Move Files to Stage | FileSystemTask |
+| FLC - Get Warehouse On Hand from dynsnc | FOREACHLOOP |
+| Move Files to Stage | FileSystemTask |
+| FLC - Process Inventory Movement from dynsnc | FOREACHLOOP |
+| DFT - Get ERP Supply Movement Data | Pipeline |
+| Move Files to Archive | FileSystemTask |
+| FLC - Process Warehouse On Hand from dynsnc | FOREACHLOOP |
+| DFT - Get Warehouse On Hand Data | Pipeline |
+| Move Files to Archive | FileSystemTask |
+| Script Task | ScriptTask |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- Sequence Container [SEQUENCE]
+  - FLC - Get Inventory Movement from dynsnc [FOREACHLOOP]
+    - Move Files to Stage [FileSystemTask]
+  - FLC - Get Warehouse On Hand from dynsnc [FOREACHLOOP]
+    - Move Files to Stage [FileSystemTask]
+  - FLC - Process Inventory Movement from dynsnc [FOREACHLOOP]
+    - DFT - Get ERP Supply Movement Data [Pipeline]
+    - Move Files to Archive [FileSystemTask]
+  - FLC - Process Warehouse On Hand from dynsnc [FOREACHLOOP]
+    - DFT - Get Warehouse On Hand Data [Pipeline]
+    - Move Files to Archive [FileSystemTask]
+    - Script Task [ScriptTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_FLC___Get_Inventory_Movement_from_dynsnc["FLC - Get Inventory Movement from dynsnc"]
+    n_Package_Sequence_Container_FLC___Get_Inventory_Movement_from_dynsnc_Move_Files_to_Stage["Move Files to Stage"]
+    n_Package_Sequence_Container_FLC___Get_Warehouse_On_Hand_from_dynsnc["FLC - Get Warehouse On Hand from dynsnc"]
+    n_Package_Sequence_Container_FLC___Get_Warehouse_On_Hand_from_dynsnc_Move_Files_to_Stage["Move Files to Stage"]
+    n_Package_Sequence_Container_FLC___Process_Inventory_Movement_from_dynsnc["FLC - Process Inventory Movement from dynsnc"]
+    n_Package_Sequence_Container_FLC___Process_Inventory_Movement_from_dynsnc_DFT___Get_ERP_Supply_Movement_Data["DFT - Get ERP Supply Movement Data"]
+    n_Package_Sequence_Container_FLC___Process_Inventory_Movement_from_dynsnc_Move_Files_to_Archive["Move Files to Archive"]
+    n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc["FLC - Process Warehouse On Hand from dynsnc"]
+    n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_DFT___Get_Warehouse_On_Hand_Data["DFT - Get Warehouse On Hand Data"]
+    n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_Move_Files_to_Archive["Move Files to Archive"]
+    n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_Script_Task["Script Task"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_Sequence_Container_FLC___Process_Inventory_Movement_from_dynsnc_DFT___Get_ERP_Supply_Movement_Data --> n_Package_Sequence_Container_FLC___Process_Inventory_Movement_from_dynsnc_Move_Files_to_Archive
+    n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_DFT___Get_Warehouse_On_Hand_Data --> n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_Move_Files_to_Archive
+    n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_Script_Task --> n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc_DFT___Get_Warehouse_On_Hand_Data
+    n_Package_Sequence_Container_FLC___Get_Warehouse_On_Hand_from_dynsnc --> n_Package_Sequence_Container_FLC___Process_Warehouse_On_Hand_from_dynsnc
+    n_Package_Sequence_Container_FLC___Get_Inventory_Movement_from_dynsnc --> n_Package_Sequence_Container_FLC___Process_Inventory_Movement_from_dynsnc
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | Entity | No |
+| User | SupplyInventoryMovementArchiveDestination | Yes |
+| User | SupplyInventoryMovementFileName | No |
+| User | SupplyWarehouseOnHandArchiveDestination | Yes |
+| User | SupplyWarehouseOnHandFileDate | No |
+| User | SupplyWarehouseOnHandFileName | No |
+
+### Expression-bound variable values
+
+#### User::SupplyInventoryMovementArchiveDestination
+
+**Expression:**
+
+```sql
+@[$Project::SupplyInventoryMovementArchive] +  @[User::Entity]
+```
+
+**Evaluated value:**
+
+```sql
+\\stl-dynsnc-p-01\BABWIntegrations\SupplyProcessing\InventoryMovement\Archive\3001
+```
+
+#### User::SupplyWarehouseOnHandArchiveDestination
+
+**Expression:**
+
+```sql
+@[$Project::SupplyWarehouseOnHandArchive] +  @[User::Entity]
+```
+
+**Evaluated value:**
+
+```sql
+\\stl-dynsnc-p-01\BABWIntegrations\SupplyProcessing\WarehouseOnHand\Archive\3001
+```
+
+## Execute SQL Tasks
+
+_None detected._
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select * from [ERP].[InventoryMovementJournalEntryStage] |
-|  | select * from [ERP].[InventoryMovementJournalEntryStage] |
-|  |  UPDATE [IntegrationStaging].[ERP].[InventoryMovementJournalEntryStage]   SET [productConfigurationId] = ?       ,[inventoryStatusId] = ?       ,[productSizeId] = ?       ,[itemSerialNumber] = ?       ,[fixedCostCharges] = ?       ,[inventoryQuantity] = ?       ,[unitCostQuantity] = ?       ,[costAmount] = ?       ,[itemBatchNumber] = ?       ,[unitCost] = ?       ,[productColorId] = ?       ,[cat |
-|  | select * from [ERP].[WarehouseOnHand] |
-|  | select * from [ERP].[WarehouseOnHand] |
-|  |   UPDATE [IntegrationStaging].[ERP].[WarehouseOnHand]   SET  [ProductColorId] = ?       ,[ProductConfigurationId] = ?        ,[ProductSizeId] = ?       ,[ProductStyleId] = ?       ,[AvailableOrderedQuantity] = ?       ,[OnHandQuantity] = ?       ,[AvailableOnHandQuantity] = ?       ,[OnOrderQuantity] = ?       ,[TotalAvailableQuantity] = ?       ,[OrderedQuantity] = ?       ,[AreWarehouseManagemen |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Flat File Source |  | FlatFileSource | DFT - Get ERP Supply Movement Data | Inventory Movement Journal Entries |  |
+| Flat File Source |  | FlatFileSource | DFT - Get Warehouse On Hand Data | Warehouse on Hand |  |
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [ERP].[InventoryMovementJournalEntryStage] |
-|  | [ERP].[WarehouseOnHand] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OLE DB Destination |  | OLEDBDestination | DFT - Get ERP Supply Movement Data | {28B6F557-CC43-401E-9EC1-3D0366410765}:external |  |
+| OLE DB Destination |  | OLEDBDestination | DFT - Get Warehouse On Hand Data | {28B6F557-CC43-401E-9EC1-3D0366410765}:external |  |

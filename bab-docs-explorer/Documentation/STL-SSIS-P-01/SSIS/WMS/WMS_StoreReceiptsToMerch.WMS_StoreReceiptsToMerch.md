@@ -1,121 +1,339 @@
-﻿# SSIS Package: WMS_StoreReceiptsToMerch
+# SSIS Package: WMS_StoreReceiptsToMerch
 
 **Project:** WMS_StoreReceiptsToMerch  
 **Folder:** WMS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        Dynamics_AX_Connection_Manager_conn(["Dynamics AX Connection Manager [DynamicsAX]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        me_01_conn(["me_01 [OLEDB]"])
-        PipelineGoFile_conn(["PipelineGoFile [FLATFILE]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        WMS_StoreReceiptsToMerch_task["WMS_StoreReceiptsToMerch"]
-        SeqCont___Ad_Hoc_Testing___BABW_Container_task["SeqCont - Ad Hoc Testing - BABW Container"]
-        WMS_StoreReceiptsToMerch_task --> SeqCont___Ad_Hoc_Testing___BABW_Container_task
-        Data_Flow_Task_task["Data Flow Task"]
-        SeqCont___Ad_Hoc_Testing___BABW_Container_task --> Data_Flow_Task_task
-        Execute_SQL_Task_task["Execute SQL Task"]
-        Data_Flow_Task_task --> Execute_SQL_Task_task
-        SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_task["SeqCont - Ad Hoc Testing - Packing StrucutreEntity"]
-        Execute_SQL_Task_task --> SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_task
-        Data_Flow_Task_task["Data Flow Task"]
-        SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_task --> Data_Flow_Task_task
-        Execute_SQL_Task_task["Execute SQL Task"]
-        Data_Flow_Task_task --> Execute_SQL_Task_task
-        Sequence_Container_task["Sequence Container"]
-        Execute_SQL_Task_task --> Sequence_Container_task
-        Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_task["Lookup Carton In Aptos and Generate Pipeline CBR File"]
-        Sequence_Container_task --> Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_task
-        Data_Flow_Task___Check_if_Any_Eligible_Records_Found_task["Data Flow Task - Check if Any Eligible Records Found"]
-        Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_task --> Data_Flow_Task___Check_if_Any_Eligible_Records_Found_task
-        Data_Flow_Task___Generate_Pipeline_File_task["Data Flow Task - Generate Pipeline File"]
-        Data_Flow_Task___Check_if_Any_Eligible_Records_Found_task --> Data_Flow_Task___Generate_Pipeline_File_task
-        SeqCont___Stage_Store_Receipts_from_Dynamics_task["SeqCont - Stage Store Receipts from Dynamics"]
-        Data_Flow_Task___Generate_Pipeline_File_task --> SeqCont___Stage_Store_Receipts_from_Dynamics_task
-        Execute_SQL_Task___Truncate_Stage_task["Execute SQL Task - Truncate Stage"]
-        SeqCont___Stage_Store_Receipts_from_Dynamics_task --> Execute_SQL_Task___Truncate_Stage_task
-        SeqCont___Stage_Receipt_Data_from_Dynamics_task["SeqCont - Stage Receipt Data from Dynamics"]
-        Execute_SQL_Task___Truncate_Stage_task --> SeqCont___Stage_Receipt_Data_from_Dynamics_task
-        Data_Flow_Task___Stage_Receipts___Ohio_to_Canada_Shipments_task["Data Flow Task - Stage Receipts - Ohio to Canada Shipments"]
-        SeqCont___Stage_Receipt_Data_from_Dynamics_task --> Data_Flow_Task___Stage_Receipts___Ohio_to_Canada_Shipments_task
-        Data_Flow_Task___Stage_TO_Receipts___UK_Shipments_task["Data Flow Task - Stage TO Receipts - UK Shipments"]
-        Data_Flow_Task___Stage_Receipts___Ohio_to_Canada_Shipments_task --> Data_Flow_Task___Stage_TO_Receipts___UK_Shipments_task
-        Data_Flow_Task___Stage_TO_Receipts___US_Shipments_task["Data Flow Task - Stage TO Receipts - US Shipments"]
-        Data_Flow_Task___Stage_TO_Receipts___UK_Shipments_task --> Data_Flow_Task___Stage_TO_Receipts___US_Shipments_task
-        spMergeStoreTransferOrderReceipt_task["spMergeStoreTransferOrderReceipt"]
-        Data_Flow_Task___Stage_TO_Receipts___US_Shipments_task --> spMergeStoreTransferOrderReceipt_task
-        Sequence_Container_1_task["Sequence Container 1"]
-        spMergeStoreTransferOrderReceipt_task --> Sequence_Container_1_task
-        Data_Flow_Task_task["Data Flow Task"]
-        Sequence_Container_1_task --> Data_Flow_Task_task
-        Execute_SQL_Task_task["Execute SQL Task"]
-        Data_Flow_Task_task --> Execute_SQL_Task_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Execute_SQL_Task_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| Dynamics AX Connection Manager | DynamicsAX |
-| IntegrationStaging | OLEDB |
-| me_01 | OLEDB |
-| PipelineGoFile | FLATFILE |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| Dynamics AX Connection Manager | DynamicsAX |  |  |  |
+| IntegrationStaging | OLEDB | stl-ssis-p-01 | IntegrationStaging | Data Source=stl-ssis-p-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| PipelineGoFile | FLATFILE |  |  |  |
+| SMTP | SMTP |  |  |  |
+| me_01 | OLEDB | bedrockdb02 | me_01 | Data Source=bedrockdb02; Initial Catalog=me_01; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WMS_StoreReceiptsToMerch | Microsoft.Package |
-| SeqCont - Ad Hoc Testing - BABW Container | STOCK:SEQUENCE |
-| Data Flow Task | Microsoft.Pipeline |
-| Execute SQL Task | Microsoft.ExecuteSQLTask |
-| SeqCont - Ad Hoc Testing - Packing StrucutreEntity | STOCK:SEQUENCE |
-| Data Flow Task | Microsoft.Pipeline |
-| Execute SQL Task | Microsoft.ExecuteSQLTask |
-| Sequence Container | STOCK:SEQUENCE |
-| Lookup Carton In Aptos and Generate Pipeline CBR File | STOCK:SEQUENCE |
-| Data Flow Task - Check if Any Eligible Records Found | Microsoft.Pipeline |
-| Data Flow Task - Generate Pipeline File | Microsoft.Pipeline |
-| SeqCont - Stage Store Receipts from Dynamics | STOCK:SEQUENCE |
-| Execute SQL Task - Truncate Stage | Microsoft.ExecuteSQLTask |
-| SeqCont - Stage Receipt Data from Dynamics | STOCK:SEQUENCE |
-| Data Flow Task - Stage Receipts - Ohio to Canada Shipments | Microsoft.Pipeline |
-| Data Flow Task - Stage TO Receipts - UK Shipments | Microsoft.Pipeline |
-| Data Flow Task - Stage TO Receipts - US Shipments | Microsoft.Pipeline |
-| spMergeStoreTransferOrderReceipt | Microsoft.ExecuteSQLTask |
-| Sequence Container 1 | STOCK:SEQUENCE |
-| Data Flow Task | Microsoft.Pipeline |
-| Execute SQL Task | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| WMS_StoreReceiptsToMerch | Package |
+| SeqCont - Ad Hoc Testing - BABW Container | SEQUENCE |
+| Data Flow Task | Pipeline |
+| Execute SQL Task | ExecuteSQLTask |
+| SeqCont - Ad Hoc Testing - Packing StrucutreEntity | SEQUENCE |
+| Data Flow Task | Pipeline |
+| Execute SQL Task | ExecuteSQLTask |
+| Sequence Container | SEQUENCE |
+| Lookup Carton In Aptos and Generate Pipeline CBR File | SEQUENCE |
+| Data Flow Task - Check if Any Eligible Records Found | Pipeline |
+| Data Flow Task - Generate Pipeline File | Pipeline |
+| SeqCont - Stage Store Receipts from Dynamics | SEQUENCE |
+| Execute SQL Task - Truncate Stage | ExecuteSQLTask |
+| SeqCont - Stage Receipt Data from Dynamics | SEQUENCE |
+| Data Flow Task - Stage Receipts - Ohio to Canada Shipments | Pipeline |
+| Data Flow Task - Stage TO Receipts - UK Shipments | Pipeline |
+| Data Flow Task - Stage TO Receipts - US Shipments | Pipeline |
+| spMergeStoreTransferOrderReceipt | ExecuteSQLTask |
+| Sequence Container 1 | SEQUENCE |
+| Data Flow Task | Pipeline |
+| Execute SQL Task | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- SeqCont - Ad Hoc Testing - BABW Container [SEQUENCE]
+  - Data Flow Task [Pipeline]
+  - Execute SQL Task [ExecuteSQLTask]
+- SeqCont - Ad Hoc Testing - Packing StrucutreEntity [SEQUENCE]
+  - Data Flow Task [Pipeline]
+  - Execute SQL Task [ExecuteSQLTask]
+- Sequence Container [SEQUENCE]
+- Sequence Container 1 [SEQUENCE]
+  - Data Flow Task [Pipeline]
+  - Execute SQL Task [ExecuteSQLTask]
+  - Lookup Carton In Aptos and Generate Pipeline CBR File [SEQUENCE]
+    - Data Flow Task - Check if Any Eligible Records Found [Pipeline]
+    - Data Flow Task - Generate Pipeline File [Pipeline]
+  - SeqCont - Stage Store Receipts from Dynamics [SEQUENCE]
+    - Execute SQL Task - Truncate Stage [ExecuteSQLTask]
+    - SeqCont - Stage Receipt Data from Dynamics [SEQUENCE]
+      - Data Flow Task - Stage Receipts - Ohio to Canada Shipments [Pipeline]
+      - Data Flow Task - Stage TO Receipts - UK Shipments [Pipeline]
+      - Data Flow Task - Stage TO Receipts - US Shipments [Pipeline]
+    - spMergeStoreTransferOrderReceipt [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_SeqCont___Ad_Hoc_Testing___BABW_Container["SeqCont - Ad Hoc Testing - BABW Container"]
+    n_Package_SeqCont___Ad_Hoc_Testing___BABW_Container_Data_Flow_Task["Data Flow Task"]
+    n_Package_SeqCont___Ad_Hoc_Testing___BABW_Container_Execute_SQL_Task["Execute SQL Task"]
+    n_Package_SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity["SeqCont - Ad Hoc Testing - Packing StrucutreEntity"]
+    n_Package_SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_Data_Flow_Task["Data Flow Task"]
+    n_Package_SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_Execute_SQL_Task["Execute SQL Task"]
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File["Lookup Carton In Aptos and Generate Pipeline CBR File"]
+    n_Package_Sequence_Container_Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_Data_Flow_Task___Check_if_Any_Eligible_Records_Found["Data Flow Task - Check if Any Eligible Records Found"]
+    n_Package_Sequence_Container_Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_Data_Flow_Task___Generate_Pipeline_File["Data Flow Task - Generate Pipeline File"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics["SeqCont - Stage Store Receipts from Dynamics"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_Execute_SQL_Task___Truncate_Stage["Execute SQL Task - Truncate Stage"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_SeqCont___Stage_Receipt_Data_from_Dynamics["SeqCont - Stage Receipt Data from Dynamics"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_SeqCont___Stage_Receipt_Data_from_Dynamics_Data_Flow_Task___Stage_Receipts___Ohio_to_Canada_Shipments["Data Flow Task - Stage Receipts - Ohio to Canada Shipments"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_SeqCont___Stage_Receipt_Data_from_Dynamics_Data_Flow_Task___Stage_TO_Receipts___UK_Shipments["Data Flow Task - Stage TO Receipts - UK Shipments"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_SeqCont___Stage_Receipt_Data_from_Dynamics_Data_Flow_Task___Stage_TO_Receipts___US_Shipments["Data Flow Task - Stage TO Receipts - US Shipments"]
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_spMergeStoreTransferOrderReceipt["spMergeStoreTransferOrderReceipt"]
+    n_Package_Sequence_Container_1["Sequence Container 1"]
+    n_Package_Sequence_Container_1_Data_Flow_Task["Data Flow Task"]
+    n_Package_Sequence_Container_1_Execute_SQL_Task["Execute SQL Task"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_SeqCont___Ad_Hoc_Testing___BABW_Container_Execute_SQL_Task --> n_Package_SeqCont___Ad_Hoc_Testing___BABW_Container_Data_Flow_Task
+    n_Package_SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_Execute_SQL_Task --> n_Package_SeqCont___Ad_Hoc_Testing___Packing_StrucutreEntity_Data_Flow_Task
+    n_Package_Sequence_Container_Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_Data_Flow_Task___Check_if_Any_Eligible_Records_Found --> n_Package_Sequence_Container_Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File_Data_Flow_Task___Generate_Pipeline_File
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_Execute_SQL_Task___Truncate_Stage --> n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_SeqCont___Stage_Receipt_Data_from_Dynamics
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_SeqCont___Stage_Receipt_Data_from_Dynamics --> n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics_spMergeStoreTransferOrderReceipt
+    n_Package_Sequence_Container_SeqCont___Stage_Store_Receipts_from_Dynamics --> n_Package_Sequence_Container_Lookup_Carton_In_Aptos_and_Generate_Pipeline_CBR_File
+    n_Package_Sequence_Container_1_Execute_SQL_Task --> n_Package_Sequence_Container_1_Data_Flow_Task
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | EndDate | Yes |
+| User | EndDateAsDATE | Yes |
+| User | FoundCartonRowsForPipelineFile | No |
+| User | GetDate | Yes |
+| User | GetDateAsDATE | Yes |
+| User | StartDate | Yes |
+| User | StartDateAsDATE | Yes |
+| User | StartDateAsDATEPlus30Days | Yes |
+| User | StartDatePlus30Days | Yes |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+20231129121251227
+```
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+11/16/2023
+```
+
+#### User::EndDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::EndDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::EndDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::EndDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-11-16
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+11/29/2023
+```
+
+#### User::GetDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::GetDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::GetDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::GetDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-11-29
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+11/15/2023
+```
+
+#### User::StartDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::StartDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::StartDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-11-15
+```
+
+#### User::StartDateAsDATEPlus30Days
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDatePlus30Days])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::StartDatePlus30Days]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::StartDatePlus30Days]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-10-16
+```
+
+#### User::StartDatePlus30Days
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack]-30 , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+10/16/2023
+```
+
+## Execute SQL Tasks
+
+### Execute SQL Task
+
+**Path:** `Package\SeqCont - Ad Hoc Testing - BABW Container\Execute SQL Task`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+truncate table WMS.[BABWContainerStage]
+```
+
+### Execute SQL Task
+
+**Path:** `Package\SeqCont - Ad Hoc Testing - Packing StrucutreEntity\Execute SQL Task`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+truncate table WMS.[BABWHSPackingStructureCaseStage]
+
+```
+
+### Execute SQL Task
+
+**Path:** `Package\Sequence Container 1\Execute SQL Task`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+truncate table wms.[StoreTransferOrderReceiptStage]
+```
+
+### Execute SQL Task - Truncate Stage
+
+**Path:** `Package\Sequence Container\SeqCont - Stage Store Receipts from Dynamics\Execute SQL Task - Truncate Stage`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+truncate table wms.[StoreTransferOrderReceiptStage]
+
+```
+
+### spMergeStoreTransferOrderReceipt
+
+**Path:** `Package\Sequence Container\SeqCont - Stage Store Receipts from Dynamics\spMergeStoreTransferOrderReceipt`  
+**Connection:** IntegrationStaging (stl-ssis-p-01/IntegrationStaging)  
+
+```sql
+exec  [WMS].[spMergeStoreTransferOrderReceipt] 
+
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select ssd.carton_no as AptosCartonNumber, l.location_code as ToLocationCode  from store_shipment_detail ssd (nolock)  join store_shipment ss (nolock) on ssd.store_shipment_id=ss.store_shipment_id join location l (nolock) on l.location_id=ss.location_id where datediff(dd,ss.create_date,GETDATE()) <= 30 -- Just to reduce size, cant remember how long merch keeps shipment data.  group by ssd.carton_n |
-|  | select distinct TargetLicensePlateNumber as ReceivedLicensePlate from WMS.StoreTransferOrderReceipt (nolock)  where ExportDate is null and ISNUMERIC(TargetLicensePlateNumber) = 1 and len(TargetLicensePlateNumber) > 10 -- We do not send the LPN to Aptos  and WarehouseId not in (1013,8175) |
-|  | select ssd.carton_no as AptosCartonNumber, l.location_code as ToLocationCode  from store_shipment_detail ssd (nolock)  join store_shipment ss (nolock) on ssd.store_shipment_id=ss.store_shipment_id join location l (nolock) on l.location_id=ss.location_id where datediff(dd,ss.create_date,GETDATE()) <= 60 -- Just to reduce size, cant remember how long merch keeps shipment data.  group by ssd.carton_n |
-|  | update WMS.StoreTransferOrderReceipt set  ExportDate = getdate() where TargetLicensePlateNumber = ? |
-|  | select distinct TargetLicensePlateNumber as ReceivedLicensePlate from WMS.StoreTransferOrderReceipt (nolock)  where ExportDate is null and ISNUMERIC(TargetLicensePlateNumber) = 1 and len(TargetLicensePlateNumber) > 10 -- We do not send the LPN to Aptos  and WarehouseId not in (1013,8175) |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OLE DB Source - IntStaging |  | OLEDBSource | Data Flow Task - Check if Any Eligible Records Found | IntegrationStaging | SqlCommand |
+| OLE DB Source |  | OLEDBSource | Data Flow Task - Generate Pipeline File | IntegrationStaging | SqlCommand |
+
+#### OLE DB Source - IntStaging — SqlCommand
+
+```sql
+select distinct TargetLicensePlateNumber as ReceivedLicensePlate
+from WMS.StoreTransferOrderReceipt (nolock) 
+where ExportDate is null
+and ISNUMERIC(TargetLicensePlateNumber) = 1
+and len(TargetLicensePlateNumber) > 10 -- We do not send the LPN to Aptos 
+and WarehouseId not in (1013,8175)
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [WMS].[BABWContainerStage] |
-|  | [WMS].[StoreTransferOrderReceiptStage] |
-|  | [WMS].[StoreTransferOrderReceiptStage] |
-|  | [WMS].[StoreTransferOrderReceiptStage] |
-|  | [WMS].[StoreTransferOrderReceiptStage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OLE DB Destination |  | OLEDBDestination | Data Flow Task | IntegrationStaging |  |
+| Flat File Destination - PipelineGoFile |  | FlatFileDestination | Data Flow Task - Generate Pipeline File | PipelineGoFile |  |
+| OLE DB Destination |  | OLEDBDestination | Data Flow Task - Stage Receipts - Ohio to Canada Shipments | IntegrationStaging |  |
+| OLE DB Destination - IntStaging -  StoreTransferOrderReceiptStage |  | OLEDBDestination | Data Flow Task - Stage TO Receipts - UK Shipments | IntegrationStaging |  |
+| OLE DB Destination - IntStaging - StoreTransferOrderReceiptStage |  | OLEDBDestination | Data Flow Task - Stage TO Receipts - US Shipments | IntegrationStaging |  |
+| OLE DB Destination |  | OLEDBDestination | Data Flow Task | IntegrationStaging |  |

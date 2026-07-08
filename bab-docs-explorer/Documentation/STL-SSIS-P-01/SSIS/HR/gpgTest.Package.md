@@ -1,21 +1,8 @@
-﻿# SSIS Package: Package
+# SSIS Package: Package
 
 **Project:** gpgTest  
 **Folder:** HR  
 **Server:** STL-SSIS-P-01  
-
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph ControlFlow
-        Package_task["Package"]
-        Sequence_Container_task["Sequence Container"]
-        Package_task --> Sequence_Container_task
-        ps1_task["ps1"]
-        Sequence_Container_task --> ps1_task
-    end
-```
 
 ## Connection Managers
 
@@ -25,9 +12,32 @@ _None detected._
 
 | Task | Type |
 |---|---|
-| Package | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| ps1 | Microsoft.ExecuteProcess |
+| Package | Package |
+| Sequence Container | SEQUENCE |
+| ps1 | ExecuteProcess |
+
+## Control Flow Outline
+
+```text
+- Sequence Container [SEQUENCE]
+  - ps1 [ExecuteProcess]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_ps1["ps1"]
+```
+
+## Variables
+
+_None detected._
+
+## Execute SQL Tasks
+
+_None detected._
 
 ## Data Flow: Sources
 
@@ -36,4 +46,3 @@ _None detected._
 ## Data Flow: Destinations
 
 _None detected._
-

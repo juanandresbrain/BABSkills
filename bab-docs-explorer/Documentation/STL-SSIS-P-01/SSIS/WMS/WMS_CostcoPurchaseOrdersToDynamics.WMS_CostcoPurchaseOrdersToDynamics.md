@@ -1,139 +1,379 @@
-﻿# SSIS Package: WMS_CostcoPurchaseOrdersToDynamics
+# SSIS Package: WMS_CostcoPurchaseOrdersToDynamics
 
 **Project:** WMS_CostcoPurchaseOrdersToDynamics  
 **Folder:** WMS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        createSO_API_conn(["createSO API [HTTP (KingswaySoft)]"])
-        GiftCardMstrData_conn(["GiftCardMstrData [OLEDB]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        PO_CSV_conn(["PO_CSV [FLATFILE]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-    end
-    subgraph ControlFlow
-        WMS_CostcoPurchaseOrdersToDynamics_task["WMS_CostcoPurchaseOrdersToDynamics"]
-        SEQ___PO_CSV_INGESTION_task["SEQ - PO CSV INGESTION"]
-        WMS_CostcoPurchaseOrdersToDynamics_task --> SEQ___PO_CSV_INGESTION_task
-        Insert_POs_into_GiftCardMstrDB_task["Insert POs into GiftCardMstrDB"]
-        SEQ___PO_CSV_INGESTION_task --> Insert_POs_into_GiftCardMstrDB_task
-        Merge_GiftCard_Detail_task["Merge GiftCard Detail"]
-        Insert_POs_into_GiftCardMstrDB_task --> Merge_GiftCard_Detail_task
-        Merge_GiftCard_Header_task["Merge GiftCard Header"]
-        Merge_GiftCard_Detail_task --> Merge_GiftCard_Header_task
-        PO_CSV_For_Each_Loop_task["PO CSV For Each Loop"]
-        Merge_GiftCard_Header_task --> PO_CSV_For_Each_Loop_task
-        PO_CSV_DataFlow_task["PO CSV DataFlow"]
-        PO_CSV_For_Each_Loop_task --> PO_CSV_DataFlow_task
-        Stage_PO_Data_to_IntegrationStaging_task["Stage PO Data to IntegrationStaging"]
-        PO_CSV_DataFlow_task --> Stage_PO_Data_to_IntegrationStaging_task
-        Truncate_CSV_Stage_task["Truncate CSV Stage"]
-        Stage_PO_Data_to_IntegrationStaging_task --> Truncate_CSV_Stage_task
-        Update_PO_Status_in_GiftCardMstrDB_task["Update PO Status in GiftCardMstrDB"]
-        Truncate_CSV_Stage_task --> Update_PO_Status_in_GiftCardMstrDB_task
-        SEQ___Push_to_Dynamics_task["SEQ - Push to Dynamics"]
-        Update_PO_Status_in_GiftCardMstrDB_task --> SEQ___Push_to_Dynamics_task
-        Email_Summary_task["Email Summary"]
-        SEQ___Push_to_Dynamics_task --> Email_Summary_task
-        Foreach_Loop_Container_task["Foreach Loop Container"]
-        Email_Summary_task --> Foreach_Loop_Container_task
-        DataFlow_createSO_API_task["DataFlow createSO API"]
-        Foreach_Loop_Container_task --> DataFlow_createSO_API_task
-        Set_Transmitted_task["Set Transmitted"]
-        DataFlow_createSO_API_task --> Set_Transmitted_task
-        PreStage_Costco_Order_Numbers_task["PreStage Costco Order Numbers"]
-        Set_Transmitted_task --> PreStage_Costco_Order_Numbers_task
-        Stage_Purchase_Orders_task["Stage Purchase Orders"]
-        PreStage_Costco_Order_Numbers_task --> Stage_Purchase_Orders_task
-        FTP_Get_Files_task["FTP Get Files"]
-        Stage_Purchase_Orders_task --> FTP_Get_Files_task
-        Insert_POs_into_GiftCardMstrDB_task["Insert POs into GiftCardMstrDB"]
-        FTP_Get_Files_task --> Insert_POs_into_GiftCardMstrDB_task
-        Merge_GiftCard_Detail_task["Merge GiftCard Detail"]
-        Insert_POs_into_GiftCardMstrDB_task --> Merge_GiftCard_Detail_task
-        Merge_GiftCard_Header_task["Merge GiftCard Header"]
-        Merge_GiftCard_Detail_task --> Merge_GiftCard_Header_task
-        Stage_PO_Data_to_IntegrationStaging_task["Stage PO Data to IntegrationStaging"]
-        Merge_GiftCard_Header_task --> Stage_PO_Data_to_IntegrationStaging_task
-        Truncate_Stage_task["Truncate Stage"]
-        Stage_PO_Data_to_IntegrationStaging_task --> Truncate_Stage_task
-        Update_PO_Status_in_GiftCardMstrDB_task["Update PO Status in GiftCardMstrDB"]
-        Truncate_Stage_task --> Update_PO_Status_in_GiftCardMstrDB_task
-        Send_Email_onError_task["Send Email onError"]
-        Update_PO_Status_in_GiftCardMstrDB_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| createSO API | HTTP (KingswaySoft) |
-| GiftCardMstrData | OLEDB |
-| IntegrationStaging | OLEDB |
-| PO_CSV | FLATFILE |
-| SMTP_EMAIL | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| GiftCardMstrData | OLEDB | kodiak | GiftCardMstrData | Data Source=kodiak; Initial Catalog=GiftCardMstrData; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| PO_CSV | FLATFILE |  |  |  |
+| SMTP_EMAIL | SMTP |  |  |  |
+| createSO API | HTTP (KingswaySoft) |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WMS_CostcoPurchaseOrdersToDynamics | Microsoft.Package |
-| SEQ - PO CSV INGESTION | STOCK:SEQUENCE |
-| Insert POs into GiftCardMstrDB | Microsoft.ExecuteSQLTask |
-| Merge GiftCard Detail | Microsoft.ExecuteSQLTask |
-| Merge GiftCard Header | Microsoft.ExecuteSQLTask |
-| PO CSV For Each Loop | STOCK:FOREACHLOOP |
-| PO CSV DataFlow | Microsoft.Pipeline |
-| Stage PO Data to IntegrationStaging | Microsoft.Pipeline |
-| Truncate CSV Stage | Microsoft.ExecuteSQLTask |
-| Update PO Status in GiftCardMstrDB | Microsoft.Pipeline |
-| SEQ - Push to Dynamics | STOCK:SEQUENCE |
-| Email Summary | Microsoft.ExecuteSQLTask |
-| Foreach Loop Container | STOCK:FOREACHLOOP |
-| DataFlow createSO API | Microsoft.Pipeline |
-| Set Transmitted | Microsoft.ExecuteSQLTask |
-| PreStage Costco Order Numbers | Microsoft.ExecuteSQLTask |
-| Stage Purchase Orders | STOCK:SEQUENCE |
-| FTP Get Files | Microsoft.ExecuteProcess |
-| Insert POs into GiftCardMstrDB | Microsoft.ExecuteSQLTask |
-| Merge GiftCard Detail | Microsoft.ExecuteSQLTask |
-| Merge GiftCard Header | Microsoft.ExecuteSQLTask |
-| Stage PO Data to IntegrationStaging | Microsoft.Pipeline |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Update PO Status in GiftCardMstrDB | Microsoft.Pipeline |
-| Send Email onError | Microsoft.SendMailTask |
+| WMS_CostcoPurchaseOrdersToDynamics | Package |
+| SEQ - PO CSV INGESTION | SEQUENCE |
+| Insert POs into GiftCardMstrDB | ExecuteSQLTask |
+| Merge GiftCard Detail | ExecuteSQLTask |
+| Merge GiftCard Header | ExecuteSQLTask |
+| PO CSV For Each Loop | FOREACHLOOP |
+| PO CSV DataFlow | Pipeline |
+| Stage PO Data to IntegrationStaging | Pipeline |
+| Truncate CSV Stage | ExecuteSQLTask |
+| Update PO Status in GiftCardMstrDB | Pipeline |
+| SEQ - Push to Dynamics | SEQUENCE |
+| Email Summary | ExecuteSQLTask |
+| Foreach Loop Container | FOREACHLOOP |
+| DataFlow createSO API | Pipeline |
+| Set Transmitted | ExecuteSQLTask |
+| PreStage Costco Order Numbers | ExecuteSQLTask |
+| Stage Purchase Orders | SEQUENCE |
+| FTP Get Files | ExecuteProcess |
+| Insert POs into GiftCardMstrDB | ExecuteSQLTask |
+| Merge GiftCard Detail | ExecuteSQLTask |
+| Merge GiftCard Header | ExecuteSQLTask |
+| Stage PO Data to IntegrationStaging | Pipeline |
+| Truncate Stage | ExecuteSQLTask |
+| Update PO Status in GiftCardMstrDB | Pipeline |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- SEQ - PO CSV INGESTION [SEQUENCE]
+  - Insert POs into GiftCardMstrDB [ExecuteSQLTask]
+  - Merge GiftCard Detail [ExecuteSQLTask]
+  - Merge GiftCard Header [ExecuteSQLTask]
+  - PO CSV For Each Loop [FOREACHLOOP]
+    - PO CSV DataFlow [Pipeline]
+  - Stage PO Data to IntegrationStaging [Pipeline]
+  - Truncate CSV Stage [ExecuteSQLTask]
+  - Update PO Status in GiftCardMstrDB [Pipeline]
+- SEQ - Push to Dynamics [SEQUENCE]
+  - Email Summary [ExecuteSQLTask]
+  - Foreach Loop Container [FOREACHLOOP]
+    - DataFlow createSO API [Pipeline]
+    - Set Transmitted [ExecuteSQLTask]
+  - PreStage Costco Order Numbers [ExecuteSQLTask]
+- Stage Purchase Orders [SEQUENCE]
+  - FTP Get Files [ExecuteProcess]
+  - Insert POs into GiftCardMstrDB [ExecuteSQLTask]
+  - Merge GiftCard Detail [ExecuteSQLTask]
+  - Merge GiftCard Header [ExecuteSQLTask]
+  - Stage PO Data to IntegrationStaging [Pipeline]
+  - Truncate Stage [ExecuteSQLTask]
+  - Update PO Status in GiftCardMstrDB [Pipeline]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_SEQ___PO_CSV_INGESTION["SEQ - PO CSV INGESTION"]
+    n_Package_SEQ___PO_CSV_INGESTION_Insert_POs_into_GiftCardMstrDB["Insert POs into GiftCardMstrDB"]
+    n_Package_SEQ___PO_CSV_INGESTION_Merge_GiftCard_Detail["Merge GiftCard Detail"]
+    n_Package_SEQ___PO_CSV_INGESTION_Merge_GiftCard_Header["Merge GiftCard Header"]
+    n_Package_SEQ___PO_CSV_INGESTION_PO_CSV_For_Each_Loop["PO CSV For Each Loop"]
+    n_Package_SEQ___PO_CSV_INGESTION_PO_CSV_For_Each_Loop_PO_CSV_DataFlow["PO CSV DataFlow"]
+    n_Package_SEQ___PO_CSV_INGESTION_Stage_PO_Data_to_IntegrationStaging["Stage PO Data to IntegrationStaging"]
+    n_Package_SEQ___PO_CSV_INGESTION_Truncate_CSV_Stage["Truncate CSV Stage"]
+    n_Package_SEQ___PO_CSV_INGESTION_Update_PO_Status_in_GiftCardMstrDB["Update PO Status in GiftCardMstrDB"]
+    n_Package_SEQ___Push_to_Dynamics["SEQ - Push to Dynamics"]
+    n_Package_SEQ___Push_to_Dynamics_Email_Summary["Email Summary"]
+    n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container["Foreach Loop Container"]
+    n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container_DataFlow_createSO_API["DataFlow createSO API"]
+    n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container_Set_Transmitted["Set Transmitted"]
+    n_Package_SEQ___Push_to_Dynamics_PreStage_Costco_Order_Numbers["PreStage Costco Order Numbers"]
+    n_Package_Stage_Purchase_Orders["Stage Purchase Orders"]
+    n_Package_Stage_Purchase_Orders_FTP_Get_Files["FTP Get Files"]
+    n_Package_Stage_Purchase_Orders_Insert_POs_into_GiftCardMstrDB["Insert POs into GiftCardMstrDB"]
+    n_Package_Stage_Purchase_Orders_Merge_GiftCard_Detail["Merge GiftCard Detail"]
+    n_Package_Stage_Purchase_Orders_Merge_GiftCard_Header["Merge GiftCard Header"]
+    n_Package_Stage_Purchase_Orders_Stage_PO_Data_to_IntegrationStaging["Stage PO Data to IntegrationStaging"]
+    n_Package_Stage_Purchase_Orders_Truncate_Stage["Truncate Stage"]
+    n_Package_Stage_Purchase_Orders_Update_PO_Status_in_GiftCardMstrDB["Update PO Status in GiftCardMstrDB"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_SEQ___PO_CSV_INGESTION_Truncate_CSV_Stage --> n_Package_SEQ___PO_CSV_INGESTION_PO_CSV_For_Each_Loop
+    n_Package_SEQ___PO_CSV_INGESTION_PO_CSV_For_Each_Loop --> n_Package_SEQ___PO_CSV_INGESTION_Insert_POs_into_GiftCardMstrDB
+    n_Package_SEQ___PO_CSV_INGESTION_Insert_POs_into_GiftCardMstrDB --> n_Package_SEQ___PO_CSV_INGESTION_Stage_PO_Data_to_IntegrationStaging
+    n_Package_SEQ___PO_CSV_INGESTION_Stage_PO_Data_to_IntegrationStaging --> n_Package_SEQ___PO_CSV_INGESTION_Update_PO_Status_in_GiftCardMstrDB
+    n_Package_SEQ___PO_CSV_INGESTION_Update_PO_Status_in_GiftCardMstrDB --> n_Package_SEQ___PO_CSV_INGESTION_Merge_GiftCard_Header
+    n_Package_SEQ___PO_CSV_INGESTION_Merge_GiftCard_Header --> n_Package_SEQ___PO_CSV_INGESTION_Merge_GiftCard_Detail
+    n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container_DataFlow_createSO_API --> n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container_Set_Transmitted
+    n_Package_SEQ___Push_to_Dynamics_PreStage_Costco_Order_Numbers --> n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container
+    n_Package_SEQ___Push_to_Dynamics_Foreach_Loop_Container --> n_Package_SEQ___Push_to_Dynamics_Email_Summary
+    n_Package_Stage_Purchase_Orders_Truncate_Stage --> n_Package_Stage_Purchase_Orders_FTP_Get_Files
+    n_Package_Stage_Purchase_Orders_Insert_POs_into_GiftCardMstrDB --> n_Package_Stage_Purchase_Orders_Stage_PO_Data_to_IntegrationStaging
+    n_Package_Stage_Purchase_Orders_FTP_Get_Files --> n_Package_Stage_Purchase_Orders_Insert_POs_into_GiftCardMstrDB
+    n_Package_Stage_Purchase_Orders_Stage_PO_Data_to_IntegrationStaging --> n_Package_Stage_Purchase_Orders_Update_PO_Status_in_GiftCardMstrDB
+    n_Package_Stage_Purchase_Orders_Update_PO_Status_in_GiftCardMstrDB --> n_Package_Stage_Purchase_Orders_Merge_GiftCard_Header
+    n_Package_Stage_Purchase_Orders_Merge_GiftCard_Header --> n_Package_Stage_Purchase_Orders_Merge_GiftCard_Detail
+    n_Package_Stage_Purchase_Orders --> n_Package_SEQ___Push_to_Dynamics
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | CSVFileForLoop | No |
+| User | CostcoPONumberForLoop | No |
+| User | CostcoPONumbersForLoop | No |
+| User | FTPStageDirectory | No |
+| User | WinSCP | Yes |
+| User | WinSCPLog | Yes |
+| User | WinSCPscript | Yes |
+
+### Expression-bound variable values
+
+#### User::WinSCP
+
+**Expression:**
+
+```sql
+"\\\\stl-ssis-p-01\\C$\\Program Files (x86)\\WinSCP\\winscp.exe"
+```
+
+**Evaluated value:**
+
+```sql
+\\stl-ssis-p-01\C$\Program Files (x86)\WinSCP\winscp.exe
+```
+
+#### User::WinSCPLog
+
+**Expression:**
+
+```sql
+" /log=\"\\\\stl-ssis-p-01\\IntegrationStaging\\ERP\\Costco\\FTP\\FTPLog\\Download.log\""
+```
+
+**Evaluated value:**
+
+```sql
+ /log="\\stl-ssis-p-01\IntegrationStaging\ERP\Costco\FTP\FTPLog\Download.log"
+```
+
+#### User::WinSCPscript
+
+**Expression:**
+
+```sql
+" /script=\\\\STL-SSIS-P-01\\IntegrationStaging\\ERP\\Costco\\FTP\\GetPurchaseOrders.txt"
+```
+
+**Evaluated value:**
+
+```sql
+ /script=\\STL-SSIS-P-01\IntegrationStaging\ERP\Costco\FTP\GetPurchaseOrders.txt
+```
+
+## Execute SQL Tasks
+
+### Insert POs into GiftCardMstrDB
+
+**Path:** `Package\SEQ - PO CSV INGESTION\Insert POs into GiftCardMstrDB`  
+**Connection:** GiftCardMstrData (kodiak/GiftCardMstrData)  
+
+```sql
+exec spSPS_InsertPurchaseOrders_fromCSVSource
+```
+
+### Merge GiftCard Detail
+
+**Path:** `Package\SEQ - PO CSV INGESTION\Merge GiftCard Detail`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec ERP.spMergeCostcoInboundPODetail
+```
+
+### Merge GiftCard Header
+
+**Path:** `Package\SEQ - PO CSV INGESTION\Merge GiftCard Header`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec ERP.spMergeCostcoInboundPOHeader
+
+```
+
+### Truncate CSV Stage
+
+**Path:** `Package\SEQ - PO CSV INGESTION\Truncate CSV Stage`  
+**Connection:** GiftCardMstrData (kodiak/GiftCardMstrData)  
+
+```sql
+TRUNCATE TABLE CostcoCSVPOHeaderStage
+TRUNCATE TABLE CostcoCSVPODetailStage
+```
+
+### Email Summary
+
+**Path:** `Package\SEQ - Push to Dynamics\Email Summary`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+exec WMS.spEmailCostcoPOExport '{737B1D82-D33B-4DF9-A433-60862E7B9965}'
+```
+
+**Property expression (runtime override):**
+
+```sql
+"exec WMS.spEmailCostcoPOExport '" +  @[System::ExecutionInstanceGUID] + "'"
+```
+
+### Set Transmitted
+
+**Path:** `Package\SEQ - Push to Dynamics\Foreach Loop Container\Set Transmitted`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+update ERP.CostcoInboundPOHeader
+set Transmitted = 1
+where CustomerRequisitionNumber = ''
+```
+
+**Property expression (runtime override):**
+
+```sql
+"update ERP.CostcoInboundPOHeader
+set Transmitted = 1
+where CustomerRequisitionNumber = '" + @[User::CostcoPONumberForLoop] + "'"
+```
+
+### PreStage Costco Order Numbers
+
+**Path:** `Package\SEQ - Push to Dynamics\PreStage Costco Order Numbers`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+select distinct CUSTOMERREQUISITIONNUMBER
+from ERP.CostcoInboundPOHeader with (nolock)
+where Transmitted=0
+
+```
+
+### Insert POs into GiftCardMstrDB
+
+**Path:** `Package\Stage Purchase Orders\Insert POs into GiftCardMstrDB`  
+**Connection:** GiftCardMstrData (kodiak/GiftCardMstrData)  
+
+```sql
+exec spSPS_InsertPurchaseOrders
+waitfor delay '00:01:00'
+```
+
+### Merge GiftCard Detail
+
+**Path:** `Package\Stage Purchase Orders\Merge GiftCard Detail`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec ERP.spMergeCostcoInboundPODetail
+```
+
+### Merge GiftCard Header
+
+**Path:** `Package\Stage Purchase Orders\Merge GiftCard Header`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec ERP.spMergeCostcoInboundPOHeader
+
+```
+
+### Truncate Stage
+
+**Path:** `Package\Stage Purchase Orders\Truncate Stage`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+TRUNCATE TABLE ERP.CostcoInboundPOHeaderStage
+TRUNCATE TABLE ERP.CostcoInboundPODetailStage
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | select distinct                     PurchaseOrderID, 	CUSTOMERREQUISITIONNUMBER, 	CUSTOMERSORDERREFERENCE, 	INVOICECUSTOMERACCOUNTNUMBER, 	ORDERINGCUSTOMERACCOUNTNUMBER, 	REQUESTEDSHIPPINGDATE, 	DELIVERYADDRESSDESCRIPTION, 	DELIVERYADDRESSNAME, 	DELIVERYADDRESSSTREET, 	DELIVERYADDRESSCITY, 	DELIVERYADDRESSSTATEID, 	DELIVERYADDRESSZIPCODE, 	DELIVERYADDRESSCOUNTRYREGIONID from vwCostcoPO_ERPStage |
-|  | select  PurchaseOrderID,	 CUSTOMERREQUISITIONNUMBER, 	CUSTOMERSLINENUMBER, 	ITEMNUMBER, 	ORDEREDSALESQUANTITY, 	SALESPRICE, 	SALESUNITSYMBOL from vwCostcoPO_ERPStage |
-|  | select * from [dbo].[PurchaseOrderStatus] |
-|  | select * from wms.vwCostcoPOtoDynamicsSO  where eCommOrderRefNum = ? |
-|  | select distinct                     PurchaseOrderID, 	CUSTOMERREQUISITIONNUMBER, 	CUSTOMERSORDERREFERENCE, 	INVOICECUSTOMERACCOUNTNUMBER, 	ORDERINGCUSTOMERACCOUNTNUMBER, 	REQUESTEDSHIPPINGDATE, 	DELIVERYADDRESSDESCRIPTION, 	DELIVERYADDRESSNAME, 	DELIVERYADDRESSSTREET, 	DELIVERYADDRESSCITY, 	DELIVERYADDRESSSTATEID, 	DELIVERYADDRESSZIPCODE, 	DELIVERYADDRESSCOUNTRYREGIONID from vwCostcoPO_ERPStage |
-|  | select  PurchaseOrderID,	 CUSTOMERREQUISITIONNUMBER, 	CUSTOMERSLINENUMBER, 	ITEMNUMBER, 	ORDEREDSALESQUANTITY, 	SALESPRICE, 	SALESUNITSYMBOL from vwCostcoPO_ERPStage |
-|  | select PurchaseOrderID, StatusID from PurchaseOrderStatus where StatusID=1 |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| PO_CSV |  | FlatFileSource | PO CSV DataFlow | PO_CSV |  |
+| PO Header |  | OLEDBSource | Stage PO Data to IntegrationStaging | GiftCardMstrData | SqlCommand |
+| PO Lines |  | OLEDBSource | Stage PO Data to IntegrationStaging | GiftCardMstrData | SqlCommand |
+| CostcoInboundPOHeaderStage |  | OLEDBSource | Update PO Status in GiftCardMstrDB | IntegrationStaging |  |
+| vwCostcoPOtoDynamicsSO |  | OLEDBSource | DataFlow createSO API | IntegrationStaging | SqlCommand |
+| PO Header |  | OLEDBSource | Stage PO Data to IntegrationStaging | GiftCardMstrData | SqlCommand |
+| PO Lines |  | OLEDBSource | Stage PO Data to IntegrationStaging | GiftCardMstrData | SqlCommand |
+| CostcoInboundPOHeaderStage |  | OLEDBSource | Update PO Status in GiftCardMstrDB | IntegrationStaging |  |
+
+#### PO Header — SqlCommand
+
+```sql
+select distinct 
+                   PurchaseOrderID,
+	CUSTOMERREQUISITIONNUMBER,
+	CUSTOMERSORDERREFERENCE,
+	INVOICECUSTOMERACCOUNTNUMBER,
+	ORDERINGCUSTOMERACCOUNTNUMBER,
+	REQUESTEDSHIPPINGDATE,
+	DELIVERYADDRESSDESCRIPTION,
+	DELIVERYADDRESSNAME,
+	DELIVERYADDRESSSTREET,
+	DELIVERYADDRESSCITY,
+	DELIVERYADDRESSSTATEID,
+	DELIVERYADDRESSZIPCODE,
+	DELIVERYADDRESSCOUNTRYREGIONID
+from vwCostcoPO_ERPStage
+```
+
+#### PO Lines — SqlCommand
+
+```sql
+select 
+PurchaseOrderID,	
+CUSTOMERREQUISITIONNUMBER,
+	CUSTOMERSLINENUMBER,
+	ITEMNUMBER,
+	ORDEREDSALESQUANTITY,
+	SALESPRICE,
+	SALESUNITSYMBOL
+from vwCostcoPO_ERPStage
+```
+
+#### vwCostcoPOtoDynamicsSO — SqlCommand
+
+```sql
+select *
+from wms.vwCostcoPOtoDynamicsSO 
+where eCommOrderRefNum = ?
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[CostcoCSVPODetailStage] |
-|  | [dbo].[CostcoCSVPOHeaderStage] |
-|  | [ERP].[CostcoInboundPODetailStage] |
-|  | [ERP].[CostcoInboundPOHeaderStage] |
-|  | [ERP].[CostcoInboundPOHeaderStage] |
-|  | [dbo].[PurchaseOrderStatus] |
-|  | [WMS].[DynamicsAPILog] |
-|  | [WMS].[vwCostcoPOtoDynamicsSO] |
-|  | [ERP].[CostcoInboundPODetailStage] |
-|  | [ERP].[CostcoInboundPOHeaderStage] |
-|  | [ERP].[CostcoInboundPOHeaderStage] |
-|  | [dbo].[PurchaseOrderStatus] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| CostcoCSVPODetailStage |  | OLEDBDestination | PO CSV DataFlow | GiftCardMstrData |  |
+| CostcoCSVPOHeaderStage |  | OLEDBDestination | PO CSV DataFlow | GiftCardMstrData |  |
+| CostcoInboundPODetailStage |  | OLEDBDestination | Stage PO Data to IntegrationStaging | IntegrationStaging |  |
+| CostcoInboundPOHeaderStage |  | OLEDBDestination | Stage PO Data to IntegrationStaging | IntegrationStaging |  |
+| GiftCardMstrDB PurchaseOrderStatus |  | OLEDBDestination | Update PO Status in GiftCardMstrDB | GiftCardMstrData |  |
+| DynamicsAPILog |  | OLEDBDestination | DataFlow createSO API | IntegrationStaging |  |
+| CostcoInboundPODetailStage |  | OLEDBDestination | Stage PO Data to IntegrationStaging | IntegrationStaging |  |
+| CostcoInboundPOHeaderStage |  | OLEDBDestination | Stage PO Data to IntegrationStaging | IntegrationStaging |  |
+| GiftCardMstrDB PurchaseOrderStatus |  | OLEDBDestination | Update PO Status in GiftCardMstrDB | GiftCardMstrData |  |

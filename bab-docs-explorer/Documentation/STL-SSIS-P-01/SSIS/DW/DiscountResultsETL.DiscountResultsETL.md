@@ -1,67 +1,228 @@
-﻿# SSIS Package: DiscountResultsETL
+# SSIS Package: DiscountResultsETL
 
 **Project:** DiscountResultsETL  
 **Folder:** DW  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        DiscountMstrData_conn(["DiscountMstrData [OLEDB]"])
-        dw_conn(["dw [OLEDB]"])
-        DWStaging_conn(["DWStaging [OLEDB]"])
-        SMTP_conn(["SMTP [SMTP]"])
-    end
-    subgraph ControlFlow
-        DiscountResultsETL_task["DiscountResultsETL"]
-        Sequence_Container_task["Sequence Container"]
-        DiscountResultsETL_task --> Sequence_Container_task
-        Merge_DiscountResults_task["Merge DiscountResults"]
-        Sequence_Container_task --> Merge_DiscountResults_task
-        Prestage_DiscountResults_for_Merge_task["Prestage DiscountResults for Merge"]
-        Merge_DiscountResults_task --> Prestage_DiscountResults_for_Merge_task
-        PreStage_DiscountResults_to_DW_task["PreStage DiscountResults to DW"]
-        Prestage_DiscountResults_for_Merge_task --> PreStage_DiscountResults_to_DW_task
-        Truncate_Stage_task["Truncate Stage"]
-        PreStage_DiscountResults_to_DW_task --> Truncate_Stage_task
-        Send_Mail_Task_task["Send Mail Task"]
-        Truncate_Stage_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| DiscountMstrData | OLEDB |
-| dw | OLEDB |
-| DWStaging | OLEDB |
-| SMTP | SMTP |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| DiscountMstrData | OLEDB | kodiak | DiscountMstrData | Data Source=kodiak; Initial Catalog=DiscountMstrData; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| SMTP | SMTP |  |  |  |
+| dw | OLEDB | papamart | dw | Data Source=papamart; Initial Catalog=dw; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| DiscountResultsETL | Microsoft.Package |
-| Sequence Container | STOCK:SEQUENCE |
-| Merge DiscountResults | Microsoft.ExecuteSQLTask |
-| Prestage DiscountResults for Merge | Microsoft.Pipeline |
-| PreStage DiscountResults to DW | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| DiscountResultsETL | Package |
+| Sequence Container | SEQUENCE |
+| Merge DiscountResults | ExecuteSQLTask |
+| Prestage DiscountResults for Merge | Pipeline |
+| PreStage DiscountResults to DW | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- Sequence Container [SEQUENCE]
+  - Merge DiscountResults [ExecuteSQLTask]
+  - PreStage DiscountResults to DW [ExecuteSQLTask]
+  - Prestage DiscountResults for Merge [Pipeline]
+  - Truncate Stage [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container["Sequence Container"]
+    n_Package_Sequence_Container_Merge_DiscountResults["Merge DiscountResults"]
+    n_Package_Sequence_Container_Prestage_DiscountResults_for_Merge["Prestage DiscountResults for Merge"]
+    n_Package_Sequence_Container_PreStage_DiscountResults_to_DW["PreStage DiscountResults to DW"]
+    n_Package_Sequence_Container_Truncate_Stage["Truncate Stage"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_Sequence_Container_Truncate_Stage --> n_Package_Sequence_Container_PreStage_DiscountResults_to_DW
+    n_Package_Sequence_Container_PreStage_DiscountResults_to_DW --> n_Package_Sequence_Container_Prestage_DiscountResults_for_Merge
+    n_Package_Sequence_Container_Prestage_DiscountResults_for_Merge --> n_Package_Sequence_Container_Merge_DiscountResults
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | EndDate | Yes |
+| User | EndDateAsDATE | Yes |
+| User | GetDate | Yes |
+| User | GetDateAsDATE | Yes |
+| User | StartDate | Yes |
+| User | StartDateAsDATE | Yes |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+20219167052100
+```
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+9/16/2021
+```
+
+#### User::EndDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::EndDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::EndDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::EndDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2021-09-16
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+9/16/2021
+```
+
+#### User::GetDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::GetDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::GetDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::GetDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2021-09-16
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+8/17/2021
+```
+
+#### User::StartDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::StartDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::StartDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2021-08-17
+```
+
+## Execute SQL Tasks
+
+### Merge DiscountResults
+
+**Path:** `Package\Sequence Container\Merge DiscountResults`  
+**Connection:** DiscountMstrData (kodiak/DiscountMstrData)  
+
+```sql
+exec spMergeDiscountResults
+```
+
+### PreStage DiscountResults to DW
+
+**Path:** `Package\Sequence Container\PreStage DiscountResults to DW`  
+**Connection:** dw (papamart/dw)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+EXEC spDM_Build_Discount_Results @DaysHorizon=30
+```
+
+**Property expression (runtime override):**
+
+```sql
+"EXEC spDM_Build_Discount_Results @DaysHorizon=" +  (DT_STR, 4, 1252) @[$Package::DaysToGoBack]
+```
+
+### Truncate Stage
+
+**Path:** `Package\Sequence Container\Truncate Stage`  
+**Connection:** DiscountMstrData (kodiak/DiscountMstrData)  
+
+```sql
+TRUNCATE TABLE OutboundDiscountResultsStage
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | SELECT        countryID, Abbrv FROM            dbo.Country |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| DW DiscountResults Staged |  | OLEDBSource | Prestage DiscountResults for Merge | dw |  |
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[vwDM_Discount_Results] |
-|  | [OutboundDiscountResultsStage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OutboundDiscountResultsStage |  | OLEDBDestination | Prestage DiscountResults for Merge | DiscountMstrData |  |

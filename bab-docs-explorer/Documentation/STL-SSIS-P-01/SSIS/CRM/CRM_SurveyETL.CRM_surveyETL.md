@@ -1,109 +1,294 @@
-﻿# SSIS Package: CRM_surveyETL
+# SSIS Package: CRM_surveyETL
 
 **Project:** CRM_SurveyETL  
 **Folder:** CRM  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        ASNCorrections_conn(["ASNCorrections [FLATFILE]"])
-        CRM_conn(["CRM [ADO.NET:SQL]"])
-        Data_xlsx_conn(["Data.xlsx [FILE]"])
-        ESPStaging_conn(["ESPStaging [OLEDB]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        papamart_DWStaging_conn(["papamart.DWStaging [OLEDB]"])
-        ProductInventory_conn(["ProductInventory [FLATFILE]"])
-        SendLog_conn(["SendLog [FLATFILE]"])
-        SendLogPIPE_csv_conn(["SendLogPIPE.csv [FILE]"])
-        SMTP_conn(["SMTP [SMTP]"])
-        surveyDestination_conn(["surveyDestination [FILE]"])
-    end
-    subgraph ControlFlow
-        CRM_surveyETL_task["CRM_surveyETL"]
-        Sequence_Container_1_task["Sequence Container 1"]
-        CRM_surveyETL_task --> Sequence_Container_1_task
-        archive_file_task["archive file"]
-        Sequence_Container_1_task --> archive_file_task
-        copy_xlsx_task["copy xlsx"]
-        archive_file_task --> copy_xlsx_task
-        copy_to_p_01_task["copy to p-01"]
-        copy_xlsx_task --> copy_to_p_01_task
-        Execute_SQL_Task_task["Execute SQL Task"]
-        copy_to_p_01_task --> Execute_SQL_Task_task
-        retreive_files_task["retreive files"]
-        Execute_SQL_Task_task --> retreive_files_task
-        retreive_files_task["retreive files"]
-        retreive_files_task --> retreive_files_task
-        stage_files_task["stage files"]
-        retreive_files_task --> stage_files_task
-        archive_file_task["archive file"]
-        stage_files_task --> archive_file_task
-        delete_file_task["delete file"]
-        archive_file_task --> delete_file_task
-        merge_data_task["merge data"]
-        delete_file_task --> merge_data_task
-        rename_file_task["rename file"]
-        merge_data_task --> rename_file_task
-        stage_data_task["stage data"]
-        rename_file_task --> stage_data_task
-        truncate_stage_task["truncate stage"]
-        stage_data_task --> truncate_stage_task
-        unzip_files_task["unzip files"]
-        truncate_stage_task --> unzip_files_task
-        Execute_Process_Task_task["Execute Process Task"]
-        unzip_files_task --> Execute_Process_Task_task
-        File_System_Task_task["File System Task"]
-        Execute_Process_Task_task --> File_System_Task_task
-        File_System_Task_1_task["File System Task 1"]
-        File_System_Task_task --> File_System_Task_1_task
-        Send_Mail_Task_task["Send Mail Task"]
-        File_System_Task_1_task --> Send_Mail_Task_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| ASNCorrections | FLATFILE |
-| CRM | ADO.NET:SQL |
-| Data.xlsx | FILE |
-| ESPStaging | OLEDB |
-| IntegrationStaging | OLEDB |
-| papamart.DWStaging | OLEDB |
-| ProductInventory | FLATFILE |
-| SendLog | FLATFILE |
-| SendLogPIPE.csv | FILE |
-| SMTP | SMTP |
-| surveyDestination | FILE |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| ASNCorrections | FLATFILE |  |  |  |
+| CRM | ADO.NET:SQL | stl-crmdb-p-01 |  | Data Source=stl-crmdb-p-01; Integrated Security=SSPI; Connect Timeout=30 |
+| Data.xlsx | FILE |  |  |  |
+| ESPStaging | OLEDB | stl-sql-p-04 | ESPStaging | Data Source=stl-sql-p-04; Initial Catalog=ESPStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| ProductInventory | FLATFILE |  |  |  |
+| SMTP | SMTP |  |  |  |
+| SendLog | FLATFILE |  |  |  |
+| SendLogPIPE.csv | FILE |  |  |  |
+| papamart.DWStaging | OLEDB | papamart | DWStaging | Data Source=papamart; Initial Catalog=DWStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| surveyDestination | FILE |  |  |  |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| CRM_surveyETL | Microsoft.Package |
-| Sequence Container 1 | STOCK:SEQUENCE |
-| archive file | Microsoft.FileSystemTask |
-| copy xlsx | STOCK:FOREACHLOOP |
-| copy to p-01 | Microsoft.FileSystemTask |
-| Execute SQL Task | Microsoft.ExecuteSQLTask |
-| retreive files | STOCK:FOREACHLOOP |
-| retreive files | Microsoft.FileSystemTask |
-| stage files | STOCK:FOREACHLOOP |
-| archive file | Microsoft.FileSystemTask |
-| delete file | Microsoft.FileSystemTask |
-| merge data | Microsoft.ExecuteSQLTask |
-| rename file | Microsoft.FileSystemTask |
-| stage data | Microsoft.Pipeline |
-| truncate stage | Microsoft.ExecuteSQLTask |
-| unzip files | STOCK:FOREACHLOOP |
-| Execute Process Task | Microsoft.ExecuteProcess |
-| File System Task | Microsoft.FileSystemTask |
-| File System Task 1 | Microsoft.FileSystemTask |
-| Send Mail Task | Microsoft.SendMailTask |
+| CRM_surveyETL | Package |
+| Sequence Container 1 | SEQUENCE |
+| archive file | FileSystemTask |
+| copy xlsx | FOREACHLOOP |
+| copy to p-01 | FileSystemTask |
+| Execute SQL Task | ExecuteSQLTask |
+| retreive files | FOREACHLOOP |
+| retreive files | FileSystemTask |
+| stage files | FOREACHLOOP |
+| archive file | FileSystemTask |
+| delete file | FileSystemTask |
+| merge data | ExecuteSQLTask |
+| rename file | FileSystemTask |
+| stage data | Pipeline |
+| truncate stage | ExecuteSQLTask |
+| unzip files | FOREACHLOOP |
+| Execute Process Task | ExecuteProcess |
+| File System Task | FileSystemTask |
+| File System Task 1 | FileSystemTask |
+| Send Mail Task | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Mail Task [SendMailTask]
+- Sequence Container 1 [SEQUENCE]
+  - Execute SQL Task [ExecuteSQLTask]
+  - archive file [FileSystemTask]
+  - copy xlsx [FOREACHLOOP]
+    - copy to p-01 [FileSystemTask]
+  - retreive files [FOREACHLOOP]
+    - retreive files [FileSystemTask]
+  - stage files [FOREACHLOOP]
+    - archive file [FileSystemTask]
+    - delete file [FileSystemTask]
+    - merge data [ExecuteSQLTask]
+    - rename file [FileSystemTask]
+    - stage data [Pipeline]
+    - truncate stage [ExecuteSQLTask]
+  - unzip files [FOREACHLOOP]
+    - Execute Process Task [ExecuteProcess]
+    - File System Task [FileSystemTask]
+    - File System Task 1 [FileSystemTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_Sequence_Container_1["Sequence Container 1"]
+    n_Package_Sequence_Container_1_archive_file["archive file"]
+    n_Package_Sequence_Container_1_copy_xlsx["copy xlsx"]
+    n_Package_Sequence_Container_1_copy_xlsx_copy_to_p_01["copy to p-01"]
+    n_Package_Sequence_Container_1_Execute_SQL_Task["Execute SQL Task"]
+    n_Package_Sequence_Container_1_retreive_files["retreive files"]
+    n_Package_Sequence_Container_1_retreive_files_retreive_files["retreive files"]
+    n_Package_Sequence_Container_1_stage_files["stage files"]
+    n_Package_Sequence_Container_1_stage_files_archive_file["archive file"]
+    n_Package_Sequence_Container_1_stage_files_delete_file["delete file"]
+    n_Package_Sequence_Container_1_stage_files_merge_data["merge data"]
+    n_Package_Sequence_Container_1_stage_files_rename_file["rename file"]
+    n_Package_Sequence_Container_1_stage_files_stage_data["stage data"]
+    n_Package_Sequence_Container_1_stage_files_truncate_stage["truncate stage"]
+    n_Package_Sequence_Container_1_unzip_files["unzip files"]
+    n_Package_Sequence_Container_1_unzip_files_Execute_Process_Task["Execute Process Task"]
+    n_Package_Sequence_Container_1_unzip_files_File_System_Task["File System Task"]
+    n_Package_Sequence_Container_1_unzip_files_File_System_Task_1["File System Task 1"]
+    n_Package_EventHandlers_OnError__Send_Mail_Task["Send Mail Task"]
+    n_Package_Sequence_Container_1_stage_files_rename_file --> n_Package_Sequence_Container_1_stage_files_truncate_stage
+    n_Package_Sequence_Container_1_stage_files_truncate_stage --> n_Package_Sequence_Container_1_stage_files_stage_data
+    n_Package_Sequence_Container_1_stage_files_stage_data --> n_Package_Sequence_Container_1_stage_files_merge_data
+    n_Package_Sequence_Container_1_stage_files_merge_data --> n_Package_Sequence_Container_1_stage_files_archive_file
+    n_Package_Sequence_Container_1_stage_files_archive_file --> n_Package_Sequence_Container_1_stage_files_delete_file
+    n_Package_Sequence_Container_1_unzip_files_File_System_Task --> n_Package_Sequence_Container_1_unzip_files_Execute_Process_Task
+    n_Package_Sequence_Container_1_unzip_files_Execute_Process_Task --> n_Package_Sequence_Container_1_unzip_files_File_System_Task_1
+    n_Package_Sequence_Container_1_retreive_files --> n_Package_Sequence_Container_1_unzip_files
+    n_Package_Sequence_Container_1_copy_xlsx --> n_Package_Sequence_Container_1_stage_files
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | DateTimeStamp | Yes |
+| User | EndDate | Yes |
+| User | EndDateAsDATE | Yes |
+| User | GetDate | Yes |
+| User | GetDateAsDATE | Yes |
+| User | StartDate | Yes |
+| User | StartDateAsDATE | Yes |
+| User | surveyFile | No |
+| User | surveyFile2 | No |
+| User | surveyFile3 | No |
+| User | surveyFileArchived | Yes |
+| User | surveyFileUnzipped | Yes |
+
+### Expression-bound variable values
+
+#### User::DateTimeStamp
+
+**Expression:**
+
+```sql
+(DT_WSTR,4)DATEPART("yyyy",GetDate()) 
++ (DT_WSTR,4)DATEPART("mm",GetDate()) 
++ (DT_WSTR,4)DATEPART("dd",GetDate()) 
++ (DT_WSTR,4)DATEPART("hh",GetDate()) 
++ (DT_WSTR,4)DATEPART("mi",GetDate()) 
++ (DT_WSTR,4)DATEPART("ss",GetDate()) 
++ (DT_WSTR,4)DATEPART("ms",GetDate())
+```
+
+**Evaluated value:**
+
+```sql
+202391311283697
+```
+
+#### User::EndDate
+
+**Expression:**
+
+```sql
+dateadd("dd", @[$Package::DaysToInclude], @[User::StartDate])
+```
+
+**Evaluated value:**
+
+```sql
+9/13/2023
+```
+
+#### User::EndDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::EndDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::EndDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::EndDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-09-13
+```
+
+#### User::GetDate
+
+**Expression:**
+
+```sql
+(DT_DATE)DATEDIFF("Day", (DT_DATE) 0, GETDATE())
+```
+
+**Evaluated value:**
+
+```sql
+9/13/2023
+```
+
+#### User::GetDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::GetDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::GetDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::GetDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-09-13
+```
+
+#### User::StartDate
+
+**Expression:**
+
+```sql
+dateadd("dd", -@[$Package::DaysToGoBack] , @[User::GetDate] )
+```
+
+**Evaluated value:**
+
+```sql
+9/12/2023
+```
+
+#### User::StartDateAsDATE
+
+**Expression:**
+
+```sql
+(DT_WSTR, 4) datepart("year", @[User::StartDate])  + "-" +
+right("0"+ (DT_WSTR, 2) datepart("mm", @[User::StartDate]),2)  + "-" +
+right("0" +(DT_WSTR, 2) datepart("dd",  @[User::StartDate]),2)
+```
+
+**Evaluated value:**
+
+```sql
+2023-09-12
+```
+
+#### User::surveyFileArchived
+
+**Expression:**
+
+```sql
+"\\\\stl-ssis-p-01\\IntegrationStaging\\CRM\\survey\\archive\\survey_" +  @[User::DateTimeStamp] + ".xlsx"
+```
+
+**Evaluated value:**
+
+```sql
+\\stl-ssis-p-01\IntegrationStaging\CRM\survey\archive\survey_202391311283697.xlsx
+```
+
+#### User::surveyFileUnzipped
+
+**Expression:**
+
+```sql
+"\\\\stl-ssis-p-01\\IntegrationStaging\\CRM\\survey\\eComm.zip"
+```
+
+**Evaluated value:**
+
+```sql
+\\stl-ssis-p-01\IntegrationStaging\CRM\survey\eComm.zip
+```
+
+## Execute SQL Tasks
+
+### Execute SQL Task
+
+**Path:** `Package\Sequence Container 1\Execute SQL Task`  
+**Connection:** papamart.DWStaging (papamart/DWStaging)  
+
+```sql
+WAITFOR DELAY '00:00:35'
+```
+
+### merge data
+
+**Path:** `Package\Sequence Container 1\stage files\merge data`  
+**Connection:** papamart.DWStaging (papamart/DWStaging)  
+
+```sql
+exec [dbo].[spMergeSurveyResults]
+```
+
+### truncate stage
+
+**Path:** `Package\Sequence Container 1\stage files\truncate stage`  
+**Connection:** papamart.DWStaging (papamart/DWStaging)  
+
+```sql
+truncate table [dbo].[CRM_surveyStage]
+```
 
 ## Data Flow: Sources
 
@@ -111,7 +296,6 @@ _None detected._
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[CRM_surveyStage] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OLE DB Destination |  | OLEDBDestination | stage data | papamart.DWStaging |  |

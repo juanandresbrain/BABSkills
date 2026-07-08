@@ -1,221 +1,597 @@
-﻿# SSIS Package: WebIntegrationValidations
+# SSIS Package: WebIntegrationValidations
 
 **Project:** WebPrintingValidations  
 **Folder:** SSIS  
 **Server:** STL-SSIS-P-01  
 
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-    subgraph Connections
-        ApplicationResources_conn(["ApplicationResources [OLEDB]"])
-        auditworks_conn(["auditworks [OLEDB]"])
-        BABWPartyPlanner_conn(["BABWPartyPlanner [OLEDB]"])
-        IntegrationStaging_conn(["IntegrationStaging [OLEDB]"])
-        LoggedFiles_conn(["LoggedFiles [FILE]"])
-        SMTP_EMAIL_conn(["SMTP_EMAIL [SMTP]"])
-        SQL_LOG_conn(["SQL_LOG [OLEDB]"])
-        UKFailedFiles_conn(["UKFailedFiles [FILE]"])
-        UKPendingWaveCSV_conn(["UKPendingWaveCSV [FLATFILE]"])
-        UKSuccessFiles_conn(["UKSuccessFiles [FILE]"])
-        UKTempFolder_conn(["UKTempFolder [FILE]"])
-        USPendingWaveCSV_conn(["USPendingWaveCSV [FLATFILE]"])
-        WebOrderProcessing_conn(["WebOrderProcessing [OLEDB]"])
-        WM_conn(["WM [OLEDB]"])
-    end
-    subgraph ControlFlow
-        WebIntegrationValidations_task["WebIntegrationValidations"]
-        PreValidation_Sequence_task["PreValidation Sequence"]
-        WebIntegrationValidations_task --> PreValidation_Sequence_task
-        Foreach_Loop___UK_Failed_Folder_task["Foreach Loop - UK Failed Folder"]
-        PreValidation_Sequence_task --> Foreach_Loop___UK_Failed_Folder_task
-        Move_Failed_to_Temp_task["Move Failed to Temp"]
-        Foreach_Loop___UK_Failed_Folder_task --> Move_Failed_to_Temp_task
-        Foreach_Loop___UK_Failed_Folder___2nd_Pass_task["Foreach Loop - UK Failed Folder - 2nd Pass"]
-        Move_Failed_to_Temp_task --> Foreach_Loop___UK_Failed_Folder___2nd_Pass_task
-        Move_Failed_to_Temp_task["Move Failed to Temp"]
-        Foreach_Loop___UK_Failed_Folder___2nd_Pass_task --> Move_Failed_to_Temp_task
-        Foreach_Loop___UK_Success_Folder_task["Foreach Loop - UK Success Folder"]
-        Move_Failed_to_Temp_task --> Foreach_Loop___UK_Success_Folder_task
-        Log_Success_Files_task["Log Success Files"]
-        Foreach_Loop___UK_Success_Folder_task --> Log_Success_Files_task
-        Move_Files_To_LoggedFiles_Folder_task["Move Files To LoggedFiles Folder"]
-        Log_Success_Files_task --> Move_Files_To_LoggedFiles_Folder_task
-        Restage_Logged_Files_Not_Sent_to_UK_task["Restage Logged Files Not Sent to UK"]
-        Move_Files_To_LoggedFiles_Folder_task --> Restage_Logged_Files_Not_Sent_to_UK_task
-        Run_FTP_task["Run FTP"]
-        Restage_Logged_Files_Not_Sent_to_UK_task --> Run_FTP_task
-        Run_FTP_again_task["Run FTP again"]
-        Run_FTP_task --> Run_FTP_again_task
-        Run_FTP_to_UK_task["Run FTP to UK"]
-        Run_FTP_again_task --> Run_FTP_to_UK_task
-        Sequence_Container_task["Sequence Container"]
-        Run_FTP_to_UK_task --> Sequence_Container_task
-        Foreach_Loop_Container_task["Foreach Loop Container"]
-        Sequence_Container_task --> Foreach_Loop_Container_task
-        Rename_File_task["Rename File"]
-        Foreach_Loop_Container_task --> Rename_File_task
-        Wait_task["Wait"]
-        Rename_File_task --> Wait_task
-        OMS_Import_Validations_task["OMS Import Validations"]
-        Wait_task --> OMS_Import_Validations_task
-        Resend_Orders_to_WM_task["Resend Orders to WM"]
-        OMS_Import_Validations_task --> Resend_Orders_to_WM_task
-        Run_WM_Pickticket_Bridge_task["Run WM Pickticket Bridge"]
-        Resend_Orders_to_WM_task --> Run_WM_Pickticket_Bridge_task
-        Run_WM_Pickticket_Bridge___1_task["Run WM Pickticket Bridge - 1"]
-        Run_WM_Pickticket_Bridge_task --> Run_WM_Pickticket_Bridge___1_task
-        TruncateStage_task["TruncateStage"]
-        Run_WM_Pickticket_Bridge___1_task --> TruncateStage_task
-        Sequence___Processing_Summary_task["Sequence - Processing Summary"]
-        TruncateStage_task --> Sequence___Processing_Summary_task
-        Order_Status_Summary_Email_task["Order Status Summary Email"]
-        Sequence___Processing_Summary_task --> Order_Status_Summary_Email_task
-        UK_Orders_Shipped_Count_task["UK Orders Shipped Count"]
-        Order_Status_Summary_Email_task --> UK_Orders_Shipped_Count_task
-        UK_Orders_Uploaded_Count_task["UK Orders Uploaded Count"]
-        UK_Orders_Shipped_Count_task --> UK_Orders_Uploaded_Count_task
-        WM_Orders_Created_Count_task["WM Orders Created Count"]
-        UK_Orders_Uploaded_Count_task --> WM_Orders_Created_Count_task
-        WM_Orders_Shipped_Count_task["WM Orders Shipped Count"]
-        WM_Orders_Created_Count_task --> WM_Orders_Shipped_Count_task
-        Validation_Sequence_task["Validation Sequence"]
-        WM_Orders_Shipped_Count_task --> Validation_Sequence_task
-        Foreach_Loop___XML_Validate_ERR_Folder_task["Foreach Loop - XML Validate ERR Folder"]
-        Validation_Sequence_task --> Foreach_Loop___XML_Validate_ERR_Folder_task
-        Log_Error_FileNames_To_Table_task["Log Error FileNames To Table"]
-        Foreach_Loop___XML_Validate_ERR_Folder_task --> Log_Error_FileNames_To_Table_task
-        OMS_Custom_Import_task["OMS Custom Import"]
-        Log_Error_FileNames_To_Table_task --> OMS_Custom_Import_task
-        OMS_Import_Validations_task["OMS Import Validations"]
-        OMS_Custom_Import_task --> OMS_Import_Validations_task
-        Order_Status_Validations_task["Order Status Validations"]
-        OMS_Import_Validations_task --> Order_Status_Validations_task
-        Sales_Audit_Validation_task["Sales Audit Validation"]
-        Order_Status_Validations_task --> Sales_Audit_Validation_task
-        Send_Emails_task["Send Emails"]
-        Sales_Audit_Validation_task --> Send_Emails_task
-        Truncate_Stage_task["Truncate Stage"]
-        Send_Emails_task --> Truncate_Stage_task
-        Send_Email_onError_task["Send Email onError"]
-        Truncate_Stage_task --> Send_Email_onError_task
-    end
-```
-
 ## Connection Managers
 
-| Name | Type |
-|---|---|
-| ApplicationResources | OLEDB |
-| auditworks | OLEDB |
-| BABWPartyPlanner | OLEDB |
-| IntegrationStaging | OLEDB |
-| LoggedFiles | FILE |
-| SMTP_EMAIL | SMTP |
-| SQL_LOG | OLEDB |
-| UKFailedFiles | FILE |
-| UKPendingWaveCSV | FLATFILE |
-| UKSuccessFiles | FILE |
-| UKTempFolder | FILE |
-| USPendingWaveCSV | FLATFILE |
-| WebOrderProcessing | OLEDB |
-| WM | OLEDB |
+| Name | Type | Server | Catalog | Connection (sanitized) |
+|---|---|---|---|---|
+| ApplicationResources | OLEDB | BearCluster01.sql.buildabear.com | ApplicationResources | Data Source=BearCluster01.sql.buildabear.com; Initial Catalog=ApplicationResources; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| BABWPartyPlanner | OLEDB | bearcluster01.sql.buildabear.com | BABWPartyPlanner | Data Source=bearcluster01.sql.buildabear.com; Initial Catalog=BABWPartyPlanner; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| IntegrationStaging | OLEDB | STL-SSIS-P-01 | IntegrationStaging | Data Source=STL-SSIS-P-01; Initial Catalog=IntegrationStaging; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| LoggedFiles | FILE |  |  |  |
+| SMTP_EMAIL | SMTP |  |  |  |
+| SQL_LOG | OLEDB | stl-ssis-p-01 | msdb | Data Source=stl-ssis-p-01; Initial Catalog=msdb; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| UKFailedFiles | FILE |  |  |  |
+| UKPendingWaveCSV | FLATFILE |  |  |  |
+| UKSuccessFiles | FILE |  |  |  |
+| UKTempFolder | FILE |  |  |  |
+| USPendingWaveCSV | FLATFILE |  |  |  |
+| WM | OLEDB | wmdb01 | wmprod | Data Source=wmdb01; Initial Catalog=wmprod; Provider=SQLNCLI10.1; Integrated Security=SSPI; Auto Translate=False; Application Name=SSIS-Package-{3F853E9A-9419-4391-BC61-834A46A6847D}wmdb01.WMPROD |
+| WebOrderProcessing | OLEDB | BearCluster01.sql.buildabear.com | WebOrderProcessing | Data Source=BearCluster01.sql.buildabear.com; Initial Catalog=WebOrderProcessing; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
+| auditworks | OLEDB | bedrockdb01 | auditworks | Data Source=bedrockdb01; Initial Catalog=auditworks; Provider=SQLNCLI11.1; Integrated Security=SSPI; Auto Translate=False |
 
 ## Control Flow Tasks
 
 | Task | Type |
 |---|---|
-| WebIntegrationValidations | Microsoft.Package |
-| PreValidation Sequence | STOCK:SEQUENCE |
-| Foreach Loop - UK Failed Folder | STOCK:FOREACHLOOP |
-| Move Failed to Temp | Microsoft.FileSystemTask |
-| Foreach Loop - UK Failed Folder - 2nd Pass | STOCK:FOREACHLOOP |
-| Move Failed to Temp | Microsoft.FileSystemTask |
-| Foreach Loop - UK Success Folder | STOCK:FOREACHLOOP |
-| Log Success Files | Microsoft.ExecuteSQLTask |
-| Move Files To LoggedFiles Folder | Microsoft.FileSystemTask |
-| Restage Logged Files Not Sent to UK | Microsoft.ExecuteSQLTask |
-| Run FTP | Microsoft.ExecuteSQLTask |
-| Run FTP again | Microsoft.ExecuteSQLTask |
-| Run FTP to UK | Microsoft.ExecuteSQLTask |
-| Sequence Container | STOCK:SEQUENCE |
-| Foreach Loop Container | STOCK:FOREACHLOOP |
-| Rename File | Microsoft.FileSystemTask |
-| Wait | Microsoft.ExecuteSQLTask |
-| OMS Import Validations | Microsoft.Pipeline |
-| Resend Orders to WM | Microsoft.ExecuteSQLTask |
-| Run WM Pickticket Bridge | Microsoft.ExecuteSQLTask |
-| Run WM Pickticket Bridge - 1 | Microsoft.ExecuteSQLTask |
-| TruncateStage | Microsoft.ExecuteSQLTask |
-| Sequence - Processing Summary | STOCK:SEQUENCE |
-| Order Status Summary Email | Microsoft.ExecuteSQLTask |
-| UK Orders Shipped Count | Microsoft.ExecuteSQLTask |
-| UK Orders Uploaded Count | Microsoft.ExecuteSQLTask |
-| WM Orders Created Count | Microsoft.ExecuteSQLTask |
-| WM Orders Shipped Count | Microsoft.ExecuteSQLTask |
-| Validation Sequence | STOCK:SEQUENCE |
-| Foreach Loop - XML Validate ERR Folder | STOCK:FOREACHLOOP |
-| Log Error FileNames To Table | Microsoft.ExecuteSQLTask |
-| OMS Custom Import | Microsoft.Pipeline |
-| OMS Import Validations | Microsoft.Pipeline |
-| Order Status Validations | Microsoft.Pipeline |
-| Sales Audit Validation | Microsoft.Pipeline |
-| Send Emails | Microsoft.ExecuteSQLTask |
-| Truncate Stage | Microsoft.ExecuteSQLTask |
-| Send Email onError | Microsoft.SendMailTask |
+| WebIntegrationValidations | Package |
+| PreValidation Sequence | SEQUENCE |
+| Foreach Loop - UK Failed Folder | FOREACHLOOP |
+| Move Failed to Temp | FileSystemTask |
+| Foreach Loop - UK Failed Folder - 2nd Pass | FOREACHLOOP |
+| Move Failed to Temp | FileSystemTask |
+| Foreach Loop - UK Success Folder | FOREACHLOOP |
+| Log Success Files | ExecuteSQLTask |
+| Move Files To LoggedFiles Folder | FileSystemTask |
+| Restage Logged Files Not Sent to UK | ExecuteSQLTask |
+| Run FTP | ExecuteSQLTask |
+| Run FTP again | ExecuteSQLTask |
+| Run FTP to UK | ExecuteSQLTask |
+| Sequence Container | SEQUENCE |
+| Foreach Loop Container | FOREACHLOOP |
+| Rename File | FileSystemTask |
+| Wait | ExecuteSQLTask |
+| OMS Import Validations | Pipeline |
+| Resend Orders to WM | ExecuteSQLTask |
+| Run WM Pickticket Bridge | ExecuteSQLTask |
+| Run WM Pickticket Bridge - 1 | ExecuteSQLTask |
+| TruncateStage | ExecuteSQLTask |
+| Sequence - Processing Summary | SEQUENCE |
+| Order Status Summary Email | ExecuteSQLTask |
+| UK Orders Shipped Count | ExecuteSQLTask |
+| UK Orders Uploaded Count | ExecuteSQLTask |
+| WM Orders Created Count | ExecuteSQLTask |
+| WM Orders Shipped Count | ExecuteSQLTask |
+| Validation Sequence | SEQUENCE |
+| Foreach Loop - XML Validate ERR Folder | FOREACHLOOP |
+| Log Error FileNames To Table | ExecuteSQLTask |
+| OMS Custom Import | Pipeline |
+| OMS Import Validations | Pipeline |
+| Order Status Validations | Pipeline |
+| Sales Audit Validation | Pipeline |
+| Send Emails | ExecuteSQLTask |
+| Truncate Stage | ExecuteSQLTask |
+| Send Email onError | SendMailTask |
+
+## Control Flow Outline
+
+```text
+- Send Email onError [SendMailTask]
+- PreValidation Sequence [SEQUENCE]
+  - Foreach Loop - UK Failed Folder [FOREACHLOOP]
+  - Foreach Loop - UK Failed Folder - 2nd Pass [FOREACHLOOP]
+    - Move Failed to Temp [FileSystemTask]
+    - Move Failed to Temp [FileSystemTask]
+  - Foreach Loop - UK Success Folder [FOREACHLOOP]
+    - Log Success Files [ExecuteSQLTask]
+    - Move Files To LoggedFiles Folder [FileSystemTask]
+  - Restage Logged Files Not Sent to UK [ExecuteSQLTask]
+  - Run FTP [ExecuteSQLTask]
+  - Run FTP again [ExecuteSQLTask]
+  - Run FTP to UK [ExecuteSQLTask]
+  - Sequence Container [SEQUENCE]
+    - Foreach Loop Container [FOREACHLOOP]
+      - Rename File [FileSystemTask]
+      - Wait [ExecuteSQLTask]
+    - OMS Import Validations [Pipeline]
+    - Resend Orders to WM [ExecuteSQLTask]
+    - Run WM Pickticket Bridge [ExecuteSQLTask]
+    - Run WM Pickticket Bridge - 1 [ExecuteSQLTask]
+    - TruncateStage [ExecuteSQLTask]
+- Sequence - Processing Summary [SEQUENCE]
+  - Order Status Summary Email [ExecuteSQLTask]
+  - UK Orders Shipped Count [ExecuteSQLTask]
+  - UK Orders Uploaded Count [ExecuteSQLTask]
+  - WM Orders Created Count [ExecuteSQLTask]
+  - WM Orders Shipped Count [ExecuteSQLTask]
+- Validation Sequence [SEQUENCE]
+  - Foreach Loop - XML Validate ERR Folder [FOREACHLOOP]
+    - Log Error FileNames To Table [ExecuteSQLTask]
+  - OMS Custom Import [Pipeline]
+  - OMS Import Validations [Pipeline]
+  - Order Status Validations [Pipeline]
+  - Sales Audit Validation [Pipeline]
+  - Send Emails [ExecuteSQLTask]
+  - Truncate Stage [ExecuteSQLTask]
+```
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    n_Package_PreValidation_Sequence["PreValidation Sequence"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder["Foreach Loop - UK Failed Folder"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder_Move_Failed_to_Temp["Move Failed to Temp"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder___2nd_Pass["Foreach Loop - UK Failed Folder - 2nd Pass"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder___2nd_Pass_Move_Failed_to_Temp["Move Failed to Temp"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder["Foreach Loop - UK Success Folder"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder_Log_Success_Files["Log Success Files"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder_Move_Files_To_LoggedFiles_Folder["Move Files To LoggedFiles Folder"]
+    n_Package_PreValidation_Sequence_Restage_Logged_Files_Not_Sent_to_UK["Restage Logged Files Not Sent to UK"]
+    n_Package_PreValidation_Sequence_Run_FTP["Run FTP"]
+    n_Package_PreValidation_Sequence_Run_FTP_again["Run FTP again"]
+    n_Package_PreValidation_Sequence_Run_FTP_to_UK["Run FTP to UK"]
+    n_Package_PreValidation_Sequence_Sequence_Container["Sequence Container"]
+    n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container["Foreach Loop Container"]
+    n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container_Rename_File["Rename File"]
+    n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container_Wait["Wait"]
+    n_Package_PreValidation_Sequence_Sequence_Container_OMS_Import_Validations["OMS Import Validations"]
+    n_Package_PreValidation_Sequence_Sequence_Container_Resend_Orders_to_WM["Resend Orders to WM"]
+    n_Package_PreValidation_Sequence_Sequence_Container_Run_WM_Pickticket_Bridge["Run WM Pickticket Bridge"]
+    n_Package_PreValidation_Sequence_Sequence_Container_Run_WM_Pickticket_Bridge___1["Run WM Pickticket Bridge - 1"]
+    n_Package_PreValidation_Sequence_Sequence_Container_TruncateStage["TruncateStage"]
+    n_Package_Sequence___Processing_Summary["Sequence - Processing Summary"]
+    n_Package_Sequence___Processing_Summary_Order_Status_Summary_Email["Order Status Summary Email"]
+    n_Package_Sequence___Processing_Summary_UK_Orders_Shipped_Count["UK Orders Shipped Count"]
+    n_Package_Sequence___Processing_Summary_UK_Orders_Uploaded_Count["UK Orders Uploaded Count"]
+    n_Package_Sequence___Processing_Summary_WM_Orders_Created_Count["WM Orders Created Count"]
+    n_Package_Sequence___Processing_Summary_WM_Orders_Shipped_Count["WM Orders Shipped Count"]
+    n_Package_Validation_Sequence["Validation Sequence"]
+    n_Package_Validation_Sequence_Foreach_Loop___XML_Validate_ERR_Folder["Foreach Loop - XML Validate ERR Folder"]
+    n_Package_Validation_Sequence_Foreach_Loop___XML_Validate_ERR_Folder_Log_Error_FileNames_To_Table["Log Error FileNames To Table"]
+    n_Package_Validation_Sequence_OMS_Custom_Import["OMS Custom Import"]
+    n_Package_Validation_Sequence_OMS_Import_Validations["OMS Import Validations"]
+    n_Package_Validation_Sequence_Order_Status_Validations["Order Status Validations"]
+    n_Package_Validation_Sequence_Sales_Audit_Validation["Sales Audit Validation"]
+    n_Package_Validation_Sequence_Send_Emails["Send Emails"]
+    n_Package_Validation_Sequence_Truncate_Stage["Truncate Stage"]
+    n_Package_EventHandlers_OnError__Send_Email_onError["Send Email onError"]
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder_Log_Success_Files --> n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder_Move_Files_To_LoggedFiles_Folder
+    n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container_Rename_File --> n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container_Wait
+    n_Package_PreValidation_Sequence_Sequence_Container_TruncateStage --> n_Package_PreValidation_Sequence_Sequence_Container_Run_WM_Pickticket_Bridge___1
+    n_Package_PreValidation_Sequence_Sequence_Container_Resend_Orders_to_WM --> n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container
+    n_Package_PreValidation_Sequence_Sequence_Container_Foreach_Loop_Container --> n_Package_PreValidation_Sequence_Sequence_Container_Run_WM_Pickticket_Bridge
+    n_Package_PreValidation_Sequence_Sequence_Container_OMS_Import_Validations --> n_Package_PreValidation_Sequence_Sequence_Container_Resend_Orders_to_WM
+    n_Package_PreValidation_Sequence_Sequence_Container_Run_WM_Pickticket_Bridge___1 --> n_Package_PreValidation_Sequence_Sequence_Container_OMS_Import_Validations
+    n_Package_PreValidation_Sequence_Sequence_Container --> n_Package_PreValidation_Sequence_Restage_Logged_Files_Not_Sent_to_UK
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder --> n_Package_PreValidation_Sequence_Sequence_Container
+    n_Package_PreValidation_Sequence_Run_FTP --> n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder___2nd_Pass
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder --> n_Package_PreValidation_Sequence_Run_FTP_to_UK
+    n_Package_PreValidation_Sequence_Run_FTP_to_UK --> n_Package_PreValidation_Sequence_Foreach_Loop___UK_Success_Folder
+    n_Package_PreValidation_Sequence_Foreach_Loop___UK_Failed_Folder___2nd_Pass --> n_Package_PreValidation_Sequence_Run_FTP_again
+    n_Package_PreValidation_Sequence_Restage_Logged_Files_Not_Sent_to_UK --> n_Package_PreValidation_Sequence_Run_FTP
+    n_Package_Sequence___Processing_Summary_UK_Orders_Shipped_Count --> n_Package_Sequence___Processing_Summary_Order_Status_Summary_Email
+    n_Package_Sequence___Processing_Summary_WM_Orders_Shipped_Count --> n_Package_Sequence___Processing_Summary_UK_Orders_Shipped_Count
+    n_Package_Sequence___Processing_Summary_UK_Orders_Uploaded_Count --> n_Package_Sequence___Processing_Summary_WM_Orders_Shipped_Count
+    n_Package_Sequence___Processing_Summary_WM_Orders_Created_Count --> n_Package_Sequence___Processing_Summary_UK_Orders_Uploaded_Count
+    n_Package_Validation_Sequence_Foreach_Loop___XML_Validate_ERR_Folder --> n_Package_Validation_Sequence_OMS_Custom_Import
+    n_Package_Validation_Sequence_Order_Status_Validations --> n_Package_Validation_Sequence_Sales_Audit_Validation
+    n_Package_Validation_Sequence_OMS_Custom_Import --> n_Package_Validation_Sequence_OMS_Import_Validations
+    n_Package_Validation_Sequence_OMS_Import_Validations --> n_Package_Validation_Sequence_Order_Status_Validations
+    n_Package_Validation_Sequence_Truncate_Stage --> n_Package_Validation_Sequence_Foreach_Loop___XML_Validate_ERR_Folder
+    n_Package_Validation_Sequence_Sales_Audit_Validation --> n_Package_Validation_Sequence_Send_Emails
+    n_Package_PreValidation_Sequence --> n_Package_Validation_Sequence
+    n_Package_Validation_Sequence --> n_Package_Sequence___Processing_Summary
+```
+
+## Variables
+
+| Namespace | Name | Expression-bound |
+|---|---|---|
+| System | Propagate | No |
+| User | ErrFileName | No |
+| User | PickticketRename | Yes |
+| User | PickticketXMLFile | No |
+| User | PickticketXMLFolder | No |
+| User | UKFailedFileName | No |
+| User | UKLoggedFileName | No |
+| User | UKOrdersShipped | No |
+| User | UKOrdersUploaded | No |
+| User | UKSuccessFileName | No |
+| User | WMOrdersCreated | No |
+| User | WMOrdersShipped | No |
+
+### Expression-bound variable values
+
+#### User::PickticketRename
+
+**Expression:**
+
+```sql
+replace(@[User::PickticketXMLFile], ".dmt", ".xml")
+```
+
+## Execute SQL Tasks
+
+### Log Success Files
+
+**Path:** `Package\PreValidation Sequence\Foreach Loop - UK Success Folder\Log Success Files`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+insert WM.UKFTPSuccessFolder (OrderNumber, OrderFileName) select '',''
+```
+
+**Property expression (runtime override):**
+
+```sql
+"insert WM.UKFTPSuccessFolder (OrderNumber, OrderFileName) select '" + SUBSTRING( @[User::UKSuccessFileName], 67, 10 )  + "','" +  SUBSTRING( @[User::UKSuccessFileName], 52, 200 ) + "'"
+```
+
+### Restage Logged Files Not Sent to UK
+
+**Path:** `Package\PreValidation Sequence\Restage Logged Files Not Sent to UK`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+```sql
+IF (Object_ID('tempdb..#DIR') IS NOT NULL) DROP TABLE #DIR
+create table #DIR (output varchar(1000))
+insert #DIR exec master..xp_cmdshell 'dir \\kermode\FileRepository\OMSOrders\BABW-UK\Success\LoggedFiles\*.xml /B'
+delete from #DIR where output is null or output = 'File Not Found'
+or substring(output, 16, 10) not in (select OrderNumber from wm.OrdersNotSentToUK)
+				
+if (select count(*) from #dir) > 0
+
+begin
+
+	declare 
+		@count int,
+		@FileName varchar(500),
+		@Copy varchar(1000)
+
+	select @count = count(*) from #DIR
+
+	while @count > 0
+
+	begin
+		select @FileName = max(output) from #DIR
+	
+		delete from #DIR where output = @FileName
+	
+		select @Copy = 'copy \\kermode\FileRepository\OMSOrders\BABW-UK\Success\LoggedFiles\' + @FileName + ' \\kermode\FileRepository\OMSOrders\BABW-UK\Temp\'
+		EXEC master..xp_cmdshell @Copy
+	
+		set @count = @count-1
+	
+		if @count = 0 
+		break
+			else
+		continue
+	end
+
+end
+```
+
+### Run FTP
+
+**Path:** `Package\PreValidation Sequence\Run FTP`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec web.spFTPukORDERS
+```
+
+### Run FTP again
+
+**Path:** `Package\PreValidation Sequence\Run FTP again`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec web.spFTPukORDERS
+```
+
+### Run FTP to UK
+
+**Path:** `Package\PreValidation Sequence\Run FTP to UK`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+exec web.spFTPukORDERS
+```
+
+### Wait
+
+**Path:** `Package\PreValidation Sequence\Sequence Container\Foreach Loop Container\Wait`  
+**Connection:** WM (wmdb01/wmprod)  
+
+```sql
+waitfor delay '00:00:30'
+```
+
+### Resend Orders to WM
+
+**Path:** `Package\PreValidation Sequence\Sequence Container\Resend Orders to WM`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+```sql
+exec wm.spWMPickticketXMLOnDemand
+--waitfor delay '00:01:00'
+
+```
+
+### Run WM Pickticket Bridge
+
+**Path:** `Package\PreValidation Sequence\Sequence Container\Run WM Pickticket Bridge`  
+**Connection:** WM (wmdb01/wmprod)  
+
+```sql
+exec spWebValidationsCleanUpAndBridge
+```
+
+### Run WM Pickticket Bridge - 1
+
+**Path:** `Package\PreValidation Sequence\Sequence Container\Run WM Pickticket Bridge - 1`  
+**Connection:** WM (wmdb01/wmprod)  
+
+```sql
+exec spWebValidationsCleanUpAndBridge
+```
+
+### TruncateStage
+
+**Path:** `Package\PreValidation Sequence\Sequence Container\TruncateStage`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+```sql
+TRUNCATE TABLE WM.OrdersNotInWM
+TRUNCATE TABLE WM.OrdersNotShippedInOMS
+TRUNCATE TABLE WM.OrdersNotWavedInOMS
+TRUNCATE TABLE WM.OrderXMLErrorLog
+TRUNCATE TABLE WM.OrdersNotInSalesAudit
+TRUNCATE TABLE WM.OrdersNotSentToUK
+
+
+```
+
+### Order Status Summary Email
+
+**Path:** `Package\Sequence - Processing Summary\Order Status Summary Email`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+exec WM.spEmailWebOrderProcessingSummary @WMCreated = 0,@WMShipped = 0,@UKCreated = 0,@UKShipped = 0
+```
+
+**Property expression (runtime override):**
+
+```sql
+"exec WM.spEmailWebOrderProcessingSummary " + 
+"@WMCreated = " + (DT_STR, 10, 1252)@[User::WMOrdersCreated] + "," + 
+"@WMShipped = " + (DT_STR, 10, 1252)@[User::WMOrdersShipped] + "," + 
+"@UKCreated = " + (DT_STR, 10, 1252)@[User::UKOrdersUploaded] + "," + 
+"@UKShipped = " +  (DT_STR, 10, 1252)@[User::UKOrdersShipped]
+```
+
+### UK Orders Shipped Count
+
+**Path:** `Package\Sequence - Processing Summary\UK Orders Shipped Count`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+```sql
+select count(o.OrderNum) as UKOrdersShipped
+from wm.Orders o
+left join wm.OrderStatus os on o.OrderID = os.OrderID and os.CurrentStatus = 1
+where datediff(dd, os.StatusDate, getdate()) = 0
+and os.Status = 'Shipped'
+and o.SourceSite = 'BABW-UK'
+```
+
+### UK Orders Uploaded Count
+
+**Path:** `Package\Sequence - Processing Summary\UK Orders Uploaded Count`  
+**Connection:** IntegrationStaging (STL-SSIS-P-01/IntegrationStaging)  
+
+```sql
+select count(*) as UKOrdersUploaded
+from WEB.UKFTPTransmissionLogDump 
+where ftplog like '%OMSInBoundOrder%'
+and right(ftpLog,4) = '100%'
+and datediff(dd, LogDateTime, getdate()) = 0
+```
+
+### WM Orders Created Count
+
+**Path:** `Package\Sequence - Processing Summary\WM Orders Created Count`  
+**Connection:** WM (wmdb01/wmprod)  
+
+```sql
+select count(*) as OrdersCreated
+from pkt_hdr_intrnl with (nolock)
+where substring(pkt_ctrl_nbr,9,1) = '_'
+and datediff(dd, create_date_time, getdate()) = 0
+```
+
+### WM Orders Shipped Count
+
+**Path:** `Package\Sequence - Processing Summary\WM Orders Shipped Count`  
+**Connection:** WM (wmdb01/wmprod)  
+
+```sql
+select count(*) as WMOrdersShipped
+from outpt_pkt_hdr with (nolock)
+where stat_code = 90
+and substring(pkt_ctrl_nbr,9,1) = '_'
+and datediff(dd, create_date_time, getdate()) = 0
+```
+
+### Log Error FileNames To Table
+
+**Path:** `Package\Validation Sequence\Foreach Loop - XML Validate ERR Folder\Log Error FileNames To Table`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+> ⚠️ `SqlStatementSource` is overridden at runtime by a property expression (shown below); the static SQL may not be what executes.
+
+**Static SqlStatementSource:**
+
+```sql
+insert WM.OrderXMLErrorLog (ErrFileName, LogDateTime) select '', getdate() 
+```
+
+**Property expression (runtime override):**
+
+```sql
+"insert WM.OrderXMLErrorLog (ErrFileName, LogDateTime) select '" + SUBSTRING( @[User::ErrFileName], 40, 100 )  + "', getdate() "
+```
+
+### Send Emails
+
+**Path:** `Package\Validation Sequence\Send Emails`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+```sql
+exec WM.spEmailWebOrdersNotInWM
+exec WM.spEmailWebOrdersNotShippedInOMS
+exec WM.spEmailWebOrdersNotWavedInOMS
+exec WM.spEmailWebOrdersNotInSalesAudit
+exec WM.spEmailOMSErrorFiles
+exec WM.spEmailWebOrdersNotSentToUK
+exec WM.spEmailWebOrdersNotInFileLog
+```
+
+### Truncate Stage
+
+**Path:** `Package\Validation Sequence\Truncate Stage`  
+**Connection:** WebOrderProcessing (BearCluster01.sql.buildabear.com/WebOrderProcessing)  
+
+```sql
+TRUNCATE TABLE WM.OrdersNotInWM
+TRUNCATE TABLE WM.OrdersNotShippedInOMS
+TRUNCATE TABLE WM.OrdersNotWavedInOMS
+TRUNCATE TABLE WM.OrderXMLErrorLog
+TRUNCATE TABLE WM.OrdersNotInSalesAudit
+TRUNCATE TABLE WM.OrdersNotSentToUK
+TRUNCATE TABLE WM.OrdersNotInImportFileLog
+
+```
 
 ## Data Flow: Sources
 
-| Component | SQL Preview |
-|---|---|
-|  | with  ordersWithCancels as 	( 		select  			distinct o.OrderNum  		from WebOrderProcessing.wm.Orders O   		inner join WebOrderProcessing.wm.Orderstatus s on o.Orderid = s.OrderID and s.currentstatus = 1 		inner join WebOrderProcessing.wm.ItemStatus S2 on O.orderid = s2.OrderID and s2.currentstatus = 1       		where s2.status = 'IV' and s.status = 'Complete' and Isnull(pickticketflag,0) = 0 		and so |
-|  | select OrderNumber  from wm.OMSCustomOrderExport with (nolock)  where datediff(dd, OrderDateUTC, getdate()) <= 90 and OrderStatus in ('completed', 'cancelled') |
-|  | select  	o.OrderNum, 	os.Status from WM.Orders o with (nolock) join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID and os.CurrentStatus = 1 where o.SourceSite = 'BABW-US' and substring(o.OrderNum, 9,1) = '_' and datediff(dd, StatusDate, getdate()) <= 90 |
-|  | select * from [dbo].[vwImportOMS_ErrorLog] |
-|  | select OrderNum, WMFileName, SendTime, getdate() as CheckDateTime from WM.OrdersSentToWM with (nolock) where datediff(dd, sendTime, getdate()) <= 90 |
-|  | select  	o.OrderNum, 	os.Status from WM.Orders o with (nolock) join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID and os.CurrentStatus = 1 where o.SourceSite = 'BABW-UK' and substring(o.OrderNum, 9,1) = '_' and datediff(dd, StatusDate, getdate()) <= 90 |
-|  | select distinct  			o.OrderNum, 			right(o.SourceSite ,2) as SourceSite		from WebOrderProcessing.WM.Orders o with (nolock) --		join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID and os.CurrentStatus = 1 		where 1=1 --		and o.SourceSite = 'BABW-US' 		and substring(o.OrderNum, 9,1) = '_' 		and datediff(dd, OrderDate, getdate()) <= 90 |
-|  | select  	substring(ftpLog,64,10) as OrderNumber, 	substring(ftpLog,49,43) as OrderFileName, 	LogDateTime from WEB.UKFTPTransmissionLogDump  where ftplog like '%OMSInBoundOrder%' and right(ftpLog,4) = '100%' |
-|  | select pkt_ctrl_nbr as OrderNumber from pkt_hdr_intrnl with (nolock) where substring(pkt_ctrl_nbr,9,1) = '_' --UNION --select pkt_ctrl_nbr as OrderNumber --from wmprod_archive.dbo.pkt_hdr_intrnl with (nolock) --where substring(pkt_ctrl_nbr,9,1) = '_' |
-|  | select left(OrderNumber,8) OrderNum  from vwImportOMSOrderFileLog with (nolock) where datediff(dd, LogCreatedDate, getdate()) <= 90 |
-|  | select distinct OrderNumber  from wm.OMSCustomOrderExport with (nolock)  where ItemStatus in ('Pending Sound') or OrderStatus in ('Completed') and datediff(dd, OrderDateUTC, getdate()) <= 90 |
-|  | select left(OrderNumber,8) OrderNumber from wm.Orders with (nolock) where datediff(dd, OrderDate, getdate()) <= 60 |
-|  | select distinct cast(e.OrderNumber as varchar(10)) as OrderNumber, e.OrderDateUTC from wm.OMSCustomOrderExport e with (nolock) where e.OrderStatus in ('New', 'Pending') and e.ItemStatus in ('New','Pending Wave') and e.OrderItemTypeName <> 'eGift' and e.OrderItemCustom1 <> 'Build-A-Bear Donation' and datediff(dd, e.OrderDateUTC, getdate()) <= 30 |
-|  | with  ordersWithCancels as 	( 		select  			distinct o.OrderNum  		from WebOrderProcessing.wm.Orders O   		inner join WebOrderProcessing.wm.Orderstatus s on o.Orderid = s.OrderID and s.currentstatus = 1 		inner join WebOrderProcessing.wm.ItemStatus S2 on O.orderid = s2.OrderID and s2.currentstatus = 1       		where s2.status = 'IV' and s.status = 'Complete' and Isnull(pickticketflag,0) = 0 		and so |
-|  | select OrderNumber  from wm.OMSCustomOrderExport with (nolock)  where datediff(dd, OrderDateUTC, getdate()) <= 90 and OrderStatus in ('completed', 'cancelled') |
-|  | select  	o.OrderNum, 	os.Status from WM.Orders o with (nolock) join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID and os.CurrentStatus = 1 where o.SourceSite = 'BABW-US' and substring(o.OrderNum, 9,1) = '_' and datediff(dd, StatusDate, getdate()) <= 90 |
-|  | select * from [dbo].[vwImportOMS_ErrorLog] |
-|  | select OrderNum, WMFileName, SendTime, getdate() as CheckDateTime from WM.OrdersSentToWM with (nolock) where datediff(dd, sendTime, getdate()) <= 90 |
-|  | select  	o.OrderNum, 	os.Status from WM.Orders o with (nolock) join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID and os.CurrentStatus = 1 where o.SourceSite = 'BABW-UK' and substring(o.OrderNum, 9,1) = '_' and datediff(dd, StatusDate, getdate()) <= 90 |
-|  | select distinct  			o.OrderNum, 			right(o.SourceSite ,2) as SourceSite		from WebOrderProcessing.WM.Orders o with (nolock) --		join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID and os.CurrentStatus = 1 		where 1=1 --		and o.SourceSite = 'BABW-US' 		and substring(o.OrderNum, 9,1) = '_' 		and datediff(dd, OrderDate, getdate()) <= 90 |
-|  | select  	substring(ftpLog,64,10) as OrderNumber, 	substring(ftpLog,49,43) as OrderFileName, 	LogDateTime from WEB.UKFTPTransmissionLogDump  where ftplog like '%OMSInBoundOrder%' and right(ftpLog,4) = '100%' |
-|  | select pkt_ctrl_nbr as OrderNumber from pkt_hdr_intrnl with (nolock) where substring(pkt_ctrl_nbr,9,1) = '_' --UNION --select pkt_ctrl_nbr as OrderNumber --from wmprod_archive.dbo.pkt_hdr_intrnl with (nolock) --where substring(pkt_ctrl_nbr,9,1) = '_' |
-|  | select  distinct 	cast(substring (ln.line_note, 12,30) as varchar(10)) as OrderNumber from auditworks.dbo.transaction_header th (nolock) join auditworks.dbo.line_note ln (nolock) on th.transaction_id = ln.transaction_id --and datediff(dd, th.transaction_date, getdate()) <=2 and th.store_no = '13' and ln.line_note like 'Web Order%' |
-|  | select o.OrderNum from WM.Orders o with (nolock) join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID where os.Status in ('waved','complete','completed', 'shipped', 'cancelled') and os.CurrentStatus = 1 |
-|  | select o.OrderNum from WM.Orders o join WM.OrderStatus os with (nolock) on o.OrderID = os.OrderID where os.Status in ('complete', 'shipped', 'cancelled') and os.CurrentStatus = 1 and datediff(dd, o.OrderDate, getdate()) <= 90 |
-|  | select * from [dbo].[vwUpdateShippedOMS_ErrorLog] |
-|  | select * from [dbo].[vwUpdateWavedOMS_ErrorLog] |
-|  | select phi.pkt_ctrl_nbr as OrderNumber, phi.create_date_time as ShipDateTime, getdate() as CheckDateTime from outpt_pkt_hdr phi with (nolock) where left(phi.pkt_ctrl_nbr, 1) in ('W', '7') and datediff(mi, phi.create_date_time, getdate()) >= 90 and phi.create_date_time >= '2017-10-03' and phi.stat_code <> 99 |
-|  | select distinct  	phi.pkt_ctrl_nbr as OrderNumber,  	phi.create_date_time as WaveDateTime, getdate() as CheckDateTime from pkt_hdr_intrnl phi with (nolock) where substring(phi.pkt_ctrl_nbr, 9,1) = '_'  and phi.stat_code >= 20 and phi.stat_code <> 99 and left(phi.pkt_ctrl_nbr, 1) in ('W', '7') and datediff(mi, phi.create_date_time, getdate()) >= 20 --and datediff(dd, swp.create_date_time, getdate() |
-|  | select  distinct 	cast(substring (ln.line_note, 12,30) as varchar(12)) as OrderNumber from auditworks.dbo.transaction_header th (nolock) join auditworks.dbo.line_note ln (nolock) on th.transaction_id = ln.transaction_id and th.store_no in ( '13', '2013')  and ln.line_note like 'Web Order%' UNION select  distinct 	cast(substring (ln.line_note, 12,30) as varchar(12)) as OrderNumber from auditworks.d |
-|  | select cast(left(reference_no,19) as varchar) as reference_no from transaction_line with (nolock) where line_object = 106 and line_action = 90 union select cast(left(reference_no,19) as varchar)  as reference_no from av_transaction_line with (nolock) where line_object = 106 and line_action = 90 |
-|  | select * from [WM].[vwTransactionDetailAll] |
-|  | select left(EnterpriseSellingID,19) as EnterpriseSellingID from PartyEnterpriseSellingXRef with (nolock) |
-|  | with  ordersWithCancels as 	( 		select  			distinct o.OrderNum 		from WebOrderProcessing.wm.Orders O   		inner join WebOrderProcessing.wm.Orderstatus s on o.Orderid = s.OrderID and s.currentstatus = 1 		inner join WebOrderProcessing.wm.ItemStatus S2 on O.orderid = s2.OrderID and s2.currentstatus = 1       		where s2.status = 'IV' and s.status = 'Pending' and Isnull(pickticketflag,0) = 0 		and sour |
+| Component | Source Object | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| Files Imported from OMS |  | OLEDBSource | OMS Import Validations | ApplicationResources | SqlCommand |
+| OMSCustomOrderExport |  | OLEDBSource | OMS Custom Import | WebOrderProcessing | SqlCommand |
+| Files Imported from OMS |  | OLEDBSource | OMS Import Validations | ApplicationResources | SqlCommand |
+| Orders Shipped From WM |  | OLEDBSource | Order Status Validations | WM | SqlCommand |
+| Orders Waved In WM |  | OLEDBSource | Order Status Validations | WM | SqlCommand |
+| Orders Shipped in Processing Tables |  | OLEDBSource | Sales Audit Validation | WebOrderProcessing | SqlCommand |
+
+#### Files Imported from OMS — SqlCommand
+
+```sql
+with 
+ordersWithCancels as
+	(
+		select 
+			distinct o.OrderNum 
+		from WebOrderProcessing.wm.Orders O  
+		inner join WebOrderProcessing.wm.Orderstatus s on o.Orderid = s.OrderID and s.currentstatus = 1
+		inner join WebOrderProcessing.wm.ItemStatus S2 on O.orderid = s2.OrderID and s2.currentstatus = 1      
+		where s2.status = 'IV' and s.status = 'Complete' and Isnull(pickticketflag,0) = 0
+		and sourcesite IN ( 'BABW-US', 'BABW-UK')
+	)
+select 
+	LogCreatedDate,
+	OrderNumber,
+	OrderFileName,
+	CountryCode,
+cast(OrderNumber as varchar(8)) as OrderNumRaw
+from vwImportOMSOrderFileLog with (nolock)
+where datediff(dd, LogCreatedDate, getdate()) <= 90
+and datediff(mi, LogCreatedDate, getdate()) >= 30
+and left(Ordernumber,8) not in (select left(OrderNum,8) from OrdersWithCancels)
+```
+
+#### OMSCustomOrderExport — SqlCommand
+
+```sql
+select distinct cast(e.OrderNumber as varchar(10)) as OrderNumber, e.OrderDateUTC
+from wm.OMSCustomOrderExport e with (nolock)
+where e.OrderStatus in ('New', 'Pending')
+and e.ItemStatus in ('New','Pending Wave')
+and e.OrderItemTypeName <> 'eGift'
+and e.OrderItemCustom1 <> 'Build-A-Bear Donation'
+and datediff(dd, e.OrderDateUTC, getdate()) <= 30
+```
+
+#### Orders Shipped From WM — SqlCommand
+
+```sql
+select phi.pkt_ctrl_nbr as OrderNumber, phi.create_date_time as ShipDateTime, getdate() as CheckDateTime
+from outpt_pkt_hdr phi with (nolock)
+where left(phi.pkt_ctrl_nbr, 1) in ('W', '7')
+and datediff(mi, phi.create_date_time, getdate()) >= 90
+and phi.create_date_time >= '2017-10-03'
+and phi.stat_code <> 99
+```
+
+#### Orders Waved In WM — SqlCommand
+
+```sql
+select distinct 
+	phi.pkt_ctrl_nbr as OrderNumber, 
+	phi.create_date_time as WaveDateTime,
+getdate() as CheckDateTime
+from pkt_hdr_intrnl phi with (nolock)
+where substring(phi.pkt_ctrl_nbr, 9,1) = '_' 
+and phi.stat_code >= 20
+and phi.stat_code <> 99
+and left(phi.pkt_ctrl_nbr, 1) in ('W', '7')
+and datediff(mi, phi.create_date_time, getdate()) >= 20
+--and datediff(dd, swp.create_date_time, getdate()) <= 3
+and phi.create_date_time >= '2017-10-03'
+```
+
+#### Orders Shipped in Processing Tables — SqlCommand
+
+```sql
+with 
+ordersWithCancels as
+	(
+		select 
+			distinct o.OrderNum
+		from WebOrderProcessing.wm.Orders O  
+		inner join WebOrderProcessing.wm.Orderstatus s on o.Orderid = s.OrderID and s.currentstatus = 1
+		inner join WebOrderProcessing.wm.ItemStatus S2 on O.orderid = s2.OrderID and s2.currentstatus = 1      
+		where s2.status = 'IV' and s.status = 'Pending' and Isnull(pickticketflag,0) = 0
+		and sourcesite = 'BABW-US'
+	)
+select 
+	O.OrderNum,
+	Os.StatusDate as ShipDateTime,
+	getdate() as CheckDateTime,
+	t.TransactionNum,
+cast(left(o.EnterpriseSellingID, 19) as varchar(19)) ESReferenceNo
+from WM.OrderStatus os
+join WM.Orders o on os.OrderId = o.OrderID
+join WM.Transactions t on o.TransactionID = t.TransactionID
+where os.CurrentStatus = 1
+and os.Status = 'Shipped'
+--and left(O.OrderNum, 1) in ('U', 'W','1','7')
+and datediff(hh, StatusDate, getdate()) >= 2
+and datediff(dd, StatusDate, getdate()) <= 30
+and O.OrderNum not in (select OrderNum from ordersWithCancels)
+```
 
 ## Data Flow: Destinations
 
-| Component | Destination |
-|---|---|
-|  | [dbo].[vwImportOMSOrderFileLog] |
-|  | [WM].[OrdersNotInWM] |
-|  | [WM].[OrdersNotSentToUK] |
-|  | [WM].[OrdersNotInImportFileLog] |
-|  | [dbo].[vwImportOMSOrderFileLog] |
-|  | [WM].[OrdersNotInWM] |
-|  | [WM].[OrdersNotSentToUK] |
-|  | [WM].[OrdersNotShippedInOMS] |
-|  | [WM].[OrdersNotWavedInOMS] |
-|  | [WM].[OrdersNotInSalesAudit] |
-
+| Component | Target Table | Type | Data Flow Task | Connection | SQL Kind |
+|---|---|---|---|---|---|
+| OrdersNotInWM |  | OLEDBDestination | OMS Import Validations | WebOrderProcessing |  |
+| OrdersNotSentToUK |  | OLEDBDestination | OMS Import Validations | WebOrderProcessing |  |
+| OrdersNotInImportFileLog |  | OLEDBDestination | OMS Custom Import | WebOrderProcessing |  |
+| OrdersNotInWM |  | OLEDBDestination | OMS Import Validations | WebOrderProcessing |  |
+| OrdersNotSentToUK |  | OLEDBDestination | OMS Import Validations | WebOrderProcessing |  |
+| OrdersNotShippedInOMS |  | OLEDBDestination | Order Status Validations | WebOrderProcessing |  |
+| OrdersNotWavedInOMS |  | OLEDBDestination | Order Status Validations | WebOrderProcessing |  |
+| OrdersNotInSalesAudit 1 |  | OLEDBDestination | Sales Audit Validation | WebOrderProcessing |  |
