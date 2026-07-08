@@ -1,0 +1,27 @@
+# dbo.EVNT_STSTC_500016
+
+**Database:** foundation_event  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| EVNT_STSTC_ID | int | 4 | 0 | YES |  |  |
+| POST_DTM | smalldatetime | 4 | 0 |  |  |  |
+| KEY_85 | nvarchar | 100 | 1 |  |  |  |
+| KEY_1 | smallint | 2 | 1 |  |  |  |
+| KEY_2 | smallint | 2 | 1 |  |  |  |
+| KEY_90 | nvarchar | 510 | 1 |  |  |  |
+| CNT | int | 4 | 0 |  |  |  |
+| LAST_MDFD_DTM | datetime | 8 | 0 |  |  |  |
+| CRTD_DTM | smalldatetime | 4 | 0 |  |  |  |
+| FLD_467_LAST | smallint | 2 | 1 |  |  |  |
+| FLD_94_FRST | nvarchar | 100 | 1 |  |  |  |
+| FLD_94_LAST | nvarchar | 100 | 1 |  |  |  |
+| FLD_95_FRST | nvarchar | 100 | 1 |  |  |  |
+| FLD_95_LAST | nvarchar | 100 | 1 |  |  |  |
+| FLD_70_FRST | datetime | 8 | 1 |  |  |  |
+| FLD_70_LAST | datetime | 8 | 1 |  |  |  |
+| FLD_71_FRST | datetime | 8 | 1 |  |  |  |
+| FLD_71_LAST | datetime | 8 | 1 |  |  |  |

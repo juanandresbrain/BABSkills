@@ -1,0 +1,576 @@
+# dbo.MNTRNG_P_STSTC_500001
+
+**Database:** COMM_EVENT  
+**Server:** bedrockdb01  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.MNTRNG_P_STSTC_500001"]
+    EVNT_500001(["EVNT_500001"]) --> SP
+    EVNT_STSTC_500001(["EVNT_STSTC_500001"]) --> SP
+    EVNT_STSTC_HSTRY_500001(["EVNT_STSTC_HSTRY_500001"]) --> SP
+    EVNT_TYPE(["EVNT_TYPE"]) --> SP
+    dbo_GET_MAX(["dbo.GET_MAX"]) --> SP
+    dbo_GET_MIN(["dbo.GET_MIN"]) --> SP
+    TMP_HSTRY_EVNT_500001(["TMP_HSTRY_EVNT_500001"]) --> SP
+    TMP_HSTRY_KEY_500001(["TMP_HSTRY_KEY_500001"]) --> SP
+    TMP_STSTC_EVNT_500001(["TMP_STSTC_EVNT_500001"]) --> SP
+    TMP_STSTC_KEY_500001(["TMP_STSTC_KEY_500001"]) --> SP
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| EVNT_500001 |
+| EVNT_STSTC_500001 |
+| EVNT_STSTC_HSTRY_500001 |
+| EVNT_TYPE |
+| dbo.GET_MAX |
+| dbo.GET_MIN |
+| TMP_HSTRY_EVNT_500001 |
+| TMP_HSTRY_KEY_500001 |
+| TMP_STSTC_EVNT_500001 |
+| TMP_STSTC_KEY_500001 |
+
+## Stored Procedure Code
+
+```sql
+CREATE PROCEDURE [dbo].[MNTRNG_P_STSTC_500001]
+
+@BATCH_SIZE as int --Max number of records in a batch
+AS
+
+--Create statistics temporary table to keep computed values per key
+IF EXISTS (SELECT * FROM sysobjects WHERE xtype = 'U' AND name = 'TMP_STSTC_KEY_500001')
+   DROP TABLE dbo.TMP_STSTC_KEY_500001
+
+CREATE TABLE dbo.TMP_STSTC_KEY_500001
+(
+   POST_DTM smalldatetime NOT NULL
+  , SRVR_NAME nvarchar(50) NOT NULL 
+ , APP_ID decimal NOT NULL 
+ , PRDCT_ID nvarchar(30) NOT NULL 
+    , KEY_1 smallint NULL 
+   , KEY_2 smallint NULL 
+   , KEY_4 smallint NULL 
+   , KEY_5 smallint NULL 
+   , KEY_6 smallint NULL 
+   , KEY_15 smallint NULL 
+   , FLD_16_SUM float NULL 
+   , FLD_16_MIN bigint NULL 
+   , FLD_16_MAX bigint NULL 
+   , FLD_17_SUM float NULL 
+   , FLD_17_MIN bigint NULL 
+   , FLD_17_MAX bigint NULL 
+   , FLD_18_SUM float NULL 
+   , FLD_18_MIN smallint NULL 
+   , FLD_18_MAX smallint NULL 
+   , FLD_19_SUM float NULL 
+   , FLD_19_MIN smallint NULL 
+   , FLD_19_MAX smallint NULL 
+
+ , CNT integer NOT NULL
+ , MIN_ID integer NOT NULL
+ , MAX_ID integer NOT NULL
+)
+
+--Indexes to speed up process
+CREATE CLUSTERED INDEX TMP_STSTC_KEY_500001_1 ON dbo.TMP_STSTC_KEY_500001 (POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15 ) ON [PRIMARY] 
+CREATE INDEX TMP_STSTC_KEY_500001_2 ON dbo.TMP_STSTC_KEY_500001 (MIN_ID, MAX_ID) ON [PRIMARY]
+
+--Create history temporary table to keep computed values per key
+IF EXISTS (SELECT * FROM sysobjects WHERE xtype = 'U' AND name = 'TMP_HSTRY_KEY_500001')
+   DROP TABLE dbo.TMP_HSTRY_KEY_500001
+
+CREATE TABLE dbo.TMP_HSTRY_KEY_500001
+(
+   POST_YEAR smallint NOT NULL,
+   POST_MNTH tinyint NOT NULL,
+   POST_WEEK tinyint NOT NULL,
+   POST_DAY tinyint NOT NULL,
+   POST_DTM smalldatetime NOT NULL
+  , SRVR_NAME nvarchar(50) NOT NULL 
+ , APP_ID decimal NOT NULL 
+ , PRDCT_ID nvarchar(30) NOT NULL 
+    , KEY_1 smallint NULL 
+   , KEY_2 smallint NULL 
+   , KEY_4 smallint NULL 
+   , KEY_5 smallint NULL 
+   , KEY_6 smallint NULL 
+   , KEY_15 smallint NULL 
+   , FLD_16_SUM float NULL 
+   , FLD_16_MIN bigint NULL 
+   , FLD_16_MAX bigint NULL 
+   , FLD_17_SUM float NULL 
+   , FLD_17_MIN bigint NULL 
+   , FLD_17_MAX bigint NULL 
+   , FLD_18_SUM float NULL 
+   , FLD_18_MIN smallint NULL 
+   , FLD_18_MAX smallint NULL 
+   , FLD_19_SUM float NULL 
+   , FLD_19_MIN smallint NULL 
+   , FLD_19_MAX smallint NULL 
+
+ , CNT integer NOT NULL
+ , MIN_ID integer NOT NULL
+ , MAX_ID integer NOT NULL
+)
+
+--Indexes to speed up process 
+CREATE CLUSTERED INDEX TMP_HSTRY_KEY_500001_1 ON dbo.TMP_HSTRY_KEY_500001 (SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15 ) ON [PRIMARY] 
+CREATE INDEX TMP_HSTRY_KEY_500001_2 ON dbo.TMP_HSTRY_KEY_500001 (MIN_ID, MAX_ID) ON [PRIMARY]
+
+--Create temporary event table for statistics
+IF EXISTS (SELECT * FROM sysobjects WHERE xtype = 'U' AND name = 'TMP_STSTC_EVNT_500001')
+   DROP TABLE dbo.TMP_STSTC_EVNT_500001
+
+CREATE TABLE dbo.TMP_STSTC_EVNT_500001
+(
+   ID_CLMN integer NOT NULL,
+   POST_DTM smalldatetime NOT NULL
+   , SRVR_NAME nvarchar(50) NOT NULL 
+ , APP_ID decimal NOT NULL 
+ , PRDCT_ID nvarchar(30) NOT NULL 
+    , FLD_1 smallint NULL 
+   , FLD_2 smallint NULL 
+   , FLD_4 smallint NULL 
+   , FLD_5 smallint NULL 
+   , FLD_6 smallint NULL 
+   , FLD_15 smallint NULL 
+   , FLD_16 bigint NULL 
+   , FLD_17 bigint NULL 
+   , FLD_18 smallint NULL 
+   , FLD_19 smallint NULL 
+   , FLD_20 nvarchar(100) NULL 
+   , FLD_21 int NULL 
+   , FLD_22 smallint NULL 
+   , FLD_23 int NULL 
+   , FLD_24 smallint NULL 
+   , FLD_25 smallint NULL 
+   , FLD_48 int NULL 
+   , FLD_49 nvarchar(20) NULL 
+   , FLD_50 int NULL 
+   , FLD_128 smallint NULL 
+   , FLD_129 smallint NULL 
+   , FLD_700 nvarchar(30) NULL 
+
+) ON [PRIMARY]
+
+--Indexes to speed up process
+CREATE CLUSTERED INDEX TMP_STSTC_EVNT_500001_1 ON dbo.TMP_STSTC_EVNT_500001 (POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 ) ON [PRIMARY] 
+CREATE INDEX TMP_STSTC_EVNT_500001_2 ON dbo.TMP_STSTC_EVNT_500001 (ID_CLMN) ON [PRIMARY]
+
+--Create temporary event table for history
+IF EXISTS (SELECT * FROM sysobjects WHERE xtype = 'U' AND name = 'TMP_HSTRY_EVNT_500001')
+   DROP TABLE dbo.TMP_HSTRY_EVNT_500001
+
+CREATE TABLE dbo.TMP_HSTRY_EVNT_500001
+(
+   ID_CLMN integer NOT NULL,
+   POST_YEAR smallint NOT NULL,
+   POST_MNTH tinyint NOT NULL,
+   POST_WEEK tinyint NOT NULL,
+   POST_DAY tinyint NOT NULL,
+   POST_DTM smalldatetime NOT NULL
+   , SRVR_NAME nvarchar(50) NOT NULL 
+ , APP_ID decimal NOT NULL 
+ , PRDCT_ID nvarchar(30) NOT NULL 
+    , FLD_1 smallint NULL 
+   , FLD_2 smallint NULL 
+   , FLD_4 smallint NULL 
+   , FLD_5 smallint NULL 
+   , FLD_6 smallint NULL 
+   , FLD_15 smallint NULL 
+   , FLD_16 bigint NULL 
+   , FLD_17 bigint NULL 
+   , FLD_18 smallint NULL 
+   , FLD_19 smallint NULL 
+   , FLD_20 nvarchar(100) NULL 
+   , FLD_21 int NULL 
+   , FLD_22 smallint NULL 
+   , FLD_23 int NULL 
+   , FLD_24 smallint NULL 
+   , FLD_25 smallint NULL 
+   , FLD_48 int NULL 
+   , FLD_49 nvarchar(20) NULL 
+   , FLD_50 int NULL 
+   , FLD_128 smallint NULL 
+   , FLD_129 smallint NULL 
+   , FLD_700 nvarchar(30) NULL 
+
+) ON [PRIMARY]
+
+--Indexes to speed up process
+CREATE CLUSTERED INDEX TMP_HSTRY_EVNT_500001_1 ON dbo.TMP_HSTRY_EVNT_500001 ( SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 ) ON [PRIMARY]
+CREATE INDEX TMP_HSTRY_EVNT_500001_2 ON dbo.TMP_HSTRY_EVNT_500001 (ID_CLMN) ON [PRIMARY]
+
+--Variables
+DECLARE @MAX_EVNT_ID as int,        --Last event id processed during this cycle
+        @STRT_EVNT_ID as int,       --First event of batch
+        @END_EVNT_ID as int,        --Last event of batch
+        @LAST_STSTC_EVNT_ID as int, --Last event id processed in the previous cycle
+        @EVNT_TYPE_ID as int,       --Constant for Event Type ID
+        @ERROR as int,              --Error return code
+        @ROWS as int,               --Total number of events processed
+        @ROWCOUNT as int,           --Number of events processed in a batch
+        @STSTC_LVL as int           --Statistics level        
+
+SELECT @EVNT_TYPE_ID = 500001, @ERROR = 0, @ROWS = 0, @END_EVNT_ID = 0
+
+--Get last event id processed during this cycle
+SELECT @MAX_EVNT_ID = MAX(ISNULL(EVNT_ID,0))
+  FROM EVNT_500001
+
+IF (@@ERROR <> 0)
+   RETURN -1
+
+--Get the stat level
+SELECT @STSTC_LVL = STSTC_LVL
+  FROM EVNT_TYPE
+ WHERE EVNT_TYPE_ID = @EVNT_TYPE_ID
+
+IF (@@ERROR <> 0)
+   RETURN -2
+
+--Loop to process all events by doing it in smaller batch
+WHILE @END_EVNT_ID < @MAX_EVNT_ID
+BEGIN
+
+   --Get last event id processed in the previous cycle
+   SELECT @LAST_STSTC_EVNT_ID = ISNULL(LAST_STSTC_EVNT_ID,0)
+     FROM EVNT_TYPE
+    WHERE EVNT_TYPE_ID = @EVNT_TYPE_ID
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      SELECT @ERROR = -3
+      BREAK
+   END
+
+   --Set the batch range
+   SELECT @STRT_EVNT_ID = @LAST_STSTC_EVNT_ID + 1, 
+          @END_EVNT_ID = @LAST_STSTC_EVNT_ID + @BATCH_SIZE
+
+   --Make sure to stay within the range of events to process
+   IF @END_EVNT_ID > @MAX_EVNT_ID
+      SELECT @END_EVNT_ID = @MAX_EVNT_ID
+
+   IF @STRT_EVNT_ID > @END_EVNT_ID 
+   BEGIN      
+      SELECT @ERROR = @ROWS 
+      BREAK
+   END
+
+   BEGIN TRAN
+
+   --Populate the temporary event table for the statistics using only the new events
+   INSERT INTO TMP_STSTC_EVNT_500001 (ID_CLMN, POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 , FLD_16 , FLD_17 , FLD_18 , FLD_19 , FLD_20 , FLD_21 , FLD_22 , FLD_23 , FLD_24 , FLD_25 , FLD_48 , FLD_49 , FLD_50 , FLD_128 , FLD_129 , FLD_700 )
+   SELECT EVNT_ID, DATEADD(ms, -DATEPART(ms, EVNT_POST_DTM), DATEADD(ss, -DATEPART(ss, EVNT_POST_DTM), DATEADD(mi, -DATEPART(mi, EVNT_POST_DTM), EVNT_POST_DTM))) 
+          , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 , FLD_16 , FLD_17 , FLD_18 , FLD_19 , FLD_20 , FLD_21 , FLD_22 , FLD_23 , FLD_24 , FLD_25 , FLD_48 , FLD_49 , FLD_50 , FLD_128 , FLD_129 , FLD_700 
+    FROM EVNT_500001
+   WHERE EVNT_ID BETWEEN @STRT_EVNT_ID AND @END_EVNT_ID
+
+   --Get the number of rows processed
+   SELECT @ROWCOUNT = @@ROWCOUNT, @ERROR = @@ERROR
+
+   IF (@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -4
+      BREAK
+   END
+
+   --Populate the temporary event table for the history using only the new events
+   INSERT INTO TMP_HSTRY_EVNT_500001 (ID_CLMN, POST_YEAR, POST_MNTH, POST_WEEK, POST_DAY, POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 , FLD_16 , FLD_17 , FLD_18 , FLD_19 , FLD_20 , FLD_21 , FLD_22 , FLD_23 , FLD_24 , FLD_25 , FLD_48 , FLD_49 , FLD_50 , FLD_128 , FLD_129 , FLD_700 )
+   SELECT EVNT_ID,
+          DATEPART(yy,EVNT_POST_DTM),
+          DATEPART(mm,EVNT_POST_DTM),
+          DATEPART(ww,EVNT_POST_DTM),
+          DATEPART(dd,EVNT_POST_DTM),   
+          DATEADD(ms, -DATEPART(ms, EVNT_POST_DTM), DATEADD(ss, -DATEPART(ss, EVNT_POST_DTM), DATEADD(mi, -DATEPART(mi, EVNT_POST_DTM), DATEADD(hh, -DATEPART(hh, EVNT_POST_DTM), EVNT_POST_DTM)))) 
+          , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 , FLD_16 , FLD_17 , FLD_18 , FLD_19 , FLD_20 , FLD_21 , FLD_22 , FLD_23 , FLD_24 , FLD_25 , FLD_48 , FLD_49 , FLD_50 , FLD_128 , FLD_129 , FLD_700 
+    FROM EVNT_500001
+   WHERE EVNT_ID BETWEEN @STRT_EVNT_ID AND @END_EVNT_ID
+
+   --Get the number of rows processed (rowcount should be the same as the previous insert into tmp_ststc_evnt_x)
+   SELECT @ROWCOUNT = @@ROWCOUNT, @ERROR = @@ERROR
+
+   IF (@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -5
+      BREAK
+   END
+
+   --Add the processed rows
+   SELECT @ROWS = @ROWS + @ROWCOUNT
+
+   --STATISTICS
+   
+   --Step 1-Insert computed values from the temp event table
+   INSERT TMP_STSTC_KEY_500001 (POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15  , FLD_16_SUM , FLD_16_MIN , FLD_16_MAX , FLD_17_SUM , FLD_17_MIN , FLD_17_MAX , FLD_18_SUM , FLD_18_MIN , FLD_18_MAX , FLD_19_SUM , FLD_19_MIN , FLD_19_MAX , CNT, MIN_ID, MAX_ID)
+   SELECT MIN(POST_DTM) , MIN(SRVR_NAME) , MIN(APP_ID) , MIN(PRDCT_ID) , MIN(FLD_1) , MIN(FLD_2) , MIN(FLD_4) , MIN(FLD_5) , MIN(FLD_6) , MIN(FLD_15) , SUM(FLD_16) , MIN(FLD_16) , MAX(FLD_16) , SUM(FLD_17) , MIN(FLD_17) , MAX(FLD_17) , SUM(FLD_18) , MIN(FLD_18) , MAX(FLD_18) , SUM(FLD_19) , MIN(FLD_19) , MAX(FLD_19) , COUNT(*), MIN(ID_CLMN), MAX(ID_CLMN)
+     FROM TMP_STSTC_EVNT_500001
+    GROUP BY POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -6
+      BREAK
+   END
+
+   --Step 2-Update actual statistics using the computed value temporary table
+   UPDATE EVNT_STSTC_500001 SET 
+          EVNT_STSTC_500001.CNT = s.CNT + te.CNT,
+          EVNT_STSTC_500001.LAST_MDFD_DTM = getdate()
+          , EVNT_STSTC_500001.FLD_16_SUM = s.FLD_16_SUM + te.FLD_16_SUM 
+ , EVNT_STSTC_500001.FLD_16_MIN = dbo.GET_MIN(s.FLD_16_MIN, te.FLD_16_MIN) 
+ , EVNT_STSTC_500001.FLD_16_MAX = dbo.GET_MAX(s.FLD_16_MAX, te.FLD_16_MAX) 
+ , EVNT_STSTC_500001.FLD_17_SUM = s.FLD_17_SUM + te.FLD_17_SUM 
+ , EVNT_STSTC_500001.FLD_17_MIN = dbo.GET_MIN(s.FLD_17_MIN, te.FLD_17_MIN) 
+ , EVNT_STSTC_500001.FLD_17_MAX = dbo.GET_MAX(s.FLD_17_MAX, te.FLD_17_MAX) 
+ , EVNT_STSTC_500001.FLD_18_SUM = s.FLD_18_SUM + te.FLD_18_SUM 
+ , EVNT_STSTC_500001.FLD_18_MIN = dbo.GET_MIN(s.FLD_18_MIN, te.FLD_18_MIN) 
+ , EVNT_STSTC_500001.FLD_18_MAX = dbo.GET_MAX(s.FLD_18_MAX, te.FLD_18_MAX) 
+ , EVNT_STSTC_500001.FLD_19_SUM = s.FLD_19_SUM + te.FLD_19_SUM 
+ , EVNT_STSTC_500001.FLD_19_MIN = dbo.GET_MIN(s.FLD_19_MIN, te.FLD_19_MIN) 
+ , EVNT_STSTC_500001.FLD_19_MAX = dbo.GET_MAX(s.FLD_19_MAX, te.FLD_19_MAX) 
+ , EVNT_STSTC_500001.FLD_48_LAST = L.FLD_48 
+ , EVNT_STSTC_500001.FLD_49_LAST = L.FLD_49 
+ 
+     FROM TMP_STSTC_KEY_500001 te, EVNT_STSTC_500001 s, TMP_STSTC_EVNT_500001 F, TMP_STSTC_EVNT_500001 L
+    WHERE te.MIN_ID = F.ID_CLMN 
+      AND te.MAX_ID = L.ID_CLMN
+      AND s.POST_DTM = te.POST_DTM
+           AND s.SRVR_NAME = te.SRVR_NAME 
+  AND s.APP_ID = te.APP_ID 
+  AND s.PRDCT_ID = te.PRDCT_ID 
+  AND s.KEY_1 = te.KEY_1 
+  AND s.KEY_2 = te.KEY_2 
+  AND s.KEY_4 = te.KEY_4 
+  AND s.KEY_5 = te.KEY_5 
+  AND s.KEY_6 = te.KEY_6 
+  AND s.KEY_15 = te.KEY_15 
+    
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -7
+      BREAK
+   END
+
+   --Step 3-clean the computed value temp table
+   TRUNCATE TABLE TMP_STSTC_KEY_500001
+
+   --Step 4-Delete temporary events already used to update statistics
+   DELETE TMP_STSTC_EVNT_500001
+     FROM TMP_STSTC_EVNT_500001 te, EVNT_STSTC_500001 s
+    WHERE s.POST_DTM = te.POST_DTM
+           AND s.SRVR_NAME = te.SRVR_NAME 
+  AND s.APP_ID = te.APP_ID 
+  AND s.PRDCT_ID = te.PRDCT_ID 
+  AND s.KEY_1 = te.FLD_1 
+  AND s.KEY_2 = te.FLD_2 
+  AND s.KEY_4 = te.FLD_4 
+  AND s.KEY_5 = te.FLD_5 
+  AND s.KEY_6 = te.FLD_6 
+  AND s.KEY_15 = te.FLD_15 
+    
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -8
+      BREAK
+   END
+
+   --Step 5-Insert computed values from the temp event table
+   INSERT TMP_STSTC_KEY_500001 (POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15  , FLD_16_SUM , FLD_16_MIN , FLD_16_MAX , FLD_17_SUM , FLD_17_MIN , FLD_17_MAX , FLD_18_SUM , FLD_18_MIN , FLD_18_MAX , FLD_19_SUM , FLD_19_MIN , FLD_19_MAX , CNT, MIN_ID, MAX_ID)
+   SELECT MIN(POST_DTM) , MIN(SRVR_NAME) , MIN(APP_ID) , MIN(PRDCT_ID) , MIN(FLD_1) , MIN(FLD_2) , MIN(FLD_4) , MIN(FLD_5) , MIN(FLD_6) , MIN(FLD_15) , SUM(FLD_16) , MIN(FLD_16) , MAX(FLD_16) , SUM(FLD_17) , MIN(FLD_17) , MAX(FLD_17) , SUM(FLD_18) , MIN(FLD_18) , MAX(FLD_18) , SUM(FLD_19) , MIN(FLD_19) , MAX(FLD_19) , COUNT(*), MIN(ID_CLMN), MAX(ID_CLMN)
+     FROM TMP_STSTC_EVNT_500001
+    GROUP BY POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -9
+      BREAK
+   END
+
+  --Step 6-Insert new keys using the computed value temporary table
+  INSERT EVNT_STSTC_500001 (POST_DTM , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15 , CNT , FLD_16_SUM , FLD_16_MIN , FLD_16_MAX , FLD_17_SUM , FLD_17_MIN , FLD_17_MAX , FLD_18_SUM , FLD_18_MIN , FLD_18_MAX , FLD_19_SUM , FLD_19_MIN , FLD_19_MAX , FLD_48_LAST 
+ , FLD_49_LAST 
+ )
+   SELECT D.POST_DTM , D.SRVR_NAME , D.APP_ID , D.PRDCT_ID , D.KEY_1 , D.KEY_2 , D.KEY_4 , D.KEY_5 , D.KEY_6 , D.KEY_15 , D.CNT , D.FLD_16_SUM , D.FLD_16_MIN , D.FLD_16_MAX , D.FLD_17_SUM , D.FLD_17_MIN , D.FLD_17_MAX , D.FLD_18_SUM , D.FLD_18_MIN , D.FLD_18_MAX , D.FLD_19_SUM , D.FLD_19_MIN , D.FLD_19_MAX , L.FLD_48 , L.FLD_49 
+     FROM TMP_STSTC_EVNT_500001 F, TMP_STSTC_EVNT_500001 L, TMP_STSTC_KEY_500001 D
+    WHERE D.MIN_ID = F.ID_CLMN 
+      AND D.MAX_ID = L.ID_CLMN
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -10
+      BREAK
+   END
+
+   --Step 7-Clean temp tables
+   TRUNCATE TABLE TMP_STSTC_EVNT_500001
+   TRUNCATE TABLE TMP_STSTC_KEY_500001
+
+   -- HISTORY
+   
+   --Continuous bucket
+   IF (@STSTC_LVL <> 0)
+   BEGIN
+   
+      --Step 1-Insert computed values from the temp event table
+      INSERT TMP_HSTRY_KEY_500001 (POST_YEAR, POST_MNTH, POST_WEEK, POST_DAY , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15  , FLD_16_SUM , FLD_16_MIN , FLD_16_MAX , FLD_17_SUM , FLD_17_MIN , FLD_17_MAX , FLD_18_SUM , FLD_18_MIN , FLD_18_MAX , FLD_19_SUM , FLD_19_MIN , FLD_19_MAX , POST_DTM, CNT, MIN_ID, MAX_ID)
+      SELECT 0, 0, 0, 0 , MIN(SRVR_NAME) , MIN(APP_ID) , MIN(PRDCT_ID) , MIN(FLD_1) , MIN(FLD_2) , MIN(FLD_4) , MIN(FLD_5) , MIN(FLD_6) , MIN(FLD_15) , SUM(FLD_16) , MIN(FLD_16) , MAX(FLD_16) , SUM(FLD_17) , MIN(FLD_17) , MAX(FLD_17) , SUM(FLD_18) , MIN(FLD_18) , MAX(FLD_18) , SUM(FLD_19) , MIN(FLD_19) , MAX(FLD_19) , '01/01/1900 12:01:00 AM', COUNT(*), MIN(ID_CLMN), MAX(ID_CLMN)
+        FROM TMP_HSTRY_EVNT_500001
+        GROUP BY  SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 
+
+      IF (@@ERROR <> 0)
+      BEGIN
+         ROLLBACK TRAN
+         SELECT @ERROR = -11
+         BREAK
+      END
+      
+      --Step 2-Update actual statistics using the computed value temporary table
+      UPDATE EVNT_STSTC_HSTRY_500001 SET 
+             EVNT_STSTC_HSTRY_500001.CNT = s.CNT + te.CNT,
+             EVNT_STSTC_HSTRY_500001.LAST_MDFD_DTM = getdate()
+             , EVNT_STSTC_HSTRY_500001.FLD_16_SUM = s.FLD_16_SUM + te.FLD_16_SUM 
+ , EVNT_STSTC_HSTRY_500001.FLD_16_MIN = dbo.GET_MIN(s.FLD_16_MIN, te.FLD_16_MIN) 
+ , EVNT_STSTC_HSTRY_500001.FLD_16_MAX = dbo.GET_MAX(s.FLD_16_MAX, te.FLD_16_MAX) 
+ , EVNT_STSTC_HSTRY_500001.FLD_17_SUM = s.FLD_17_SUM + te.FLD_17_SUM 
+ , EVNT_STSTC_HSTRY_500001.FLD_17_MIN = dbo.GET_MIN(s.FLD_17_MIN, te.FLD_17_MIN) 
+ , EVNT_STSTC_HSTRY_500001.FLD_17_MAX = dbo.GET_MAX(s.FLD_17_MAX, te.FLD_17_MAX) 
+ , EVNT_STSTC_HSTRY_500001.FLD_18_SUM = s.FLD_18_SUM + te.FLD_18_SUM 
+ , EVNT_STSTC_HSTRY_500001.FLD_18_MIN = dbo.GET_MIN(s.FLD_18_MIN, te.FLD_18_MIN) 
+ , EVNT_STSTC_HSTRY_500001.FLD_18_MAX = dbo.GET_MAX(s.FLD_18_MAX, te.FLD_18_MAX) 
+ , EVNT_STSTC_HSTRY_500001.FLD_19_SUM = s.FLD_19_SUM + te.FLD_19_SUM 
+ , EVNT_STSTC_HSTRY_500001.FLD_19_MIN = dbo.GET_MIN(s.FLD_19_MIN, te.FLD_19_MIN) 
+ , EVNT_STSTC_HSTRY_500001.FLD_19_MAX = dbo.GET_MAX(s.FLD_19_MAX, te.FLD_19_MAX) 
+ , EVNT_STSTC_HSTRY_500001.FLD_48_LAST = L.FLD_48 
+ , EVNT_STSTC_HSTRY_500001.FLD_49_LAST = L.FLD_49 
+ 
+        FROM TMP_HSTRY_KEY_500001 te, EVNT_STSTC_HSTRY_500001 s, TMP_HSTRY_EVNT_500001 F, TMP_HSTRY_EVNT_500001 L
+       WHERE te.MIN_ID = F.ID_CLMN 
+         AND te.MAX_ID = L.ID_CLMN
+         AND s.POST_YEAR = 0
+         AND s.POST_MNTH = 0
+         AND s.POST_WEEK = 0
+         AND s.POST_DAY  = 0 
+              AND s.SRVR_NAME = te.SRVR_NAME 
+  AND s.APP_ID = te.APP_ID 
+  AND s.PRDCT_ID = te.PRDCT_ID 
+  AND s.KEY_1 = te.KEY_1 
+  AND s.KEY_2 = te.KEY_2 
+  AND s.KEY_4 = te.KEY_4 
+  AND s.KEY_5 = te.KEY_5 
+  AND s.KEY_6 = te.KEY_6 
+  AND s.KEY_15 = te.KEY_15 
+    
+
+      IF (@@ERROR <> 0)
+      BEGIN
+         ROLLBACK TRAN
+         SELECT @ERROR = -12
+         BREAK
+      END
+
+      --Step 3-clean the computed value temp table
+      TRUNCATE TABLE TMP_HSTRY_KEY_500001
+
+      --Step 4-Delete temporary events already used to update statistics
+      DELETE TMP_HSTRY_EVNT_500001
+        FROM TMP_HSTRY_EVNT_500001 te, EVNT_STSTC_HSTRY_500001 s
+       WHERE s.POST_YEAR = 0
+         AND s.POST_MNTH = 0
+         AND s.POST_WEEK = 0
+         AND s.POST_DAY  = 0 
+              AND s.SRVR_NAME = te.SRVR_NAME 
+  AND s.APP_ID = te.APP_ID 
+  AND s.PRDCT_ID = te.PRDCT_ID 
+  AND s.KEY_1 = te.FLD_1 
+  AND s.KEY_2 = te.FLD_2 
+  AND s.KEY_4 = te.FLD_4 
+  AND s.KEY_5 = te.FLD_5 
+  AND s.KEY_6 = te.FLD_6 
+  AND s.KEY_15 = te.FLD_15 
+    
+
+      IF (@@ERROR <> 0)
+      BEGIN
+         ROLLBACK TRAN
+         SELECT @ERROR = -13
+         BREAK
+      END
+
+      --Step 5-Insert computed values from the temp event table
+      INSERT TMP_HSTRY_KEY_500001 (POST_YEAR, POST_MNTH, POST_WEEK, POST_DAY , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15  , FLD_16_SUM , FLD_16_MIN , FLD_16_MAX , FLD_17_SUM , FLD_17_MIN , FLD_17_MAX , FLD_18_SUM , FLD_18_MIN , FLD_18_MAX , FLD_19_SUM , FLD_19_MIN , FLD_19_MAX , POST_DTM, CNT, MIN_ID, MAX_ID)
+      SELECT 0, 0, 0, 0 , MIN(SRVR_NAME) , MIN(APP_ID) , MIN(PRDCT_ID) , MIN(FLD_1) , MIN(FLD_2) , MIN(FLD_4) , MIN(FLD_5) , MIN(FLD_6) , MIN(FLD_15) , SUM(FLD_16) , MIN(FLD_16) , MAX(FLD_16) , SUM(FLD_17) , MIN(FLD_17) , MAX(FLD_17) , SUM(FLD_18) , MIN(FLD_18) , MAX(FLD_18) , SUM(FLD_19) , MIN(FLD_19) , MAX(FLD_19) , '01/01/1900 12:01:00 AM', COUNT(*), MIN(ID_CLMN), MAX(ID_CLMN)
+        FROM TMP_HSTRY_EVNT_500001
+        GROUP BY  SRVR_NAME , APP_ID , PRDCT_ID , FLD_1 , FLD_2 , FLD_4 , FLD_5 , FLD_6 , FLD_15 
+
+      IF (@@ERROR <> 0)
+      BEGIN
+         ROLLBACK TRAN
+         SELECT @ERROR = -14
+         BREAK
+      END
+
+      --Step 6-Insert new keys using the computed value temporary table
+      INSERT EVNT_STSTC_HSTRY_500001 (POST_DTM, POST_YEAR, POST_MNTH, POST_WEEK, POST_DAY , SRVR_NAME , APP_ID , PRDCT_ID , KEY_1 , KEY_2 , KEY_4 , KEY_5 , KEY_6 , KEY_15 , CNT , FLD_16_SUM , FLD_16_MIN , FLD_16_MAX , FLD_17_SUM , FLD_17_MIN , FLD_17_MAX , FLD_18_SUM , FLD_18_MIN , FLD_18_MAX , FLD_19_SUM , FLD_19_MIN , FLD_19_MAX , FLD_48_LAST 
+ , FLD_49_LAST 
+ )
+      SELECT D.POST_DTM, 0, 0, 0, 0 , D.SRVR_NAME , D.APP_ID , D.PRDCT_ID , D.KEY_1 , D.KEY_2 , D.KEY_4 , D.KEY_5 , D.KEY_6 , D.KEY_15 , D.CNT , D.FLD_16_SUM , D.FLD_16_MIN , D.FLD_16_MAX , D.FLD_17_SUM , D.FLD_17_MIN , D.FLD_17_MAX , D.FLD_18_SUM , D.FLD_18_MIN , D.FLD_18_MAX , D.FLD_19_SUM , D.FLD_19_MIN , D.FLD_19_MAX , L.FLD_48 , L.FLD_49 
+        FROM TMP_HSTRY_EVNT_500001 F, TMP_HSTRY_EVNT_500001 L, TMP_HSTRY_KEY_500001 D
+       WHERE D.MIN_ID = F.ID_CLMN 
+         AND D.MAX_ID = L.ID_CLMN
+
+      IF (@@ERROR <> 0)
+      BEGIN
+         ROLLBACK TRAN
+         SELECT @ERROR = -15
+         BREAK
+      END
+
+      --Step 7-Clean temp tables
+      TRUNCATE TABLE TMP_HSTRY_EVNT_500001
+      TRUNCATE TABLE TMP_HSTRY_KEY_500001
+   END
+
+   --Update the last event id processed
+   UPDATE EVNT_TYPE
+      SET LAST_STSTC_EVNT_ID = @END_EVNT_ID
+    WHERE EVNT_TYPE_ID = @EVNT_TYPE_ID 
+
+   IF (@@ERROR <> 0)
+   BEGIN
+      ROLLBACK TRAN
+      SELECT @ERROR = -16
+      BREAK
+   END
+
+   COMMIT TRAN
+
+END --WHILE
+
+DROP TABLE TMP_STSTC_EVNT_500001
+DROP TABLE TMP_HSTRY_EVNT_500001
+DROP TABLE TMP_STSTC_KEY_500001
+DROP TABLE TMP_HSTRY_KEY_500001
+
+IF @ERROR <> 0
+   RETURN @ERROR
+ELSE
+   RETURN @ROWS
+```
+

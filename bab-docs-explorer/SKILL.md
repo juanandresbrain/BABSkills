@@ -1,23 +1,24 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all three servers (bearcluster01, bedrockdb02, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all four servers (bearcluster01, bedrockdb01, bedrockdb02, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **3 servers, 37 databases, ~6,496 tables, ~8,344 stored procedures, ~78 functions, ~1,344 views, 265 SSIS packages, and 479 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **4 servers, ~55 databases, ~10,749 tables, ~8,275 stored procedures, ~115 functions, ~2,125 views, 265 SSIS packages, and 562 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
 
 The documentation is **bundled inside this skill** at `Documentation/`, organized by server, so no external paths are needed:
 
 | Server | Tables | Stored Procedures | Functions | Views | SSIS | Jobs |
 |---|---|---|---|---|---|---|
 | bearcluster01 | ~594 | ~762 | ~22 | ~169 | 0 | ~20 |
+| bedrockdb01 | ~4,253 | ~2,558 | ~37 | ~781 | 0 | ~83 |
 | bedrockdb02 | ~4,971 | ~4,408 | ~35 | ~870 | 0 | ~170 |
 | STL-SSIS-P-01 | ~931 | ~547 | ~21 | ~305 | ~265 | ~289 |
 
-> Because names repeat across servers (e.g. `dbo.CommandLog` exists on all three), most queries return **one result per server**. Use `--server` to narrow to a single server. Run `list-servers` to see the current breakdown.
+> Because names repeat across servers (e.g. `dbo.CommandLog` exists on several), most queries return **one result per server**. Use `--server` to narrow to a single server. Run `list-servers` to see the current breakdown.
 
 ## Dependencies
 Python 3 only. On Windows, if `python` is not found, use the `py` launcher instead (e.g. `py scripts/explore_docs.py ...`).

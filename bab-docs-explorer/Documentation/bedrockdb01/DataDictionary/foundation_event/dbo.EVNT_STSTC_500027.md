@@ -1,0 +1,30 @@
+# dbo.EVNT_STSTC_500027
+
+**Database:** foundation_event  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| EVNT_STSTC_ID | int | 4 | 0 | YES |  |  |
+| POST_DTM | smalldatetime | 4 | 0 |  |  |  |
+| KEY_1 | smallint | 2 | 1 |  |  |  |
+| KEY_2 | smallint | 2 | 1 |  |  |  |
+| KEY_3 | smallint | 2 | 1 |  |  |  |
+| KEY_34 | nvarchar | 100 | 1 |  |  |  |
+| KEY_5 | smallint | 2 | 1 |  |  |  |
+| KEY_7 | smallint | 2 | 1 |  |  |  |
+| CNT | int | 4 | 0 |  |  |  |
+| LAST_MDFD_DTM | datetime | 8 | 0 |  |  |  |
+| CRTD_DTM | smalldatetime | 4 | 0 |  |  |  |
+| FLD_259_LAST | smallint | 2 | 1 |  |  |  |
+| FLD_262_LAST | smallint | 2 | 1 |  |  |  |
+| FLD_30_SUM | float | 8 | 1 |  |  |  |
+| FLD_30_MAX | bigint | 8 | 1 |  |  |  |
+| FLD_32_SUM | float | 8 | 1 |  |  |  |
+| FLD_32_MAX | bigint | 8 | 1 |  |  |  |
+| FLD_31_SUM | float | 8 | 1 |  |  |  |
+| FLD_31_MAX | bigint | 8 | 1 |  |  |  |
+| FLD_33_SUM | float | 8 | 1 |  |  |  |
+| FLD_33_MAX | bigint | 8 | 1 |  |  |  |

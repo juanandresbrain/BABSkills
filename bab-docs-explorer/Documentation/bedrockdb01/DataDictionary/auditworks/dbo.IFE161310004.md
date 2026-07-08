@@ -1,0 +1,17 @@
+# dbo.IFE161310004
+
+**Database:** auditworks  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| C1_f_ntry_nky_1 | numeric | 17 | 1 |  |  |  |
+| C2_lnID | numeric | 13 | 1 |  |  |  |
+| C4_lnbjct | numeric | 13 | 1 |  |  |  |
+| C5_lnctn | numeric | 13 | 1 |  |  |  |
+| C9_trnsctnstrn | numeric | 13 | 1 |  |  |  |
+| C10_trnsctnrgstrn | numeric | 13 | 1 |  |  |  |
+| C12_trnsctnn | numeric | 13 | 1 |  |  |  |
+| C14_trnsctndt | datetime | 8 | 1 |  |  |  |

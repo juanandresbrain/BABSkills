@@ -1,0 +1,77 @@
+# dbo.parameter_general_replicate
+
+**Database:** auditworks_external  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| sa_company_no | int | 4 | 0 |  |  |  |
+| transaction_no_length | tinyint | 1 | 0 |  |  |  |
+| max_transaction_no | int | 4 | 0 |  |  |  |
+| transaction_zero_flag | tinyint | 1 | 0 |  |  |  |
+| set_employee_no_from_account | tinyint | 1 | 0 |  |  |  |
+| calculate_employee_discount | tinyint | 1 | 0 |  |  |  |
+| verify_attachments | tinyint | 1 | 0 |  |  |  |
+| upc_lookup_source | nchar | 2 | 0 |  |  |  |
+| archive_days_retained | smallint | 2 | 0 |  |  |  |
+| extended_archive_days_retained | smallint | 2 | 0 |  |  |  |
+| ap_bank_code | smallint | 2 | 0 |  |  |  |
+| ap_company_no | tinyint | 1 | 0 |  |  |  |
+| sa_company_name | nvarchar | 100 | 0 |  |  |  |
+| default_gl_company_no | tinyint | 1 | 0 |  |  |  |
+| gl_account_segment_qty | tinyint | 1 | 0 |  |  |  |
+| dayend_delayed_days | tinyint | 1 | 0 |  |  |  |
+| prev_day_cutoff_time | smallint | 2 | 0 |  |  |  |
+| polling_retention_days | tinyint | 1 | 0 |  |  |  |
+| journal_entry_description | nvarchar | 40 | 0 |  |  |  |
+| activity_minute_interval | smallint | 2 | 0 |  |  |  |
+| register_activity_am_pm | tinyint | 1 | 0 |  |  |  |
+| register_activity_exclude_zero | tinyint | 1 | 0 |  |  |  |
+| register_activity_user_amounts | tinyint | 1 | 0 |  |  |  |
+| register_activity_days | smallint | 2 | 0 |  |  |  |
+| employee_purchase_days | smallint | 2 | 0 |  |  |  |
+| media_category_statistics_days | smallint | 2 | 0 |  |  |  |
+| media_reconciliation_days | smallint | 2 | 0 |  |  |  |
+| process_log_days | smallint | 2 | 0 |  |  |  |
+| sos_cash_days | smallint | 2 | 0 |  |  |  |
+| sos_credit_days | smallint | 2 | 0 |  |  |  |
+| subledger_periods | tinyint | 1 | 0 |  |  |  |
+| tax_days | smallint | 2 | 0 |  |  |  |
+| tax_periods | tinyint | 1 | 0 |  |  |  |
+| min_edit_batch_size | int | 4 | 0 |  |  |  |
+| dayend_batch_store_dates | int | 4 | 0 |  |  |  |
+| dummy_upc_no | numeric | 9 | 1 |  |  |  |
+| employee_no_length_adj | tinyint | 1 | 0 |  |  |  |
+| glc_as_of_period_qty | tinyint | 1 | 0 |  |  |  |
+| audit_trail_days | smallint | 2 | 0 |  |  |  |
+| store_performance_days | smallint | 2 | 0 |  |  |  |
+| concurrent_dayend_processes | tinyint | 1 | 0 |  |  |  |
+| concurrent_edit_processes | tinyint | 1 | 0 |  |  |  |
+| date_format_string | nvarchar | 24 | 1 |  |  |  |
+| min_transaction_date | smalldatetime | 4 | 1 |  |  |  |
+| subledger_detail_periods | tinyint | 1 | 1 |  |  |  |
+| earliest_live_date | smalldatetime | 4 | 1 |  |  |  |
+| sv_exception_trans_view_id | int | 4 | 1 |  |  |  |
+| sv_exception_line_view_id | int | 4 | 1 |  |  |  |
+| sku_lookup_method | tinyint | 1 | 1 |  |  |  |
+| update_smartload | smallint | 2 | 1 |  |  |  |
+| tax_override_lookup | tinyint | 1 | 0 |  |  |  |
+| auto_upc_correction | tinyint | 1 | 1 |  |  |  |
+| trickle_polling_flag | tinyint | 1 | 1 |  |  |  |
+| current_day_autoaccept_time | smallint | 2 | 1 |  |  |  |
+| object_action_lookup_flag | tinyint | 1 | 0 |  |  |  |
+| check_after_midnight_trans | tinyint | 1 | 1 |  |  |  |
+| ignore_missing_registers | tinyint | 1 | 1 |  |  |  |
+| glc_export_used | tinyint | 1 | 1 |  |  |  |
+| glc_postable_used | tinyint | 1 | 1 |  |  |  |
+| retain_class_code | tinyint | 1 | 1 |  |  |  |
+| flash_budget_detail | nchar | 2 | 1 |  |  |  |
+| sts_internal_1 | varchar | 10 | 0 |  |  |  |
+| sts_internal_2 | binary | 10 | 1 |  |  |  |
+| sv_exception_merch_view_id | int | 4 | 1 |  |  |  |
+| if_lookup_rebuild_flag | tinyint | 1 | 1 |  |  |  |
+| if_lookup_rebuild_request | datetime | 8 | 1 |  |  |  |
+| media_rec_rebuild_request | datetime | 8 | 1 |  |  |  |
+| last_item_grp_taxability_mod | datetime | 8 | 1 |  |  |  |

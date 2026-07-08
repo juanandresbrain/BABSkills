@@ -1,0 +1,103 @@
+# dbo.shap_work_cust_liab_main
+
+**Database:** auditworks  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| temp_id | numeric | 9 | 0 | YES |  |  |
+| process_id | int | 4 | 0 |  |  |  |
+| function_no | smallint | 2 | 0 |  |  |  |
+| if_entry_no | numeric | 9 | 0 |  |  |  |
+| line_id | numeric | 9 | 0 |  |  |  |
+| line_action | tinyint | 1 | 0 |  |  |  |
+| line_object | smallint | 2 | 0 |  |  |  |
+| line_object_type | tinyint | 1 | 0 |  |  |  |
+| store_no | int | 4 | 0 |  |  |  |
+| key_store_no | int | 4 | 0 |  |  |  |
+| original_key_store_no | int | 4 | 0 |  |  |  |
+| default_issuing_store_no | int | 4 | 0 |  |  |  |
+| default_issuance_date | smalldatetime | 4 | 0 |  |  |  |
+| issuing_store_no | int | 4 | 1 |  |  |  |
+| date_issued | smalldatetime | 4 | 1 |  |  |  |
+| amount | money | 8 | 0 |  |  |  |
+| interface_control_flag | tinyint | 1 | 0 |  |  |  |
+| tracking_id | smallint | 2 | 0 |  |  |  |
+| reference_no_datatype | char | 1 | 0 |  |  |  |
+| reference_no_length | tinyint | 1 | 0 |  |  |  |
+| ref_no_too_long_flag | tinyint | 1 | 0 |  |  |  |
+| reference_range_lookup | tinyint | 1 | 1 |  |  |  |
+| rejected_status | tinyint | 1 | 0 |  |  |  |
+| rejected_validation_id | smallint | 2 | 0 |  |  |  |
+| transaction_id | numeric | 9 | 0 |  |  |  |
+| transaction_category | tinyint | 1 | 0 |  |  |  |
+| transaction_date | smalldatetime | 4 | 0 |  |  |  |
+| entry_date_time | datetime | 8 | 0 |  |  |  |
+| transaction_void_flag | smallint | 2 | 0 |  |  |  |
+| upc_no | numeric | 9 | 1 |  |  |  |
+| upc_lookup_division | tinyint | 1 | 1 |  |  |  |
+| units | unit_datatype | 9 | 1 |  |  |  |
+| liability_amount | money | 8 | 0 |  |  |  |
+| receivable_amount | money | 8 | 0 |  |  |  |
+| amount_3 | money | 8 | 0 |  |  |  |
+| amount_4 | money | 8 | 0 |  |  |  |
+| amount_5 | money | 8 | 0 |  |  |  |
+| amount_6 | money | 8 | 0 |  |  |  |
+| amount_7 | money | 8 | 0 |  |  |  |
+| amount_8 | money | 8 | 0 |  |  |  |
+| amount_9 | money | 8 | 0 |  |  |  |
+| amount_10 | money | 8 | 0 |  |  |  |
+| stocked_amount | money | 8 | 0 |  |  |  |
+| stocked_flag | smallint | 2 | 0 |  |  |  |
+| stocked_stolen_flag | smallint | 2 | 0 |  |  |  |
+| issued_flag | smallint | 2 | 0 |  |  |  |
+| stolen_from_cust_flag | smallint | 2 | 0 |  |  |  |
+| forfeited_flag | smallint | 2 | 0 |  |  |  |
+| amount_outstanding | money | 8 | 0 |  |  |  |
+| units_outstanding | unit_datatype | 9 | 0 |  |  |  |
+| units_2 | unit_datatype | 9 | 0 |  |  |  |
+| units_3 | unit_datatype | 9 | 0 |  |  |  |
+| units_4 | unit_datatype | 9 | 0 |  |  |  |
+| units_5 | unit_datatype | 9 | 0 |  |  |  |
+| liability_amount_in | money | 8 | 0 |  |  |  |
+| receivable_amount_in | money | 8 | 0 |  |  |  |
+| amount_3_in | money | 8 | 0 |  |  |  |
+| amount_4_in | money | 8 | 0 |  |  |  |
+| amount_5_in | money | 8 | 0 |  |  |  |
+| amount_6_in | money | 8 | 0 |  |  |  |
+| amount_7_in | money | 8 | 0 |  |  |  |
+| amount_8_in | money | 8 | 0 |  |  |  |
+| amount_9_in | money | 8 | 0 |  |  |  |
+| amount_10_in | money | 8 | 0 |  |  |  |
+| stocked_amount_in | money | 8 | 0 |  |  |  |
+| stocked_flag_in | smallint | 2 | 0 |  |  |  |
+| stocked_stolen_flag_in | smallint | 2 | 0 |  |  |  |
+| issued_flag_in | smallint | 2 | 0 |  |  |  |
+| stolen_from_cust_flag_in | smallint | 2 | 0 |  |  |  |
+| forfeited_flag_in | smallint | 2 | 0 |  |  |  |
+| amount_outstanding_in | money | 8 | 0 |  |  |  |
+| units_outstanding_in | unit_datatype | 9 | 0 |  |  |  |
+| units_2_in | unit_datatype | 9 | 0 |  |  |  |
+| units_3_in | unit_datatype | 9 | 0 |  |  |  |
+| units_4_in | unit_datatype | 9 | 0 |  |  |  |
+| units_5_in | unit_datatype | 9 | 0 |  |  |  |
+| entry_count_in | int | 4 | 1 |  |  |  |
+| unit_amount_flag | tinyint | 1 | 0 |  |  |  |
+| reference_type | tinyint | 1 | 0 |  |  |  |
+| reference_no | varchar | 20 | 1 |  |  |  |
+| original_reference_no | varchar | 20 | 1 |  |  |  |
+| pass | tinyint | 1 | 0 |  |  |  |
+| assumed_completion_date | smalldatetime | 4 | 1 |  |  |  |
+| reopen_date | smalldatetime | 4 | 1 |  |  |  |
+| employee_no | int | 4 | 1 |  |  |  |
+| reversal_flag | tinyint | 1 | 1 |  |  |  |
+| cust_update_flag | tinyint | 1 | 1 |  |  |  |
+| reassignment_flag | tinyint | 1 | 1 |  |  |  |
+| existing_entry | tinyint | 1 | 1 |  |  |  |
+| existing_detail | tinyint | 1 | 1 |  |  |  |
+| expiry_days | smallint | 2 | 1 |  |  |  |
+| discount_line_object | smallint | 2 | 1 |  |  |  |
+| unformatted_reference_no | varchar | 20 | 1 |  |  |  |
+| last_client_activity_date | smalldatetime | 4 | 1 |  |  |  |

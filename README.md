@@ -30,6 +30,7 @@ Run `python bab-docs-explorer/scripts/explore_docs.py list-servers` for the live
 | Server | Tables | SPs | Functions | Views | SSIS | Jobs |
 |---|---|---|---|---|---|---|
 | bearcluster01 | 594 | 762 | 22 | 169 | 0 | 20 |
+| bedrockdb01 | 4253 | 2558 | 37 | 781 | 0 | 83 |
 | bedrockdb02 | 4971 | 4408 | 35 | 870 | 0 | 170 |
 | STL-SSIS-P-01 | 931 | 547 | 21 | 305 | 265 | 289 |
-| **Grand Total** | **6496** | **5717** | **78** | **1344** | **265** | **479** |
+| **Grand Total** | **10749** | **8275** | **115** | **2125** | **265** | **562** |

@@ -1,0 +1,36 @@
+# dbo.dt_getpropertiesbyid_vcs_u
+
+**Database:** auditworks_work  
+**Server:** bedrockdb01  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    SP["dbo.dt_getpropertiesbyid_vcs_u"]
+    SP --> NoRefs(["No dependencies detected"])
+```
+
+## Table Dependencies
+
+_No table dependencies detected._
+
+## Stored Procedure Code
+
+```sql
+create procedure dbo.dt_getpropertiesbyid_vcs_u
+    @id       int,
+    @property varchar(64),
+    @value    nvarchar(255) = NULL OUT
+
+as
+
+    set nocount on
+
+    select @value = (
+        select uvalue
+                from dbo.dtproperties
+                where @id=objectid and @property=property
+                )
+```
+

@@ -1,0 +1,45 @@
+# dbo.transl_special_order_detail
+
+**Database:** auditworks  
+**Server:** bedrockdb01  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    VIEW["dbo.transl_special_order_detail"]
+    dbo_awl_special_order_detail(["dbo.awl_special_order_detail"]) --> VIEW
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.awl_special_order_detail |
+
+## View Code
+
+```sql
+CREATE VIEW dbo.transl_special_order_detail AS
+   SELECT store_no,
+          register_no,
+          entry_date_time,
+          transaction_series,
+          transaction_no,
+          line_id,
+          units,
+          units_sign,
+          salesperson,
+          merchandise_description,
+          expecting_delivery_on,
+          color_description,
+          size_description,
+          width_description,
+          vendor_name,
+          vendor_style_description,
+          spo_class_description,
+          vendor_no,
+          row_sequence_no 
+     FROM auditworks_work.dbo.awl_special_order_detail
+```
+

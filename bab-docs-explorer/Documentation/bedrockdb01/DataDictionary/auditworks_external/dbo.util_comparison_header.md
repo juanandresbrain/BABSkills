@@ -1,0 +1,15 @@
+# dbo.util_comparison_header
+
+**Database:** auditworks_external  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| table_name | nvarchar | 60 | 0 |  |  |  |
+| validation_area | nvarchar | 60 | 0 |  |  |  |
+| comparison_key | nvarchar | 510 | 0 |  |  |  |
+| comparison_text1 | nvarchar | 510 | 1 |  |  |  |
+| comparison_text2 | nvarchar | 510 | 1 |  |  |  |
+| comparison_text_minor | nvarchar | 510 | 1 |  |  |  |

@@ -1,0 +1,23 @@
+# dbo.av_special_order_detail
+
+**Database:** auditworks  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| av_transaction_id | tran_id_datatype | 9 | 0 |  |  |  |
+| line_id | numeric | 5 | 0 |  |  |  |
+| units | real | 4 | 0 |  |  |  |
+| salesperson | int | 4 | 1 |  |  |  |
+| merchandise_description | nvarchar | 64 | 1 |  |  |  |
+| expecting_delivery_on | nvarchar | 64 | 1 |  |  |  |
+| color_description | nvarchar | 64 | 1 |  |  |  |
+| size_description | nvarchar | 64 | 1 |  |  |  |
+| width_description | nvarchar | 64 | 1 |  |  |  |
+| vendor_name | nvarchar | 64 | 1 |  |  |  |
+| vendor_style_description | nvarchar | 64 | 1 |  |  |  |
+| spo_class_description | nvarchar | 64 | 1 |  |  |  |
+| vendor_no | nchar | 12 | 1 |  |  |  |
+| transaction_date | smalldatetime | 4 | 1 |  |  |  |

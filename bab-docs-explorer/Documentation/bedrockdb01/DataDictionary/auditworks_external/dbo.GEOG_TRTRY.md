@@ -1,0 +1,13 @@
+# dbo.GEOG_TRTRY
+
+**Database:** auditworks_external  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| TRTRY_CODE | nchar | 6 | 0 |  |  |  |
+| CNTRY_CODE_ISO3 | nchar | 6 | 0 |  |  |  |
+| TRTRY_DESC | nvarchar | 510 | 1 |  |  |  |
+| TRTRY_SHRT_DESC | nvarchar | 100 | 1 |  |  |  |

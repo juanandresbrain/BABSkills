@@ -1,0 +1,17 @@
+# dbo.av_tax_override_detail
+
+**Database:** auditworks_external  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| av_transaction_id | tran_id_datatype | 9 | 0 |  |  |  |
+| line_id | numeric | 5 | 0 |  |  |  |
+| tax_level | tinyint | 1 | 0 |  |  |  |
+| tax_category | smallint | 2 | 0 |  |  |  |
+| taxable | tinyint | 1 | 1 |  |  |  |
+| exception_tax_jurisdiction | nchar | 10 | 1 |  |  |  |
+| tax_exempt_no | nvarchar | 40 | 1 |  |  |  |
+| transaction_date | smalldatetime | 4 | 0 |  |  |  |

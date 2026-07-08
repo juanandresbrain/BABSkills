@@ -1,0 +1,40 @@
+# dbo.oim_rtv
+
+**Database:** auditworks  
+**Server:** bedrockdb01  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| oim_rtv_id | numeric | 9 | 0 |  |  |  |
+| document_no | nvarchar | 40 | 0 |  |  |  |
+| inventory_move_request_no | nvarchar | 40 | 1 |  |  |  |
+| po_no | nvarchar | 40 | 1 |  |  |  |
+| location_id | smallint | 2 | 0 |  |  |  |
+| vendor_code | nvarchar | 40 | 0 |  |  |  |
+| vendor_address_type_desc | nvarchar | 40 | 1 |  |  |  |
+| terms_code | nvarchar | 30 | 1 |  |  |  |
+| returned_date | smalldatetime | 4 | 1 |  |  |  |
+| document_description | nvarchar | 120 | 1 |  |  |  |
+| packed_by | nvarchar | 120 | 1 |  |  |  |
+| weight | numeric | 9 | 1 |  |  |  |
+| unit_weight_code | nvarchar | 20 | 1 |  |  |  |
+| no_of_containers | smallint | 2 | 1 |  |  |  |
+| container_type_code | nvarchar | 6 | 1 |  |  |  |
+| carrier_code | nvarchar | 8 | 1 |  |  |  |
+| ship_via_code | nvarchar | 4 | 1 |  |  |  |
+| fob_description | nvarchar | 40 | 1 |  |  |  |
+| return_authorization_no | nvarchar | 40 | 1 |  |  |  |
+| credit_note_number | nvarchar | 40 | 1 |  |  |  |
+| insurance_amount_1 | numeric | 9 | 1 |  |  |  |
+| freight_amount_1 | numeric | 9 | 1 |  |  |  |
+| misc_amount_1 | numeric | 9 | 1 |  |  |  |
+| insurance_amount_2 | numeric | 9 | 1 |  |  |  |
+| freight_amount_2 | numeric | 9 | 1 |  |  |  |
+| misc_amount_2 | numeric | 9 | 1 |  |  |  |
+| reason_code | nvarchar | 10 | 1 |  |  |  |
+| grouping_label | nvarchar | 40 | 1 |  |  |  |
+| document_source | smallint | 2 | 0 |  |  |  |
+| last_modified | smalldatetime | 4 | 0 |  |  |  |
+| line_id | numeric | 5 | 1 |  |  |  |
