@@ -32,5 +32,6 @@ Run `python bab-docs-explorer/scripts/explore_docs.py list-servers` for the live
 | bearcluster01 | 594 | 762 | 22 | 169 | 0 | 20 |
 | bedrockdb01 | 4253 | 2558 | 37 | 781 | 0 | 83 |
 | bedrockdb02 | 4971 | 4408 | 35 | 870 | 0 | 170 |
+| papamart | 1676 | 1035 | 76 | 742 | 0 | 59 |
 | STL-SSIS-P-01 | 931 | 547 | 21 | 305 | 265 | 289 |
-| **Grand Total** | **10749** | **8275** | **115** | **2125** | **265** | **562** |
+| **Grand Total** | **12425** | **9310** | **191** | **2867** | **265** | **621** |

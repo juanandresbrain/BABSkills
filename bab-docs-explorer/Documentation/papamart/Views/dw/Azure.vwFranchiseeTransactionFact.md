@@ -1,0 +1,295 @@
+# Azure.vwFranchiseeTransactionFact
+
+**Database:** dw  
+**Server:** papamart  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    VIEW["Azure.vwFranchiseeTransactionFact"]
+    dbo_currency_dim(["dbo.currency_dim"]) --> VIEW
+    dbo_franchisee_sales_facts(["dbo.franchisee_sales_facts"]) --> VIEW
+    dbo_franchiseetransactionfact(["dbo.franchiseetransactionfact"]) --> VIEW
+    dbo_store_franchise_dim(["dbo.store_franchise_dim"]) --> VIEW
+    dbo_time_dim(["dbo.time_dim"]) --> VIEW
+    dbo_Transaction_Type_Dim(["dbo.Transaction_Type_Dim"]) --> VIEW
+    Azure_vwDateFilter(["Azure.vwDateFilter"]) --> VIEW
+    Azure_vwStores(["Azure.vwStores"]) --> VIEW
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.currency_dim |
+| dbo.franchisee_sales_facts |
+| dbo.franchiseetransactionfact |
+| dbo.store_franchise_dim |
+| dbo.time_dim |
+| dbo.Transaction_Type_Dim |
+| Azure.vwDateFilter |
+| Azure.vwStores |
+
+## View Code
+
+```sql
+CREATE view [Azure].[vwFranchiseeTransactionFact]
+
+AS
+-- =============================================================================================================
+-- Name: [Azure].[vwFranchiseeSCSales]
+--
+-- Description: Unfortunately the sales data from the franchisees not yet moved into the automated POS exports
+--				is all rolled up and reported on a weekly basis.  This view attempts to produce the same format 
+--				as TransactionFact but does not contain the same granularity.
+--
+--
+-- Dependencies: 
+--
+-- Revision History
+--		Name:				Date:			Comments:
+--		Tim Bytnar			4/4/2018		Initial creation
+--
+-- =============================================================================================================
+
+SELECT  cast(fsf.transaction_id as varchar(20)) AS TransactionID,
+		ds.StoreKey AS StoreKey,
+		CONVERT(DATE,dd.actual_date) AS TransactionDate,
+		CAST(CONVERT(VARCHAR,CONVERT(DATE,dd.actual_date)) +' ' + LEFT(CONVERT(TIME,CONVERT(VARCHAR,td.hour) + ':' + CONVERT(VARCHAR,td.minute)),5) + ':00.000' AS DATETIME) AS TransactionDateTime,
+		ttd.transaction_type as TransactionType,
+		cast(fsf.transaction_no as varchar(20)) as TransactionNumber,
+		fsf.register_no as RegisterNumber,
+		fsf.GAAP_transaction_flag as GAAPTransaction,
+		fsf.[store_transaction_flag] AS StoreTransaction,
+	    fsf.[Enterprise_Selling_Only_Flag] AS EnterpriseSellingOnlyTransaction,
+        fsf.[donation_only_flag] AS DonationTransaction,
+        fsf.[giftcard_only_flag] AS GiftCardOnlyTransaction,
+  		fsf.[party_flag] AS PartyFlag,
+	    fsf.[total_units] AS TotalUnits,
+		fsf.[GAAP_sales_amount] AS GAAPSalesAmount,
+		fsf.[Store_Sales_Amount] AS StoreSalesAmount,
+		fsf.[Enterprise_Selling_Amount] AS EnterpriseSellingAmount,
+		fsf.[net_sales_amount] AS NetSalesAmount,
+		fsf.[unit_gross_amount] AS UnitGrossAmount,
+		fsf.[unit_net_amount] AS UnitNetAmount,
+		fsf.[reward_certificate_amount] AS RewardCertificateAmount,
+		fsf.[buy_stuff_amount] AS BuyStuffAmount,
+		fsf.[redemption_amount] AS RedemptionAmount,
+		fsf.[tax_amount] AS TaxAmount,
+		fsf.[unit_discount_amount] AS UnitDiscountAmount,
+		fsf.[coupon_discount_amount] AS CouponDiscountAmount,
+		fsf.[coupon_discount_units] AS CouponDiscountUnits,
+		fsf.[giftcard_discount_amount] AS GiftcardDiscountAmount,
+		fsf.[total_discount_amount] AS TotalDiscountAmount,
+		fsf.[receipt_total_amount] AS ReceiptTotalAmount,
+		fsf.[fin_GAAP_sales_amount] AS FinGAAPSalesAmount,
+		fsf.[fin_Store_Sales_Amount] AS FinStoreSalesAmount,
+		fsf.[upsell_discount_amount] AS UpsellDiscountAmount,
+		fsf.[merchandise_UGA] AS MerchandiseUnitGrossAmount,
+		fsf.[merchandise_units] AS MerchandiseUnits,
+		fsf.[Gaap_Units] AS GAAPUnits,
+		fsf.[Enterprise_Selling_Units] AS EnterpriseSellingUnits,
+		fsf.[merchandise_cost] AS MerchandiseCost,
+		fsf.[donations_UGA] AS DonationUnitGrossAmount,
+		fsf.[donations_units] AS DonationUnits ,
+		fsf.[party_deposit_UGA] AS PartyDepositUnitGrossAmount,
+		fsf.[party_deposit_units] AS PartyDepositUnits,
+		fsf.[giftcard_UGA] AS GiftCardUnitGrossAmount,
+		fsf.[giftcard_units] AS GiftCardUnits ,
+		fsf.[animal_UGA] AS AnimalUnitGrossAmount,
+		fsf.[animal_units] AS AnimalUnits,
+		fsf.[animal_cost] AS AnimalCost,
+		fsf.[non_animal_UGA] AS NonAnimalUnitGrossAmount,
+		fsf.[non_animal_units] AS NonAnimalUnits,
+		fsf.[non_animal_cost] AS NonAnimalCost,
+		fsf.[footwear_UGA] AS FootwearUnitGrossAmount,
+		fsf.[footwear_units] AS FootwearUnits,
+		fsf.[footwear_cost] AS FootwearCost,
+		fsf.[accessories_UGA] AS AccessoryUnitGrossAmount,
+		fsf.[footwear_cost] AS AccessoryCost,
+		fsf.[accessories_units] AS AccessoryUnits,
+		fsf.[sounds_UGA] AS SoundUnitGrossAmount,
+		fsf.[sounds_units] AS SoundUnits,
+		fsf.[sounds_cost] AS SoundCost,
+		fsf.[clothing_UGA] AS ClothingUnitGrossAmount,
+		fsf.[clothing_units] AS ClothingUnits,
+		fsf.[clothing_cost] AS ClothingCost,
+		fsf.[other_UGA] AS OtherUnitGrossAmount,
+		fsf.[other_units] AS OtherUnits,
+		fsf.[other_cost] AS OtherCost,
+		fsf.[shipping_UGA] AS ShippingUnitGrossAmount,
+		fsf.[shipping_units] AS ShippingUnits,
+		fsf.[other_fees_UGA] AS OtherFeesUnitGrossAmount,
+		fsf.[other_fees_units] AS OtherFeesUnits,
+		fsf.[cub_cash_UGA] AS CubCashUnitGrossAmount,
+		fsf.[cub_cash_units] AS CubCashUnits,
+		fsf.[paid_outs_UGA] AS PaidOutsUnitGrossAmount,
+		fsf.[paid_outs_units] AS PaidOutsUnits,
+		fsf.[stuffing_supplies_UGA] AS StuffingSuppliesUnitGrossAmount,
+		fsf.[stuffing_supplies_units] AS StuffingSuppliesUnits,
+		fsf.[sports_UGA] AS SportUnitGrossAmount,
+		fsf.[sports_units] AS SportUnits,
+		fsf.[sports_cost] AS SportCost,
+		fsf.[prestuffed_UGA] AS PresuffedUnitGrossAmount,
+		fsf.[prestuffed_units] AS PresuffedUnits,
+		fsf.[prestuffed_cost] AS PresuffedCost,
+		fsf.[scents_UGA] AS ScentUnitGrossAmount,
+		fsf.[scents_units] AS ScentUnits,
+		fsf.[scents_cost] AS ScentCost,
+		cd.currency_code as CurrencyCode,
+		CASE WHEN (fsf.Store_transaction_flag=1 OR fsf.giftcard_only_flag=1) THEN 1 ELSE 0 END AS CaptureEligible,
+		0 as EmployeeDiscountUGA,
+		0 as ReturnUGA,
+		0 as ReturnUnits
+	
+FROM dbo.franchiseetransactionfact AS fsf WITH(NOLOCK) INNER JOIN
+     dbo.store_franchise_dim AS sfd WITH(NOLOCK) ON sfd.store_key = fsf.store_key INNER JOIN
+     --DOMO.vwDOMOStores AS ds WITH(NOLOCK) ON ds.StoreID = sfd.store_id INNER JOIN
+	 Azure.vwStores ds with (nolock) ON ds.StoreID = sfd.store_id INNER JOIN
+     Azure.vwDateFilter AS dd WITH(NOLOCK) ON dd.date_key = fsf.date_key INNER JOIN
+     dbo.currency_dim AS cd WITH(NOLOCK) ON cd.currency_key = fsf.currency_key INNER JOIN
+	 [dbo].[time_dim] td WITH(NOLOCK) ON fsf.time_key = td.time_key INNER JOIN
+	 dbo.Transaction_Type_Dim ttd ON fsf.transaction_type_key = ttd.transaction_key
+WHERE   ((ds.TradingGroup  in ( 'Franchise - BABW-AU','Franchise - INTENCITY ENTERTAINMENT (PTY) LTD','Franchise - CP Retail Concepts PTE LTD','Franchise - Ansaldo S.A.') and dd.Actual_Date >= '12/31/2017') 
+				or ds.TradingGroup = 'Franchise - Harry''s Kitchen Brand Limited')
+
+UNION ALL
+
+
+SELECT	Cast(Date_key as varchar(10)) + Cast(ds.StoreKey as varchar(10)) as TransactionID,
+		ds.StoreKey AS StoreKey,
+		CONVERT(DATE,dd.actual_date) AS TransactionDate,
+		dd.actual_date AS TransactionDateTime,
+		'Unclassified' as TransactionType,
+		'0' as TransactionNumber,
+		0 as RegisterNumber,
+		fsf.transaction_count as GAAPTransaction,
+		1 AS StoreTransaction,
+	    0 AS EnterpriseSellingOnlyTransaction,
+        0 AS DonationTransaction,
+        0 AS GiftCardOnlyTransaction,
+  		0 AS PartyFlag,
+	    (ISNULL(fsf.accessories_units,0) + 
+			 ISNULL(fsf.clothes_units,0) + 
+			 ISNULL(fsf.footware_units,0) + 
+			 ISNULL(fsf.friend_units,0) + 
+			 ISNULL(fsf.gift_card_units,0) + 
+			 ISNULL(fsf.human_units,0) + 
+			 ISNULL(fsf.pet_units,0) + 
+			 ISNULL(fsf.prestuffed_units,0) + 
+			 ISNULL(fsf.sound_units,0) + 
+			 ISNULL(fsf.sound_units,0) + 
+			 ISNULL(fsf.sports_units,0) + 
+			 ISNULL(fsf.stuffers_units,0) + 
+			 ISNULL(fsf.unstuffed_units,0)) AS TotalUnits,
+		fsf.total_sales AS GAAPSalesAmount,
+		fsf.total_sales AS StoreSalesAmount,
+		0 AS EnterpriseSellingAmount,
+		total_sales AS NetSalesAmount,
+		0 AS UnitGrossAmount,
+		0 AS UnitNetAmount,
+		0 AS RewardCertificateAmount,
+		0 AS BuyStuffAmount,
+		0 AS RedemptionAmount,
+		0 AS TaxAmount,
+		0 AS UnitDiscountAmount,
+		0 AS CouponDiscountAmount,
+		0 AS CouponDiscountUnits,
+		0 AS GiftcardDiscountAmount,
+		fsf.coupons_and_discounts AS TotalDiscountAmount,
+		0 AS ReceiptTotalAmount,
+		fsf.total_sales AS FinGAAPSalesAmount,
+		fsf.total_sales AS FinStoreSalesAmount,
+		CAST(0 AS money) AS UpsellDiscountAmount,
+		(ISNULL(fsf.unstuffed_sales,0) + 
+			ISNULL(fsf.clothes_sales,0) + 
+			ISNULL(fsf.accessories_sales,0) + 
+			ISNULL(fsf.footware_sales,0) + 
+			ISNULL(fsf.sports_sales,0) + 
+			ISNULL(fsf.sound_sales,0) + 
+			ISNULL(fsf.prestuffed_sales,0)) AS MerchandiseUnitGrossAmount,
+		(ISNULL(fsf.unstuffed_units,0) + 
+			ISNULL(fsf.clothes_units,0) + 
+			ISNULL(fsf.accessories_units,0) + 
+			ISNULL(fsf.footware_units,0) + 
+			ISNULL(fsf.sports_units,0) + 
+			ISNULL(fsf.sound_units,0) + 
+			ISNULL(fsf.prestuffed_units,0)) AS MerchandiseUnits,
+		(ISNULL(fsf.accessories_units,0) + 
+			 ISNULL(fsf.clothes_units,0) + 
+			 ISNULL(fsf.footware_units,0) + 
+			 ISNULL(fsf.friend_units,0) + 
+			 ISNULL(fsf.gift_card_units,0) + 
+			 ISNULL(fsf.human_units,0) + 
+			 ISNULL(fsf.pet_units,0) + 
+			 ISNULL(fsf.prestuffed_units,0) + 
+			 ISNULL(fsf.sound_units,0) + 
+			 ISNULL(fsf.sound_units,0) + 
+			 ISNULL(fsf.sports_units,0) + 
+			 ISNULL(fsf.stuffers_units,0) + 
+			 ISNULL(fsf.unstuffed_units,0)) AS GAAPUnits,
+		0 AS EnterpriseSellingUnits,
+		CAST(0 AS money) AS MerchandiseCost,
+		0 AS DonationUnitGrossAmount,
+		0 AS DonationUnits ,
+		0 AS PartyDepositUnitGrossAmount,
+		0 AS PartyDepositUnits,
+		0 AS GiftCardUnitGrossAmount,
+		0 AS GiftCardUnits ,
+		fsf.unstuffed_sales AS AnimalUnitGrossAmount,
+		fsf.unstuffed_units AS AnimalUnits,
+		CAST(0 AS money) AS AnimalCost,
+		0 AS NonAnimalUnitGrossAmount,
+		0 AS NonAnimalUnits,
+		CAST(0 AS money) AS NonAnimalCost,
+		fsf.footware_sales AS FootwearUnitGrossAmount,
+		fsf.footware_units AS FootwearUnits,
+		CAST(0 AS money) AS FootwearCost,
+		fsf.accessories_sales AS AccessoryUnitGrossAmount,
+		CAST(0 AS money) AS AccessoryCost,
+		fsf.accessories_units AS AccessoryUnits,
+		fsf.sound_sales AS SoundUnitGrossAmount,
+		fsf.sound_units AS SoundUnits,
+		CAST(0 AS money) AS SoundCost,
+		fsf.clothes_sales AS ClothingUnitGrossAmount,
+		fsf.clothes_units AS ClothingUnits,
+		CAST(0 AS money) AS ClothingCost,
+		0 AS OtherUnitGrossAmount,
+		0 AS OtherUnits,
+		CAST(0 AS money) AS OtherCost,
+		0 AS ShippingUnitGrossAmount,
+		0 AS ShippingUnits,
+		0 AS OtherFeesUnitGrossAmount,
+		0 AS OtherFeesUnits,
+		fsf.giftcards_redeemed AS CubCashUnitGrossAmount,
+		0 AS CubCashUnits,
+		0 AS PaidOutsUnitGrossAmount,
+		0 AS PaidOutsUnits,
+		0 AS StuffingSuppliesUnitGrossAmount,
+		0 AS StuffingSuppliesUnits,
+		fsf.sports_sales AS SportUnitGrossAmount,
+		fsf.sports_units AS SportUnits,
+		CAST(0 AS money) AS SportCost,
+		fsf.prestuffed_sales AS PresuffedUnitGrossAmount,
+		fsf.prestuffed_units AS PresuffedUnits,
+		CAST(0 AS money) AS PresuffedCost,
+		0 AS ScentUnitGrossAmount,
+		0 AS ScentUnits,
+		CAST(0 AS money) AS ScentCost,
+		cd.currency_code as CurrencyCode,
+		0 AS CaptureEligible,
+		0 as EmployeeDiscountUGA,
+		0 as ReturnUGA,
+		0 as ReturnUnits
+FROM    dbo.franchisee_sales_facts AS fsf INNER JOIN
+        dbo.store_franchise_dim AS sfd ON sfd.store_key = fsf.franchisee_store_key INNER JOIN
+        --DOMO.vwDOMOStores AS ds ON ds.StoreID = sfd.store_id INNER JOIN
+		Azure.vwStores ds with (nolock) ON ds.StoreID = sfd.store_id INNER JOIN
+        Azure.vwDateFilter AS dd ON dd.date_key = fsf.week_ending_date_key INNER JOIN
+        dbo.currency_dim AS cd ON cd.currency_key = fsf.currency_key
+WHERE   (ds.TradingGroup IN ('Franchise - BAB GULF FZE', 'Franchise - Build A Bear Deutschland GmbH', 'Franchise - Central Dept Stores LTD', 'Franchise - CP Retail Concepts PTE LTD', 
+								 'Franchise - Koates X Siempre','Franchise - BABW-AU', 'Franchise - BABW Turkey'/* Mexico*/ )
+			  or (ds.TradingGroup  in ( 'Franchise - BABW-AU','Franchise - INTENCITY ENTERTAINMENT (PTY) LTD','Franchise - CP Retail Concepts PTE LTD') and dd.Actual_Date < '12/31/2017'))
+```
+

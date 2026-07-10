@@ -1,0 +1,91 @@
+# dbo.tmpTransactionFactsTmp
+
+**Database:** dw  
+**Server:** papamart  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| transaction_id | int | 4 | 0 |  |  |  |
+| store_key | int | 4 | 0 |  |  |  |
+| date_key | int | 4 | 1 |  |  |  |
+| time_key | int | 4 | 1 |  |  |  |
+| transaction_type_key | int | 4 | 1 |  |  |  |
+| currency_key | int | 4 | 1 |  |  |  |
+| transaction_key | varchar | 100 | 1 |  |  |  |
+| transaction_no | int | 4 | 1 |  |  |  |
+| register_no | int | 4 | 1 |  |  |  |
+| line_count | int | 4 | 1 |  |  |  |
+| party_flag | tinyint | 1 | 1 |  |  |  |
+| GAAP_transaction_flag | tinyint | 1 | 1 |  |  |  |
+| donation_only_flag | tinyint | 1 | 1 |  |  |  |
+| giftcard_only_flag | tinyint | 1 | 1 |  |  |  |
+| party_deposit_only_flag | tinyint | 1 | 1 |  |  |  |
+| GAAP_sales_amount | decimal | 17 | 1 |  |  |  |
+| net_sales_amount | decimal | 17 | 1 |  |  |  |
+| total_units | decimal | 17 | 1 |  |  |  |
+| unit_net_amount | decimal | 17 | 1 |  |  |  |
+| unit_gross_amount | decimal | 17 | 1 |  |  |  |
+| reward_certificate_amount | decimal | 17 | 1 |  |  |  |
+| buy_stuff_amount | decimal | 17 | 1 |  |  |  |
+| tax_amount | decimal | 17 | 1 |  |  |  |
+| redemption_amount | decimal | 17 | 1 |  |  |  |
+| unit_discount_amount | decimal | 17 | 1 |  |  |  |
+| coupon_discount_amount | decimal | 17 | 1 |  |  |  |
+| coupon_discount_units | decimal | 17 | 1 |  |  |  |
+| giftcard_discount_amount | decimal | 17 | 1 |  |  |  |
+| total_discount_amount | decimal | 17 | 1 |  |  |  |
+| receipt_total_amount | decimal | 17 | 1 |  |  |  |
+| merchandise_UGA | decimal | 17 | 1 |  |  |  |
+| merchandise_units | decimal | 17 | 1 |  |  |  |
+| donations_UGA | decimal | 17 | 1 |  |  |  |
+| donations_units | decimal | 17 | 1 |  |  |  |
+| party_deposit_UGA | decimal | 17 | 1 |  |  |  |
+| party_deposit_units | decimal | 17 | 1 |  |  |  |
+| giftcard_UGA | decimal | 17 | 1 |  |  |  |
+| giftcard_units | decimal | 17 | 1 |  |  |  |
+| animal_UGA | decimal | 17 | 1 |  |  |  |
+| animal_units | decimal | 17 | 1 |  |  |  |
+| non_animal_UGA | decimal | 17 | 1 |  |  |  |
+| non_animal_units | decimal | 17 | 1 |  |  |  |
+| footwear_UGA | decimal | 17 | 1 |  |  |  |
+| footwear_units | decimal | 17 | 1 |  |  |  |
+| accessories_UGA | decimal | 17 | 1 |  |  |  |
+| accessories_units | decimal | 17 | 1 |  |  |  |
+| sounds_UGA | decimal | 17 | 1 |  |  |  |
+| sounds_units | decimal | 17 | 1 |  |  |  |
+| clothing_UGA | decimal | 17 | 1 |  |  |  |
+| clothing_units | decimal | 17 | 1 |  |  |  |
+| other_UGA | decimal | 17 | 1 |  |  |  |
+| other_units | decimal | 17 | 1 |  |  |  |
+| shipping_UGA | decimal | 17 | 1 |  |  |  |
+| shipping_units | decimal | 17 | 1 |  |  |  |
+| other_fees_UGA | decimal | 17 | 1 |  |  |  |
+| other_fees_units | decimal | 17 | 1 |  |  |  |
+| cub_cash_UGA | decimal | 17 | 1 |  |  |  |
+| cub_cash_units | decimal | 17 | 1 |  |  |  |
+| paid_outs_UGA | decimal | 17 | 1 |  |  |  |
+| paid_outs_units | decimal | 17 | 1 |  |  |  |
+| stuffing_supplies_UGA | decimal | 17 | 1 |  |  |  |
+| stuffing_supplies_units | decimal | 17 | 1 |  |  |  |
+| sports_UGA | decimal | 17 | 1 |  |  |  |
+| sports_units | decimal | 17 | 1 |  |  |  |
+| prestuffed_UGA | decimal | 17 | 1 |  |  |  |
+| prestuffed_units | decimal | 5 | 1 |  |  |  |
+| fin_GAAP_sales_amount | money | 8 | 1 |  |  |  |
+| upsell_discount_amount | money | 8 | 1 |  |  |  |
+| cashier_key | int | 4 | 0 |  |  |  |
+| merchandise_cost | money | 8 | 1 |  |  |  |
+| animal_cost | money | 8 | 1 |  |  |  |
+| non_animal_cost | money | 8 | 1 |  |  |  |
+| footwear_cost | money | 8 | 1 |  |  |  |
+| accessories_cost | money | 8 | 1 |  |  |  |
+| sounds_cost | money | 8 | 1 |  |  |  |
+| clothing_cost | money | 8 | 1 |  |  |  |
+| other_cost | money | 8 | 1 |  |  |  |
+| sports_cost | money | 8 | 1 |  |  |  |
+| prestuffed_cost | money | 8 | 1 |  |  |  |
+| Scents_UGA | decimal | 17 | 1 |  |  |  |
+| Scents_units | decimal | 17 | 1 |  |  |  |
+| Scents_cost | money | 8 | 1 |  |  |  |

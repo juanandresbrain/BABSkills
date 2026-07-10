@@ -1,13 +1,13 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all four servers (bearcluster01, bedrockdb01, bedrockdb02, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all five servers (bearcluster01, bedrockdb01, bedrockdb02, papamart, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **4 servers, ~55 databases, ~10,749 tables, ~8,275 stored procedures, ~115 functions, ~2,125 views, 265 SSIS packages, and 562 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **5 servers, ~66 databases, ~12,425 tables, ~9,310 stored procedures, ~191 functions, ~2,867 views, 265 SSIS packages, and 621 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
 
 The documentation is **bundled inside this skill** at `Documentation/`, organized by server, so no external paths are needed:
 
@@ -16,6 +16,7 @@ The documentation is **bundled inside this skill** at `Documentation/`, organize
 | bearcluster01 | ~594 | ~762 | ~22 | ~169 | 0 | ~20 |
 | bedrockdb01 | ~4,253 | ~2,558 | ~37 | ~781 | 0 | ~83 |
 | bedrockdb02 | ~4,971 | ~4,408 | ~35 | ~870 | 0 | ~170 |
+| papamart | ~1,676 | ~1,035 | ~76 | ~742 | 0 | ~59 |
 | STL-SSIS-P-01 | ~931 | ~547 | ~21 | ~305 | ~265 | ~289 |
 
 > Because names repeat across servers (e.g. `dbo.CommandLog` exists on several), most queries return **one result per server**. Use `--server` to narrow to a single server. Run `list-servers` to see the current breakdown.

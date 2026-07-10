@@ -1,0 +1,21 @@
+# dbo.sysdtslog90
+
+**Database:** SSISTemplates  
+**Server:** papamart  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| id | int | 4 | 0 | YES |  |  |
+| event | sysname | 256 | 0 |  |  |  |
+| computer | nvarchar | 256 | 0 |  |  |  |
+| operator | nvarchar | 256 | 0 |  |  |  |
+| source | nvarchar | 2048 | 0 |  |  |  |
+| sourceid | uniqueidentifier | 16 | 0 |  |  |  |
+| executionid | uniqueidentifier | 16 | 0 |  |  |  |
+| starttime | datetime | 8 | 0 |  |  |  |
+| endtime | datetime | 8 | 0 |  |  |  |
+| datacode | int | 4 | 0 |  |  |  |
+| databytes | image | 16 | 1 |  |  |  |
+| message | nvarchar | 4096 | 0 |  |  |  |

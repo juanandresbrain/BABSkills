@@ -1,0 +1,28 @@
+# dbo.tmpKeySales
+
+**Database:** dw  
+**Server:** papamart  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| country | varchar | 50 | 1 |  |  |  |
+| PurchaseChannel | nvarchar | 40 | 1 |  |  |  |
+| customerNumber | varchar | 20 | 1 |  |  |  |
+| transactionID | int | 4 | 1 |  |  |  |
+| TransactionDate | date | 3 | 1 |  |  |  |
+| KeyStory | nvarchar | 60 | 1 |  |  |  |
+| Sales | numeric | 17 | 1 |  |  |  |
+| Units | int | 4 | 1 |  |  |  |
+| CustomerFirstTransactionDate | datetime | 8 | 1 |  |  |  |
+| isFreshCustomer | int | 4 | 1 |  |  |  |
+| isFirstPurchaseChannel | int | 4 | 1 |  |  |  |
+| isFirstPurchase | int | 4 | 1 |  |  |  |
+| isNewCustomer | int | 4 | 1 |  |  |  |
+| isRepeatCustomer | int | 4 | 1 |  |  |  |
+| isWeb | int | 4 | 1 |  |  |  |
+| isRetail | int | 4 | 1 |  |  |  |
+| LifetimeTransactionSequence | int | 4 | 1 |  |  |  |
+| LifetimeVisitSequence | int | 4 | 1 |  |  |  |
+| GaapSalesTranTotal | numeric | 17 | 1 |  |  |  |

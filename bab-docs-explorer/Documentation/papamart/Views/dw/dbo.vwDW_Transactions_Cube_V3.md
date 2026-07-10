@@ -1,0 +1,349 @@
+# dbo.vwDW_Transactions_Cube_V3
+
+**Database:** dw  
+**Server:** papamart  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    VIEW["dbo.vwDW_Transactions_Cube_V3"]
+    CRMCustomerDim(["CRMCustomerDim"]) --> VIEW
+    CRMTransactionFact(["CRMTransactionFact"]) --> VIEW
+    has_traffic(["has_traffic"]) --> VIEW
+    StoreCompDetail_Dim(["StoreCompDetail_Dim"]) --> VIEW
+    time_dim(["time_dim"]) --> VIEW
+    Transaction_Facts(["Transaction_Facts"]) --> VIEW
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| CRMCustomerDim |
+| CRMTransactionFact |
+| has_traffic |
+| StoreCompDetail_Dim |
+| time_dim |
+| Transaction_Facts |
+
+## View Code
+
+```sql
+CREATE VIEW [dbo].[vwDW_Transactions_Cube_V3]
+AS
+-- =============================================================================================================
+-- Name: [dbo].[vwDW_Transactions_Cube_V3]
+--
+-- Description: View underlying the SSAS Papa Mart Cube used on the dashboard.   
+-- Aggregates POS transactions sales and product group metrics by store and date
+--
+--	NOTE: IF YOU CHANGE THIS, YOU WILL PROBABLY HAVE TO ALSO CHANGE spDW_Build_Transaction_Facts
+--
+-- Dependencies: 
+--
+-- Revision History
+--		Name:				Date:			Comments:
+--		Kevin Shyr			2/7/2015		Added Scents data
+--		Kevin Shyr			10/2/2014		Change age calculation
+--		Gary Murrish		5/7/2014		Added Cost Measures
+--		Gary Murrish		7/9/2013		Added Fiscal GAAP Sales
+--		Gary Murrish		9/12/2012		Changed the ShopperTrak Source
+--		Gary Murrish		6/5/2012		Added Count of number of transactions with a discount
+--		Gary Murrish		5/24/2012		Added Shopper Trak Flag for those days where we have shopper trak info
+--		Gary Murrish		5/10/2012		Changed Comp Store Selection
+--		Gary Murrish		2/14/2012		Complete remodel
+--		Dan Tweedie			06/09/2016		Added new columns related to new Enterprise Selling transactions handling
+--												Store_transaction_flag,
+--												Store_Sales_Amount,
+--												Store_units,
+--												numStoreTransWithDiscount,
+--												Financial_Store_Sales_Amount
+--		Dan Tweedie			06/22/2016		Added hasTraffic flag
+--		Dan Tweedie			06/29/2016		Removed 'AND td.hour BETWEEN cmp.ShopperTrakStartHour AND cmp.ShopperTrakEndHour'  so no longer filtering by this
+--		Dan Tweedie			08/09/2016		New Measures
+--											•	Enterprise Selling Amount = Sales amount associated with Enterprise Selling Orders / Cancels / Returns
+--											•	Enterprise Selling Transaction Count = Transaction count associated with Enterprise Selling Orders / Cancels / Returns
+--											•	Enterprise Selling Units = Unit count associated with Enterprise Selling Orders / Cancels / Returns
+--											•	Gaap Units = Merchandise Units, not including Enterprise Selling Orders / Cancels / Returns
+--											•	Enterprise Selling Only Amount = Sale amount for transactions which only contain ES Orders / Cancels Returns
+--											•	Enterprise Selling Only Transaction Count = Count of transactions which only contain ES Orders / Cancels Returns
+--											•	Enterprise Selling Only Units = Unit count for transactions which only contain ES Orders / Cancels Returns
+--		Dan Tweedie		10/03/2016			Added left join to CRMTransactionFact to get the CRMTransactionType values for column SFS_TRN_TYP_CD
+--		Dan Tweedie		10/04/2016			Added [TransactionEligibleForLoyaltyCapture]
+--		Tim Bytnar		11/14/2017			Added in support for Party Master column
+--      John Eck        1/18/2017           Added Direct Mailable transaction flag.
+--      John Eck		7/12/18				REemoved has traffic cte and replaced with an indexed table
+--		Dan TWeedie		10/08/2018			Removed join to crm_trn_sum_fact and clnsd_addr_dim, replaced columns to source from CRMTransactionFact and CRMCustomerDim
+--      Kelly Farrar	4/24/2019			Add Has Phone Number Flag to view
+--		Dan Tweedie		2020-1-11			Added PickupFromStore,ShipFromStore,Curbside,SameDayShipt measures
+-- =============================================================================================================
+
+
+SELECT
+	transaction_id,
+	tf.store_key,
+	tf.date_key,
+	tf.TIME_KEY,
+	transaction_type_key,
+	currency_key,
+	Party_Flag,
+	GAAP_transaction_flag,
+	CAST(ISNULL(cmp.isCompTY, 0) AS integer) AS isComp,
+	CAST(ISNULL(cmp.isCompNY, 0) AS integer) AS isCompNextYear,
+	line_count,
+	unit_net_amount,
+	unit_gross_amount,
+	unit_discount_amount,
+	animal_UGA,
+	animal_units,
+	non_animal_UGA,
+	non_animal_units,
+	Footwear_UGA,
+	footwear_units,
+	accessories_UGA,
+	accessories_units,
+	sounds_UGA,
+	sounds_units,
+	Scents_UGA,
+	Scents_units,
+	Clothing_UGA,
+	clothing_units,
+	Other_UGA,
+	other_units,
+	GAAP_sales_amount,
+	net_sales_amount,
+	giftcard_discount_amount,
+	giftcard_UGA,
+	Merchandise_UGA,
+	merchandise_units,
+	Donations_UGA,
+	donations_units,
+	stuffing_supplies_UGA,
+	Shipping_UGA,
+	shipping_units,
+	Other_Fees_UGA,
+	other_fees_units,
+	Cub_Cash_UGA,
+	Party_Deposit_UGA,
+	party_deposit_units,
+	reward_certificate_amount * -1 as reward_certificate_amount,
+	buy_stuff_amount,
+	tax_amount,
+	redemption_amount,
+	coupon_discount_amount * -1 AS coupon_discount_amount,
+	total_discount_amount * -1 AS total_discount_amount,
+	sports_UGA,
+	sports_units,
+	Prestuffed_UGA,
+	prestuffed_units,
+	--ctsf.SFS_TRN_TYP_CD,
+	cast(case 
+		when v.CRMTransactionType = 'NEW' then 1
+		when v.CRMTransactionType = 'Repeat' then 2
+		when v.CRMTransactionType is NULL then 0
+		else 0
+	end as int) as SFS_TRN_TYP_CD,
+	--ctsf.MNTH_01_12_VST_CNT,
+	--ctsf.MNTH_01_24_VST_CNT,
+	--ctsf.MNTH_01_36_VST_CNT,
+	v.MNTH_01_12_VST_CNT,
+	v.MNTH_01_24_VST_CNT,
+	v.MNTH_01_36_VST_CNT,
+	1 AS calc,
+	CASE
+		WHEN tf.sounds_units > 0 THEN 1
+		ELSE 0
+	END AS isSoundTrans,
+	tf.giftcard_units,
+	CAST(0 AS decimal(10, 2)) AS giftcards_redeemed,
+	CAST(0 AS decimal(15, 8)) AS franchisee_exchange_rate,
+	CAST(0 AS decimal(15, 8)) AS franchisee_withholding_tax_rate,
+	CAST(0 AS decimal(10, 2)) AS returns_UGA,
+	CAST(CASE
+		WHEN cmp.isShopperTrak IS NULL THEN 0
+		WHEN cmp.isShopperTrak = 1 
+		--AND td.hour BETWEEN cmp.ShopperTrakStartHour AND cmp.ShopperTrakEndHour 
+			THEN 1
+		ELSE 0
+	END AS smallint) AS isShopperTrak,
+	CAST(CASE
+		WHEN tf.unit_discount_amount <> 0 THEN tf.GAAP_transaction_flag
+		ELSE 0
+	END AS smallint) AS numGAAPTransWithDiscount,
+	CAST(CASE
+		WHEN cmp.isShopperTrakCompTY IS NULL THEN 0
+		WHEN cmp.isShopperTrakCompTY = 1 
+		--AND td.hour BETWEEN cmp.ShopperTrakStartHour AND cmp.ShopperTrakEndHour 
+			THEN 1
+		ELSE 0
+	END AS integer) AS isSTComp,
+	CAST(CASE
+		WHEN cmp.isShopperTrakCompNY IS NULL THEN 0
+		WHEN cmp.isShopperTrakCompNY = 1 
+		--AND td.hour BETWEEN cmp.ShopperTrakStartHour AND cmp.ShopperTrakEndHour 
+			THEN 1
+		ELSE 0
+	END AS integer) AS isSTCompNextYear,
+	CAST(ISNULL(cmp.isSOTF, 0) AS integer) AS isSOTF,
+	tf.fin_GAAP_sales_amount AS Financial_GAAP_Sales_Amount,
+	tf.Upsell_Discount_Amount * -1 AS Upsell_Discount_Amount,
+	tf.merchandise_cost as Merchandise_Cost,
+	tf.animal_cost as Animal_Cost,
+	tf.non_animal_cost as Non_Animal_Cost,
+	tf.footwear_cost as Footwear_Cost,
+	tf.accessories_cost AS Accessories_Cost,
+	tf.sounds_cost AS Sounds_Cost,
+	tf.Scents_cost AS Scents_Cost,
+	tf.clothing_cost as Clothing_Cost,
+	tf.other_cost as Other_Cost,
+	tf.sports_cost as Sports_Cost,
+	tf.prestuffed_cost as Prestuffed_Cost,
+	Store_transaction_flag,
+	Store_Sales_Amount,
+	Store_units,
+	CAST(CASE
+		WHEN tf.unit_discount_amount <> 0 THEN tf.Store_transaction_flag
+		ELSE 0
+	END AS smallint) AS numStoreTransWithDiscount,
+	tf.fin_Store_sales_amount as Financial_Store_Sales_Amount,
+	isnull(ht.hasTraffic, 0) as hasTraffic,
+	
+	tf.Enterprise_Selling_Amount,
+
+	CAST(CASE
+		WHEN
+			tf.Enterprise_selling_units <> 0
+				then 1
+				else 0
+		end as smallint) as Enterprise_Selling_Transaction_Count,
+	
+	tf.Enterprise_Selling_Units,
+	tf.Gaap_Units,
+	
+	tf.Enterprise_Selling_only_flag as Enterprise_Selling_Only_Transaction_Count,
+
+	CASE
+		WHEN tf.enterprise_selling_only_flag = 1
+			then tf.Enterprise_selling_amount
+			else 0
+		end as Enterprise_Selling_Only_Amount,
+		
+	CAST(CASE
+		WHEN tf.enterprise_selling_only_flag = 1
+			then tf.Enterprise_selling_units
+			else 0
+		end as smallint) as Enterprise_Selling_Only_Units,
+	isnull(tf.giftcard_only_flag, 0) as GiftCard_Only_Flag,
+	case when isnull(tf.giftcard_only_flag, 0) = 1 or tf.Store_transaction_flag =1 
+		then 1
+		else 0
+	end as [TransactionEligibleForLoyaltyCapture],
+	ISNULL(tf.party_master,0) as party_master,
+	--Case ISNULL(Mail_stat_cd,'None') when 'OPT-IN' then 1 else 0 end as DM_Transactions
+	isnull(cd.DirectMailOptIn,0) as DM_Transactions,
+	isnull(cd.HasPhoneNumber, 0) as HasPhoneNumber,
+	isnull(tf.isShipFromStore,0) as isShipFromStore,
+	isnull(tf.isPickupFromStore,0) as isPickUpFromStore,
+	isnull(tf.isCurbside,0) as isCurbside,
+	isnull(tf.isSameDayShipt,0) as isSameDayShipt,
+	case 
+		when isnull(tf.isShipFromStore,0) = 1 
+		then Store_Sales_Amount
+		else 0
+	end as ShipFromStoreAmount,
+	case 
+		when isnull(tf.isShipFromStore,0) = 1 
+		then tf.Store_units 
+		else 0 
+	end as ShipFromStoreUnits,
+	
+	case 
+		when isnull(tf.isShipFromStore,0) = 1 
+		then tf.fin_Store_sales_amount 
+		else 0
+	end as FinancialShipFromStoreAmount,
+	case 
+		when isnull(tf.isPickupFromStore,0) = 1 
+		then Store_Sales_Amount
+		else 0
+	end as PickupFromStoreAmount,
+	case 
+		when isnull(tf.isPickupFromStore,0) = 1 
+		then tf.Store_units 
+		else 0 
+	end as PickupFromStoreUnits,
+	case 
+		when isnull(tf.isPickupFromStore,0) = 1 
+		then tf.fin_Store_sales_amount 
+		else 0
+	end as FinancialPickupFromStoreAmount,
+
+	case 
+		when isnull(tf.isCurbside,0) = 1 
+		then Store_Sales_Amount
+		else 0
+	end as CurbsideAmount,
+	case 
+		when isnull(tf.isCurbside,0) = 1 
+		then tf.Store_units 
+		else 0 
+	end as CurbsideUnits,
+	case 
+		when isnull(tf.isCurbside,0) = 1 
+		then tf.fin_Store_sales_amount 
+		else 0
+	end as FinancialCurbsideAmount,
+	case 
+		when isnull(tf.isSameDayShipt,0) = 1 
+		then Store_Sales_Amount
+		else 0
+	end as SameDayShiptAmount,
+	case 
+		when isnull(tf.isSameDayShipt,0) = 1 
+		then tf.Store_units 
+		else 0 
+	end as SameDayShiptUnits,
+	case 
+		when isnull(tf.isSameDayShipt,0) = 1 
+		then tf.fin_Store_sales_amount 
+		else 0
+	end as FinancialSameDayShiptAmount,
+
+	CAST(CASE
+		WHEN tf.unit_discount_amount <> 0 THEN tf.isShipFromStore
+		ELSE 0
+	END AS smallint) AS numShipFromStoreTransWithDiscount,
+	CAST(CASE
+		WHEN tf.unit_discount_amount <> 0 THEN tf.isPickupFromStore
+		ELSE 0
+	END AS smallint) AS numPickupFromStoreTransWithDiscount,
+
+	CAST(CASE
+		WHEN tf.unit_discount_amount <> 0 THEN tf.isCurbside
+		ELSE 0
+	END AS smallint) AS numCurbsideTransWithDiscount,
+	CAST(CASE
+		WHEN tf.unit_discount_amount <> 0 THEN tf.isSameDayShipt
+		ELSE 0
+	END AS smallint) AS numSameDayShiptTransWithDiscount
+FROM
+	Transaction_Facts tf WITH (NOLOCK)
+	--LEFT JOIN CRM_TRN_SUM_FACT ctsf WITH (NOLOCK)
+	--	ON ctsf.TDF_TRN_ID = tf.transaction_id
+	LEFT JOIN StoreCompDetail_Dim cmp WITH (NOLOCK)
+		ON cmp.store_key = tf.store_key
+		AND cmp.date_key = tf.date_key
+	INNER JOIN time_dim td WITH (NOLOCK)
+		ON tf.TIME_KEY = td.TIME_KEY
+	LEFT OUTER JOIN has_traffic ht 
+		ON tf.store_key = ht.store_key
+		AND tf.date_key = ht.date_key
+	LEFT JOIN CRMTransactionFact v with (nolock) on tf.transaction_id = v.TransactionID
+	--LEFT JOIN CLNSD_ADDR_DIM CAD with (nolock) on ctsf.clnsd_addr_id = cad.clnsd_addr_ID
+	left join CRMCustomerDim cd with (nolock) on v.CustomerNumber = cd.CustomerNumber 
+
+
+--where tf.transaction_id <> 412599001
+```
+
