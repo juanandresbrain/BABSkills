@@ -1,0 +1,104 @@
+# dbo.vendpackingsliptrans
+
+**Database:** LH_D365  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Id | varchar | 8000 | 1 |  |  |  |
+| SinkCreatedOn | datetime2 | 8 | 1 |  |  |  |
+| SinkModifiedOn | datetime2 | 8 | 1 |  |  |  |
+| fullymatched | bigint | 8 | 1 |  |  |  |
+| inventreftype | bigint | 8 | 1 |  |  |  |
+| stockedproduct | bigint | 8 | 1 |  |  |  |
+| sysdatastatecode | bigint | 8 | 1 |  |  |  |
+| destcountryregionid | varchar | 8000 | 1 |  |  |  |
+| acceptedqty_in | decimal | 17 | 1 |  |  |  |
+| accountingdate | datetime2 | 8 | 1 |  |  |  |
+| costledgervoucher | varchar | 8000 | 1 |  |  |  |
+| currencycode_w | varchar | 8000 | 1 |  |  |  |
+| defaultdimension | bigint | 8 | 1 |  |  |  |
+| deliverydate | datetime2 | 8 | 1 |  |  |  |
+| destcounty | varchar | 8000 | 1 |  |  |  |
+| deststate | varchar | 8000 | 1 |  |  |  |
+| deviationqty_ru | decimal | 17 | 1 |  |  |  |
+| exciseamount_ru | decimal | 17 | 1 |  |  |  |
+| excisevalue_ru | decimal | 17 | 1 |  |  |  |
+| externalitemid | varchar | 8000 | 1 |  |  |  |
+| intercompanyinventtransid | varchar | 8000 | 1 |  |  |  |
+| intrastatdispatchid | varchar | 8000 | 1 |  |  |  |
+| intrastatfulfillmentdate_hu | datetime2 | 8 | 1 |  |  |  |
+| inventdate | datetime2 | 8 | 1 |  |  |  |
+| inventdimid | varchar | 8000 | 1 |  |  |  |
+| inventqty | decimal | 17 | 1 |  |  |  |
+| inventrefid | varchar | 8000 | 1 |  |  |  |
+| inventreftransid | varchar | 8000 | 1 |  |  |  |
+| inventtransid | varchar | 8000 | 1 |  |  |  |
+| invoicetransrefrecid | bigint | 8 | 1 |  |  |  |
+| intrastatcommodity | bigint | 8 | 1 |  |  |  |
+| itemid | varchar | 8000 | 1 |  |  |  |
+| lineamount_w | decimal | 17 | 1 |  |  |  |
+| linenum | decimal | 17 | 1 |  |  |  |
+| name | varchar | 8000 | 1 |  |  |  |
+| ngpcodestable_fr | bigint | 8 | 1 |  |  |  |
+| numbersequencegroup | varchar | 8000 | 1 |  |  |  |
+| ordered | decimal | 17 | 1 |  |  |  |
+| origcountryregionid | varchar | 8000 | 1 |  |  |  |
+| origpurchid | varchar | 8000 | 1 |  |  |  |
+| origstateid | varchar | 8000 | 1 |  |  |  |
+| packingslipid | varchar | 8000 | 1 |  |  |  |
+| pdscwordered | decimal | 17 | 1 |  |  |  |
+| pdscwqty | decimal | 17 | 1 |  |  |  |
+| pdscwremain | decimal | 17 | 1 |  |  |  |
+| port | varchar | 8000 | 1 |  |  |  |
+| priceunit | decimal | 17 | 1 |  |  |  |
+| procurementcategory | bigint | 8 | 1 |  |  |  |
+| purchaselineexpecteddeliverydate | datetime2 | 8 | 1 |  |  |  |
+| purchaselinelinenumber | bigint | 8 | 1 |  |  |  |
+| purchunit | varchar | 8000 | 1 |  |  |  |
+| qty | decimal | 17 | 1 |  |  |  |
+| reasontableref | bigint | 8 | 1 |  |  |  |
+| receivedqty_in | decimal | 17 | 1 |  |  |  |
+| rejectedqty_in | decimal | 17 | 1 |  |  |  |
+| remain | decimal | 17 | 1 |  |  |  |
+| remaininvent | decimal | 17 | 1 |  |  |  |
+| returnactionid | varchar | 8000 | 1 |  |  |  |
+| sourcedocumentline | bigint | 8 | 1 |  |  |  |
+| statisticvalue_lt | decimal | 17 | 1 |  |  |  |
+| statprocid | varchar | 8000 | 1 |  |  |  |
+| taxamount_ru | decimal | 17 | 1 |  |  |  |
+| taxgroup_ru | varchar | 8000 | 1 |  |  |  |
+| taxitemgroup_ru | varchar | 8000 | 1 |  |  |  |
+| transactioncode | varchar | 8000 | 1 |  |  |  |
+| transport | varchar | 8000 | 1 |  |  |  |
+| valuemst | decimal | 17 | 1 |  |  |  |
+| vatamount_ru | decimal | 17 | 1 |  |  |  |
+| vatvalue_ru | decimal | 17 | 1 |  |  |  |
+| vendpackingslipjour | bigint | 8 | 1 |  |  |  |
+| weight | decimal | 17 | 1 |  |  |  |
+| workerpurchaser | bigint | 8 | 1 |  |  |  |
+| itemcodeid | varchar | 8000 | 1 |  |  |  |
+| cancelledqty | decimal | 17 | 1 |  |  |  |
+| fintag | bigint | 8 | 1 |  |  |  |
+| dlvmode | varchar | 8000 | 1 |  |  |  |
+| baborigremainphysqty | decimal | 17 | 1 |  |  |  |
+| modifieddatetime | datetime2 | 8 | 1 |  |  |  |
+| modifiedby | varchar | 8000 | 1 |  |  |  |
+| modifiedtransactionid | bigint | 8 | 1 |  |  |  |
+| createddatetime | datetime2 | 8 | 1 |  |  |  |
+| createdby | varchar | 8000 | 1 |  |  |  |
+| createdtransactionid | bigint | 8 | 1 |  |  |  |
+| dataareaid | varchar | 8000 | 1 |  |  |  |
+| recversion | bigint | 8 | 1 |  |  |  |
+| partition | bigint | 8 | 1 |  |  |  |
+| sysrowversion | bigint | 8 | 1 |  |  |  |
+| recid | bigint | 8 | 1 |  |  |  |
+| tableid | bigint | 8 | 1 |  |  |  |
+| versionnumber | bigint | 8 | 1 |  |  |  |
+| createdon | datetime2 | 8 | 1 |  |  |  |
+| modifiedon | datetime2 | 8 | 1 |  |  |  |
+| IsDelete | bit | 1 | 1 |  |  |  |
+| createdonpartition | varchar | 8000 | 1 |  |  |  |
+| PartitionId | varchar | 2048 | 1 |  |  |  |

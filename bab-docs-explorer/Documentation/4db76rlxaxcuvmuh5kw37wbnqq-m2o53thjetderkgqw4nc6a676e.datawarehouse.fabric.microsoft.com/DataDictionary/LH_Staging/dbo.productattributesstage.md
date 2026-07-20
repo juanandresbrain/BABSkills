@@ -1,0 +1,21 @@
+# dbo.productattributesstage
+
+**Database:** LH_Staging  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| ItemNumber | varchar | 8000 | 1 |  |  |  |
+| CategoryType | varchar | 8000 | 1 |  |  |  |
+| Occasions | varchar | 8000 | 1 |  |  |  |
+| isBundle | varchar | 8000 | 1 |  |  |  |
+| isSet | varchar | 8000 | 1 |  |  |  |
+| EmbroideryType | varchar | 8000 | 1 |  |  |  |
+| OnlineExclusive | varchar | 8000 | 1 |  |  |  |
+| MSTAT | varchar | 8000 | 1 |  |  |  |
+| ProductHierarchyCode | varchar | 8000 | 1 |  |  |  |
+| SoundEligible | varchar | 8000 | 1 |  |  |  |
+| SportsTeam | varchar | 8000 | 1 |  |  |  |
+| SkinType | varchar | 8000 | 1 |  |  |  |

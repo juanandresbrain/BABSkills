@@ -1,0 +1,22 @@
+# dbo.bundlekeystorystage
+
+**Database:** LH_Staging_ProdBackup  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Bundle | varchar | 8000 | 1 |  |  |  |
+| ListPrice | decimal | 13 | 1 |  |  |  |
+| SalesPrice | decimal | 13 | 1 |  |  |  |
+| KeyStory | varchar | 8000 | 1 |  |  |  |
+| Product1 | varchar | 8000 | 1 |  |  |  |
+| Product2 | varchar | 8000 | 1 |  |  |  |
+| Product3 | varchar | 8000 | 1 |  |  |  |
+| Product4 | varchar | 8000 | 1 |  |  |  |
+| Product5 | varchar | 8000 | 1 |  |  |  |
+| Product6 | varchar | 8000 | 1 |  |  |  |
+| Product7 | varchar | 8000 | 1 |  |  |  |
+| Product8 | varchar | 8000 | 1 |  |  |  |
+| Country | varchar | 8000 | 1 |  |  |  |

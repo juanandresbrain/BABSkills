@@ -43,4 +43,4 @@ Calendar(Date(Year(MIN('vwJumpMindSalesSummaryPowerBI'[TransactionDate])), 1, 1)
 
 | Server | Database | Linked SQL Documentation |
 |---|---|---|
-| 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com | LH_Source | _(not found in SQL documentation)_ |
+| 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com | LH_Source | [4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com/LH_Source](../../../4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com/DataDictionary/LH_Source/) |

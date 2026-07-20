@@ -1,0 +1,19 @@
+# dbo.integrationstaging_wms_itemsuomstage
+
+**Database:** LH_Source  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Denominator | int | 4 | 1 |  |  |  |
+| Factor | float | 8 | 1 |  |  |  |
+| FromUnitSymbol | varchar | 8000 | 1 |  |  |  |
+| InnerOffset | float | 8 | 1 |  |  |  |
+| Numerator | int | 4 | 1 |  |  |  |
+| OuterOffset | float | 8 | 1 |  |  |  |
+| ProductNumber | varchar | 8000 | 1 |  |  |  |
+| Rounding | varchar | 8000 | 1 |  |  |  |
+| ToUnitSymbol | varchar | 8000 | 1 |  |  |  |
+| Entity | varchar | 8000 | 1 |  |  |  |

@@ -1,0 +1,96 @@
+# dbo.franchiseetransactionfacts_stage
+
+**Database:** LH_Staging_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| transaction_id | varchar | 8000 | 1 |  |  |  |
+| store_key | int | 4 | 1 |  |  |  |
+| date_key | int | 4 | 1 |  |  |  |
+| time_key | int | 4 | 1 |  |  |  |
+| transaction_type_key | int | 4 | 1 |  |  |  |
+| currency_key | int | 4 | 1 |  |  |  |
+| transaction_key | varchar | 8000 | 1 |  |  |  |
+| transaction_no | varchar | 8000 | 1 |  |  |  |
+| register_no | int | 4 | 1 |  |  |  |
+| line_count | int | 4 | 1 |  |  |  |
+| party_flag | int | 4 | 1 |  |  |  |
+| GAAP_transaction_flag | int | 4 | 1 |  |  |  |
+| donation_only_flag | int | 4 | 1 |  |  |  |
+| giftcard_only_flag | int | 4 | 1 |  |  |  |
+| party_deposit_only_flag | int | 4 | 1 |  |  |  |
+| GAAP_sales_amount | decimal | 17 | 1 |  |  |  |
+| net_sales_amount | decimal | 17 | 1 |  |  |  |
+| total_units | int | 4 | 1 |  |  |  |
+| unit_net_amount | decimal | 17 | 1 |  |  |  |
+| unit_gross_amount | decimal | 17 | 1 |  |  |  |
+| reward_certificate_amount | int | 4 | 1 |  |  |  |
+| buy_stuff_amount | int | 4 | 1 |  |  |  |
+| tax_amount | decimal | 17 | 1 |  |  |  |
+| redemption_amount | decimal | 17 | 1 |  |  |  |
+| unit_discount_amount | decimal | 17 | 1 |  |  |  |
+| coupon_discount_amount | int | 4 | 1 |  |  |  |
+| coupon_discount_units | int | 4 | 1 |  |  |  |
+| giftcard_discount_amount | decimal | 17 | 1 |  |  |  |
+| total_discount_amount | decimal | 17 | 1 |  |  |  |
+| receipt_total_amount | decimal | 17 | 1 |  |  |  |
+| merchandise_uga | decimal | 17 | 1 |  |  |  |
+| merchandise_units | int | 4 | 1 |  |  |  |
+| gaap_units | int | 4 | 1 |  |  |  |
+| donations_UGA | int | 4 | 1 |  |  |  |
+| donations_units | int | 4 | 1 |  |  |  |
+| party_deposit_UGA | int | 4 | 1 |  |  |  |
+| party_deposit_units | int | 4 | 1 |  |  |  |
+| giftcard_uga | decimal | 17 | 1 |  |  |  |
+| giftcard_units | int | 4 | 1 |  |  |  |
+| animal_UGA | decimal | 17 | 1 |  |  |  |
+| animal_units | int | 4 | 1 |  |  |  |
+| non_animal_UGA | decimal | 17 | 1 |  |  |  |
+| non_animal_units | int | 4 | 1 |  |  |  |
+| footwear_UGA | decimal | 17 | 1 |  |  |  |
+| footwear_units | int | 4 | 1 |  |  |  |
+| accessories_UGA | decimal | 17 | 1 |  |  |  |
+| accessories_units | int | 4 | 1 |  |  |  |
+| sounds_UGA | decimal | 17 | 1 |  |  |  |
+| sounds_units | int | 4 | 1 |  |  |  |
+| clothing_UGA | decimal | 17 | 1 |  |  |  |
+| clothing_units | int | 4 | 1 |  |  |  |
+| other_UGA | decimal | 17 | 1 |  |  |  |
+| other_units | int | 4 | 1 |  |  |  |
+| shipping_UGA | int | 4 | 1 |  |  |  |
+| shipping_units | int | 4 | 1 |  |  |  |
+| other_fees_UGA | int | 4 | 1 |  |  |  |
+| other_fees_units | int | 4 | 1 |  |  |  |
+| cub_cash_UGA | int | 4 | 1 |  |  |  |
+| cub_cash_units | int | 4 | 1 |  |  |  |
+| paid_outs_UGA | int | 4 | 1 |  |  |  |
+| paid_outs_units | int | 4 | 1 |  |  |  |
+| stuffing_supplies_UGA | int | 4 | 1 |  |  |  |
+| stuffing_supplies_units | int | 4 | 1 |  |  |  |
+| sports_UGA | decimal | 17 | 1 |  |  |  |
+| sports_units | int | 4 | 1 |  |  |  |
+| prestuffed_UGA | decimal | 17 | 1 |  |  |  |
+| prestuffed_units | int | 4 | 1 |  |  |  |
+| fin_GAAP_sales_amount | decimal | 9 | 1 |  |  |  |
+| upsell_discount_amount | decimal | 9 | 1 |  |  |  |
+| cashier_key | int | 4 | 1 |  |  |  |
+| merchandise_cost | decimal | 17 | 1 |  |  |  |
+| animal_cost | decimal | 17 | 1 |  |  |  |
+| non_animal_cost | decimal | 17 | 1 |  |  |  |
+| footwear_cost | decimal | 17 | 1 |  |  |  |
+| accessories_cost | decimal | 17 | 1 |  |  |  |
+| sounds_cost | decimal | 17 | 1 |  |  |  |
+| clothing_cost | decimal | 17 | 1 |  |  |  |
+| other_cost | decimal | 17 | 1 |  |  |  |
+| sports_cost | decimal | 17 | 1 |  |  |  |
+| prestuffed_cost | decimal | 17 | 1 |  |  |  |
+| Scents_UGA | decimal | 17 | 1 |  |  |  |
+| Scents_units | int | 4 | 1 |  |  |  |
+| Scents_cost | decimal | 17 | 1 |  |  |  |
+| Store_transaction_flag | int | 4 | 1 |  |  |  |
+| Store_Sales_Amount | decimal | 17 | 1 |  |  |  |
+| Store_units | int | 4 | 1 |  |  |  |
+| fin_Store_sales_amount | decimal | 17 | 1 |  |  |  |

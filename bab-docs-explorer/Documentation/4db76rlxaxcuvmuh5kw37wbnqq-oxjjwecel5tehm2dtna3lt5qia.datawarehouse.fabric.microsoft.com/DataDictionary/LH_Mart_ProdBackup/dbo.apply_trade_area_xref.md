@@ -1,0 +1,15 @@
+# dbo.apply_trade_area_xref
+
+**Database:** LH_Mart_ProdBackup  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Postal_Code | varchar | 8000 | 1 |  |  |  |
+| Trade_area | int | 4 | 1 |  |  |  |
+| current_address_key | int | 4 | 1 |  |  |  |
+| customer_key | int | 4 | 1 |  |  |  |
+| Country | varchar | 8000 | 1 |  |  |  |
+| Household_key | int | 4 | 1 |  |  |  |

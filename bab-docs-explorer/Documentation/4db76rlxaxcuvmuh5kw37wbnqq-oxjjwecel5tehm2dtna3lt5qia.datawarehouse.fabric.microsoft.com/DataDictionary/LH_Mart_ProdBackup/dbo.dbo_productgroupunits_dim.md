@@ -1,0 +1,12 @@
+# dbo.dbo_productgroupunits_dim
+
+**Database:** LH_Mart_ProdBackup  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Unit_Key | bigint | 8 | 1 |  |  |  |
+| Units | int | 4 | 1 |  |  |  |
+| Unit_Range | varchar | 8000 | 1 |  |  |  |

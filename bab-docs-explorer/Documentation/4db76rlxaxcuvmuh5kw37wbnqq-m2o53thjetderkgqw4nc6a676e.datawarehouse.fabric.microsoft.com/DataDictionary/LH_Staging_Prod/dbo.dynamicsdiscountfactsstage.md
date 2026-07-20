@@ -1,0 +1,26 @@
+# dbo.dynamicsdiscountfactsstage
+
+**Database:** LH_Staging_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Amount | decimal | 9 | 1 |  |  |  |
+| DiscountCost | decimal | 9 | 1 |  |  |  |
+| DiscountOriginType | varchar | 8000 | 1 |  |  |  |
+| RetailTerminalId | varchar | 8000 | 1 |  |  |  |
+| RetailTransactionId | varchar | 8000 | 1 |  |  |  |
+| BABIntRetailOperatingUnitNumber | varchar | 8000 | 1 |  |  |  |
+| LineNum | bigint | 8 | 1 |  |  |  |
+| Percentage | decimal | 9 | 1 |  |  |  |
+| RetailStoreId | varchar | 8000 | 1 |  |  |  |
+| SaleLineNum | bigint | 8 | 1 |  |  |  |
+| CustomerDiscountType | varchar | 8000 | 1 |  |  |  |
+| BABIntRetailProcessed | varchar | 8000 | 1 |  |  |  |
+| Entity | varchar | 8000 | 1 |  |  |  |
+| RetailReceiptId | varchar | 8000 | 1 |  |  |  |
+| DiscountTransUniqueLineNum | int | 4 | 1 |  |  |  |
+| ManualDiscountType | varchar | 8000 | 1 |  |  |  |
+| PeriodicDiscountOfferId | varchar | 8000 | 1 |  |  |  |

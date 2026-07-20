@@ -1,0 +1,28 @@
+# dbo.crm_surveystage
+
+**Database:** LH_Staging_CI  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    VIEW["dbo.crm_surveystage"]
+    dbo_crm_surveystage(["dbo.crm_surveystage"]) --> VIEW
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.crm_surveystage |
+
+## View Code
+
+```sql
+;
+CREATE   VIEW [dbo].[crm_surveystage]
+AS
+    SELECT [recID], [Q35] COLLATE Latin1_General_CI_AS AS [Q35], [Q34] COLLATE Latin1_General_CI_AS AS [Q34], [Q34S] COLLATE Latin1_General_CI_AS AS [Q34S], [Q7] COLLATE Latin1_General_CI_AS AS [Q7], [Q91] COLLATE Latin1_General_CI_AS AS [Q91], [Q11_1] COLLATE Latin1_General_CI_AS AS [Q11_1], [Q11_2] COLLATE Latin1_General_CI_AS AS [Q11_2], [Q11_3] COLLATE Latin1_General_CI_AS AS [Q11_3], [Q11_4] COLLATE Latin1_General_CI_AS AS [Q11_4], [Q11_5] COLLATE Latin1_General_CI_AS AS [Q11_5], [Q11_6] COLLATE Latin1_General_CI_AS AS [Q11_6], [Q11_7] COLLATE Latin1_General_CI_AS AS [Q11_7], [Q11_8] COLLATE Latin1_General_CI_AS AS [Q11_8], [Q11_9] COLLATE Latin1_General_CI_AS AS [Q11_9], [Q11_10] COLLATE Latin1_General_CI_AS AS [Q11_10], [Q11_11] COLLATE Latin1_General_CI_AS AS [Q11_11], [Q11_12] COLLATE Latin1_General_CI_AS AS [Q11_12], [Q80_1] COLLATE Latin1_General_CI_AS AS [Q80_1], [Q80_2] COLLATE Latin1_General_CI_AS AS [Q80_2], [Q80_3] COLLATE Latin1_General_CI_AS AS [Q80_3], [Q80_4] COLLATE Latin1_General_CI_AS AS [Q80_4], [Q80_5] COLLATE Latin1_General_CI_AS AS [Q80_5], [Q80_6] COLLATE Latin1_General_CI_AS AS [Q80_6], [Q80_7] COLLATE Latin1_General_CI_AS AS [Q80_7], [Q80_8] COLLATE Latin1_General_CI_AS AS [Q80_8], [Q112] COLLATE Latin1_General_CI_AS AS [Q112], [Q99_1] COLLATE Latin1_General_CI_AS AS [Q99_1], [Q99_2] COLLATE Latin1_General_CI_AS AS [Q99_2], [Q99_3] COLLATE Latin1_General_CI_AS AS [Q99_3], [Q99_4] COLLATE Latin1_General_CI_AS AS [Q99_4], [Q99_5] COLLATE Latin1_General_CI_AS AS [Q99_5], [Q99_6] COLLATE Latin1_General_CI_AS AS [Q99_6], [Q99_7] COLLATE Latin1_General_CI_AS AS [Q99_7], [Q99_8] COLLATE Latin1_General_CI_AS AS [Q99_8], [Q99_9] COLLATE Latin1_General_CI_AS AS [Q99_9], [Q99_10] COLLATE Latin1_General_CI_AS AS [Q99_10], [Q99_11] COLLATE Latin1_General_CI_AS AS [Q99_11], [Q110] COLLATE Latin1_General_CI_AS AS [Q110], [Q118] COLLATE Latin1_General_CI_AS AS [Q118], [Q116_1] COLLATE Latin1_General_CI_AS AS [Q116_1], [Q116_2] COLLATE Latin1_General_CI_AS AS [Q116_2], [Q116_3] COLLATE Latin1_General_CI_AS AS [Q116_3], [Q116_4] COLLATE Latin1_General_CI_AS AS [Q116_4], [Q116_5] COLLATE Latin1_General_CI_AS AS [Q116_5], [Q116_6] COLLATE Latin1_General_CI_AS AS [Q116_6], [Q117_7] COLLATE Latin1_General_CI_AS AS [Q117_7], [Q116_8] COLLATE Latin1_General_CI_AS AS [Q116_8], [Q116_9] COLLATE Latin1_General_CI_AS AS [Q116_9], [Q116_10] COLLATE Latin1_General_CI_AS AS [Q116_10], [Q116S] COLLATE Latin1_General_CI_AS AS [Q116S], [Q108] COLLATE Latin1_General_CI_AS AS [Q108], [Q111_1] COLLATE Latin1_General_CI_AS AS [Q111_1], [Q111_2] COLLATE Latin1_General_CI_AS AS [Q111_2], [Q111_3] COLLATE Latin1_General_CI_AS AS [Q111_3], [Q105] COLLATE Latin1_General_CI_AS AS [Q105], [Q115] COLLATE Latin1_General_CI_AS AS [Q115], [Q82_1] COLLATE Latin1_General_CI_AS AS [Q82_1], [Q82_2] COLLATE Latin1_General_CI_AS AS [Q82_2], [Q82_3] COLLATE Latin1_General_CI_AS AS [Q82_3], [Q82_4] COLLATE Latin1_General_CI_AS AS [Q82_4], [Q82_5] COLLATE Latin1_General_CI_AS AS [Q82_5], [Q82_6] COLLATE Latin1_General_CI_AS AS [Q82_6], [Q82_7] COLLATE Latin1_General_CI_AS AS [Q82_7], [Q82_8] COLLATE Latin1_General_CI_AS AS [Q82_8], [Q82_9] COLLATE Latin1_General_CI_AS AS [Q82_9], [Q82_10] COLLATE Latin1_General_CI_AS AS [Q82_10], [Q82_11] COLLATE Latin1_General_CI_AS AS [Q82_11], [Q82S] COLLATE Latin1_General_CI_AS AS [Q82S], [Q95] COLLATE Latin1_General_CI_AS AS [Q95], [Q36] COLLATE Latin1_General_CI_AS AS [Q36], [Q59] COLLATE Latin1_General_CI_AS AS [Q59], [Q94] COLLATE Latin1_General_CI_AS AS [Q94], [Q103] COLLATE Latin1_General_CI_AS AS [Q103], [Q71A1] COLLATE Latin1_General_CI_AS AS [Q71A1], [Q71A2] COLLATE Latin1_General_CI_AS AS [Q71A2], [Q71A3] COLLATE Latin1_General_CI_AS AS [Q71A3], [Q71A4] COLLATE Latin1_General_CI_AS AS [Q71A4], [Q71A5] COLLATE Latin1_General_CI_AS AS [Q71A5], [Q71A6] COLLATE Latin1_General_CI_AS AS [Q71A6], [Q71A7] COLLATE Latin1_General_CI_AS AS [Q71A7], [Q81A1] COLLATE Latin1_G
+```
+

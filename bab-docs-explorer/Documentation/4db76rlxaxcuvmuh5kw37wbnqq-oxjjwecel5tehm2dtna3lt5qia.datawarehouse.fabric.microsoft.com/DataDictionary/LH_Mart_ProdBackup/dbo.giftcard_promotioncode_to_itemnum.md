@@ -1,0 +1,13 @@
+# dbo.giftcard_promotioncode_to_itemnum
+
+**Database:** LH_Mart_ProdBackup  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| promotion_code | int | 4 | 1 |  |  |  |
+| item_num | int | 4 | 1 |  |  |  |
+| store13_item_num | int | 4 | 1 |  |  |  |
+| description | varchar | 8000 | 1 |  |  |  |

@@ -1,0 +1,12 @@
+# dbo.view_create_table
+
+**Database:** LH_D365  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| namespace | varchar | 8000 | 1 |  |  |  |
+| viewName | varchar | 8000 | 1 |  |  |  |
+| isTemporary | bit | 1 | 1 |  |  |  |

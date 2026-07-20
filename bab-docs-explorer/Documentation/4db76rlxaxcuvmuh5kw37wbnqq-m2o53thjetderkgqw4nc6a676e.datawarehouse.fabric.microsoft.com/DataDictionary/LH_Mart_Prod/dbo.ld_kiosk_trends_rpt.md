@@ -1,0 +1,17 @@
+# dbo.ld_kiosk_trends_rpt
+
+**Database:** LH_Mart_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| section | varchar | 8000 | 1 |  |  |  |
+| metric | varchar | 8000 | 1 |  |  |  |
+| order1 | int | 4 | 1 |  |  |  |
+| order2 | int | 4 | 1 |  |  |  |
+| periodTY | varchar | 8000 | 1 |  |  |  |
+| periodLY | varchar | 8000 | 1 |  |  |  |
+| ytdTY | varchar | 8000 | 1 |  |  |  |
+| ytdLY | varchar | 8000 | 1 |  |  |  |

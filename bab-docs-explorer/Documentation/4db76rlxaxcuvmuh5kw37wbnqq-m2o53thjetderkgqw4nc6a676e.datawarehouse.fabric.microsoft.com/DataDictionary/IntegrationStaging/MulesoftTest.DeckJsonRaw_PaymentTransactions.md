@@ -1,0 +1,29 @@
+# MulesoftTest.DeckJsonRaw_PaymentTransactions
+
+**Database:** IntegrationStaging  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| _RowIndex | bigint | 8 | 0 |  |  |  |
+| _ParentKeyField | bigint | 8 | 0 |  |  |  |
+| PaymentTransactionID | bigint | 8 | 1 |  |  |  |
+| OrderPaymentId | bigint | 8 | 1 |  |  |  |
+| PaymentTransactionTypeId | bigint | 8 | 1 |  |  |  |
+| Amount | real | 4 | 1 |  |  |  |
+| EarlyCaptureAmount | real | 4 | 1 |  |  |  |
+| Generic1 | varchar | -1 | 1 |  |  |  |
+| Generic2 | varchar | -1 | 1 |  |  |  |
+| Generic3 | varchar | -1 | 1 |  |  |  |
+| Generic4 | varchar | -1 | 1 |  |  |  |
+| Generic5 | varchar | -1 | 1 |  |  |  |
+| TransactionDateUTC | datetime2 | 8 | 1 |  |  |  |
+| IsDecline | bit | 1 | 1 |  |  |  |
+| PaymentResponseCodeGroup | bigint | 8 | 1 |  |  |  |
+| ParentTransactionID | varchar | -1 | 1 |  |  |  |
+| InsertDate | datetime2 | 8 | 1 |  |  |  |
+| UpdateDate | datetime2 | 8 | 1 |  |  |  |
+| JSONDate | datetime2 | 8 | 1 |  |  |  |
+| MSSQL_System_Uniquifier_1737773248 | bigint | 8 | 0 |  |  |  |

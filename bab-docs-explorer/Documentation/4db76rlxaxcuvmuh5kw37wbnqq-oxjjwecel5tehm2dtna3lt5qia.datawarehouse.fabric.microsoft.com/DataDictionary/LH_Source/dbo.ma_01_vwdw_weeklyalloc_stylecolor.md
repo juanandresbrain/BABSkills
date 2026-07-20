@@ -1,0 +1,17 @@
+# dbo.ma_01_vwdw_weeklyalloc_stylecolor
+
+**Database:** LH_Source  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| STYLE_CODE | varchar | 8000 | 1 |  |  |  |
+| COLOR_CODE | varchar | 8000 | 1 |  |  |  |
+| LOCATION_CODE | varchar | 8000 | 1 |  |  |  |
+| product_key | varchar | 8000 | 1 |  |  |  |
+| store_key | int | 4 | 1 |  |  |  |
+| date_key | int | 4 | 1 |  |  |  |
+| merch_year_wk | int | 4 | 1 |  |  |  |
+| allocation_units | int | 4 | 1 |  |  |  |

@@ -1,0 +1,27 @@
+# dbo.webproductionordersummary
+
+**Database:** LH_Mart_CI  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+    VIEW["dbo.webproductionordersummary"]
+    dbo_webproductionordersummary(["dbo.webproductionordersummary"]) --> VIEW
+```
+
+## Table Dependencies
+
+| Referenced Table |
+|---|
+| dbo.webproductionordersummary |
+
+## View Code
+
+```sql
+;
+
+CREATE VIEW dbo.webproductionordersummary AS SELECT ProductionOrderId, ProductionOrderNumber COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderNumber, ProductionOrderSubTotal, ProductionOrderShippingAndHandling, ProductionOrderPromoCode COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderPromoCode, ProductionOrderPromoDiscount, ProductionOrderPromoDescription COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderPromoDescription, ProductionOrderBearBucksNumber COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderBearBucksNumber, ProductionOrderTotal, ProductionOrderSpecialInstructions COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderSpecialInstructions, ProductionOrderGiftMessage COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderGiftMessage, ProductionOrderDateTimeCreated, ProductionOrderDeferredShipDate, ProductionOrderDateTimeShipped, ProductionOrderShippingMethod COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderShippingMethod, ProductionOrderTrackingNumber COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderTrackingNumber, ProductionOrderBillingStateProvince COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderBillingStateProvince, ProductionOrderBillingZipPostalCode COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderBillingZipPostalCode, ProductionOrderBillingCountry COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderBillingCountry, ProductionOrderShippingStateProvince COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderShippingStateProvince, ProductionOrderShippingZipPostalCode COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderShippingZipPostalCode, ProductionOrderShippingCountry COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderShippingCountry, ProductionOrderIsWillCall, ProductionOrderIsLoyaltyMember, ProductionOrderLoyaltyNumber COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderLoyaltyNumber, ProductionOrderIsRush, ProductionOrderWebOrderStatus COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderWebOrderStatus, ProductionOrderCatalogName COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderCatalogName, ProductionOrderNumberOfPackages, ProductionOrderWebCartOrderId, ProductionOrderWebCartUpdateMsgSent, ProductionOrderSiteCode COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderSiteCode, ProductionOrderBearBuilderId COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderBearBuilderId, ProductionOrderBuyStuffStamps, ProductionOrderActuallShippingCost, ProductionOrderHasShippableProducts, ProductionOrderWH_version, ProductionOrderReceiptCode COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderReceiptCode, ProductionOrderServerName COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ProductionOrderServerName, ProductionOrderStatusID, StatusDate, ESReferenceNbr COLLATE Latin1_General_100_CI_AS_KS_WS_SC_UTF8  AS ESReferenceNbr, InsertDate, UpdateDate FROM LH_Mart.dbo.webproductionordersummary;;
+```
+

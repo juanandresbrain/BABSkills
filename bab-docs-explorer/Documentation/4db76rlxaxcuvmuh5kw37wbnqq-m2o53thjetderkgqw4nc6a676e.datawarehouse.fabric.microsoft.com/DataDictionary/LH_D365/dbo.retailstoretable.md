@@ -1,0 +1,105 @@
+# dbo.retailstoretable
+
+**Database:** LH_D365  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Id | varchar | 8000 | 1 |  |  |  |
+| SinkCreatedOn | datetime2 | 8 | 1 |  |  |  |
+| SinkModifiedOn | datetime2 | 8 | 1 |  |  |  |
+| closingmethod | bigint | 8 | 1 |  |  |  |
+| createlabelsforzeroprice | bigint | 8 | 1 |  |  |  |
+| generatesitemlabels | bigint | 8 | 1 |  |  |  |
+| generatesshelflabels | bigint | 8 | 1 |  |  |  |
+| hidetrainingmode | bigint | 8 | 1 |  |  |  |
+| inventorylookup | bigint | 8 | 1 |  |  |  |
+| itemidonreceipt | bigint | 8 | 1 |  |  |  |
+| onestatementperday | bigint | 8 | 1 |  |  |  |
+| poitemfilter | bigint | 8 | 1 |  |  |  |
+| separatestmtperstaffterminal | bigint | 8 | 1 |  |  |  |
+| statementmethod | bigint | 8 | 1 |  |  |  |
+| stmtpostasbusinessday | bigint | 8 | 1 |  |  |  |
+| tenderdeclarationcalculation | bigint | 8 | 1 |  |  |  |
+| usecustomerbasedtax | bigint | 8 | 1 |  |  |  |
+| usedefaultcustaccount | bigint | 8 | 1 |  |  |  |
+| usedestinationbasedtax | bigint | 8 | 1 |  |  |  |
+| iscallcenter | bigint | 8 | 1 |  |  |  |
+| startamountcalculation | bigint | 8 | 1 |  |  |  |
+| bankdropcalculation | bigint | 8 | 1 |  |  |  |
+| usecustomerbasedtaxexemption | bigint | 8 | 1 |  |  |  |
+| isspokechannel | bigint | 8 | 1 |  |  |  |
+| sysdatastatecode | bigint | 8 | 1 |  |  |  |
+| taxgroup | varchar | 8000 | 1 |  |  |  |
+| culturename | varchar | 8000 | 1 |  |  |  |
+| databasename | varchar | 8000 | 1 |  |  |  |
+| functionalityprofile | varchar | 8000 | 1 |  |  |  |
+| inventlocationidforcustomerorder | varchar | 8000 | 1 |  |  |  |
+| maximumpostingdifference | decimal | 17 | 1 |  |  |  |
+| maximumtextlengthonreceipt | bigint | 8 | 1 |  |  |  |
+| maxroundingamount | decimal | 17 | 1 |  |  |  |
+| maxroundingtaxamount | decimal | 17 | 1 |  |  |  |
+| maxshiftdifferenceamount | decimal | 17 | 1 |  |  |  |
+| maxtransactiondifferenceamount | decimal | 17 | 1 |  |  |  |
+| numberoftoporbottomlines | bigint | 8 | 1 |  |  |  |
+| offlineprofile | bigint | 8 | 1 |  |  |  |
+| openfrom | bigint | 8 | 1 |  |  |  |
+| opento | bigint | 8 | 1 |  |  |  |
+| password | varchar | 8000 | 1 |  |  |  |
+| phone | varchar | 8000 | 1 |  |  |  |
+| removeaddtender | varchar | 8000 | 1 |  |  |  |
+| replicationcounter | bigint | 8 | 1 |  |  |  |
+| retailreqplanidsched | varchar | 8000 | 1 |  |  |  |
+| returntaxgroup_w | varchar | 8000 | 1 |  |  |  |
+| roundingaccountledgerdimension | bigint | 8 | 1 |  |  |  |
+| roundingtaxaccount | varchar | 8000 | 1 |  |  |  |
+| servicechargepct | decimal | 17 | 1 |  |  |  |
+| servicechargeprompt | varchar | 8000 | 1 |  |  |  |
+| sqlservername | varchar | 8000 | 1 |  |  |  |
+| stmtcalcbatchendtime | bigint | 8 | 1 |  |  |  |
+| storenumber | varchar | 8000 | 1 |  |  |  |
+| taxgroupdataareaid | varchar | 8000 | 1 |  |  |  |
+| taxidentificationnumber | varchar | 8000 | 1 |  |  |  |
+| taxoverridegroup | bigint | 8 | 1 |  |  |  |
+| username | varchar | 8000 | 1 |  |  |  |
+| eftstorenumber | varchar | 8000 | 1 |  |  |  |
+| linkedcallcenter | bigint | 8 | 1 |  |  |  |
+| layoutid | varchar | 8000 | 1 |  |  |  |
+| workloadinstanceid | varchar | 8000 | 1 |  |  |  |
+| modifieddatetime | datetime2 | 8 | 1 |  |  |  |
+| modifiedby | varchar | 8000 | 1 |  |  |  |
+| modifiedtransactionid | bigint | 8 | 1 |  |  |  |
+| createddatetime | datetime2 | 8 | 1 |  |  |  |
+| createdby | varchar | 8000 | 1 |  |  |  |
+| createdtransactionid | bigint | 8 | 1 |  |  |  |
+| dataareaid | varchar | 8000 | 1 |  |  |  |
+| recversion | bigint | 8 | 1 |  |  |  |
+| partition | bigint | 8 | 1 |  |  |  |
+| sysrowversion | bigint | 8 | 1 |  |  |  |
+| recid | bigint | 8 | 1 |  |  |  |
+| tableid | bigint | 8 | 1 |  |  |  |
+| versionnumber | bigint | 8 | 1 |  |  |  |
+| createdon | datetime2 | 8 | 1 |  |  |  |
+| modifiedon | datetime2 | 8 | 1 |  |  |  |
+| IsDelete | bit | 1 | 1 |  |  |  |
+| createdonpartition | varchar | 8000 | 1 |  |  |  |
+| PartitionId | varchar | 2048 | 1 |  |  |  |
+| sunposexternal | bigint | 8 | 1 |  |  |  |
+| babonereplenorderperitem | bigint | 8 | 1 |  |  |  |
+| suntafretailreplensalesweightsunday | decimal | 17 | 1 |  |  |  |
+| suntafretailreplensalesweightmonday | decimal | 17 | 1 |  |  |  |
+| suntafretailreplensalesweighttuesday | decimal | 17 | 1 |  |  |  |
+| suntafretailreplensalesweightwednesday | decimal | 17 | 1 |  |  |  |
+| suntafretailreplensalesweightthursday | decimal | 17 | 1 |  |  |  |
+| suntafretailreplensalesweightfriday | decimal | 17 | 1 |  |  |  |
+| suntafretailreplensalesweightsaturday | decimal | 17 | 1 |  |  |  |
+| babassortmentid | varchar | 8000 | 1 |  |  |  |
+| babnumofshipmentsperweek | bigint | 8 | 1 |  |  |  |
+| babcartonspershipment | bigint | 8 | 1 |  |  |  |
+| babretailrepleprioassortment | varchar | 8000 | 1 |  |  |  |
+| babconcept | varchar | 8000 | 1 |  |  |  |
+| babvolume | varchar | 8000 | 1 |  |  |  |
+| babfulfillmentmethod | varchar | 8000 | 1 |  |  |  |
+| babfinancialdimensionupdate | bigint | 8 | 1 |  |  |  |

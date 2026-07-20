@@ -1,0 +1,19 @@
+# dbo.experianfootfall_companyhierarchystoremappingbak20161104_sqlsynccopy
+
+**Database:** LH_Staging  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| store_key | int | 4 | 1 |  |  |  |
+| SiteIdentity | int | 4 | 1 |  |  |  |
+| IsShopperTrak | bit | 1 | 1 |  |  |  |
+| IsFootFall | bit | 1 | 1 |  |  |  |
+| IsCurrentlyOffline | bit | 1 | 1 |  |  |  |
+| CompanyID | int | 4 | 1 |  |  |  |
+| HierarchyID | int | 4 | 1 |  |  |  |
+| NodeName | varchar | 8000 | 1 |  |  |  |
+| CurrencyCode | varchar | 8000 | 1 |  |  |  |
+| Updt_dt | datetime2 | 8 | 1 |  |  |  |

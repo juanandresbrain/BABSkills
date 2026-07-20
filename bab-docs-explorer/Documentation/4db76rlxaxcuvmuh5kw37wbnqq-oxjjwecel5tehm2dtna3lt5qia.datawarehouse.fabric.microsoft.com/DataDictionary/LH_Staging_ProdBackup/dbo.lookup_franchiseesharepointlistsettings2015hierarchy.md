@@ -1,0 +1,16 @@
+# dbo.lookup_franchiseesharepointlistsettings2015hierarchy
+
+**Database:** LH_Staging_ProdBackup  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| ListID | int | 4 | 1 |  |  |  |
+| FranchiseeName | varchar | 8000 | 1 |  |  |  |
+| SiteURL | varchar | 8000 | 1 |  |  |  |
+| ListName | varchar | 8000 | 1 |  |  |  |
+| ListView | varchar | 8000 | 1 |  |  |  |
+| Enabled | bit | 1 | 1 |  |  |  |
+| SharePointListViewFormatVersion | int | 4 | 1 |  |  |  |

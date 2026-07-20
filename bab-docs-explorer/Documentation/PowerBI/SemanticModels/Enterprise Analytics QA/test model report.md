@@ -1036,4 +1036,4 @@ in
 
 | Server | Database | Linked SQL Documentation |
 |---|---|---|
-| powerbi://api.powerbi.com/v1.0/myorg/Enterprise%20Analytics%20QA | Sales Audit Data Model | _(not found in SQL documentation)_ |
+| powerbi://api.powerbi.com/v1.0/myorg/Enterprise%20Analytics%20QA | Sales Audit Data Model | _(PowerBI composite-model link, not a SQL source → dataset "Sales Audit Data Model")_ |

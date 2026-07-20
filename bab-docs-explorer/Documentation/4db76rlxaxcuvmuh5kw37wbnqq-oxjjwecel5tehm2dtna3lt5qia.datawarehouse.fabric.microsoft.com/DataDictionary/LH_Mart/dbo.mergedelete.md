@@ -1,0 +1,11 @@
+# dbo.mergedelete
+
+**Database:** LH_Mart  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-oxjjwecel5tehm2dtna3lt5qia.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| wrkd_id | int | 4 | 1 |  |  |  |
+| DeleteRow | int | 4 | 1 |  |  |  |

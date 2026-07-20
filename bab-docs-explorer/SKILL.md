@@ -1,13 +1,13 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, SQL Agent jobs, and PowerBI reports/semantic models in the BAB Engineering Data Architecture documentation, spanning all six SQL servers (bearcluster01, bedrockdb01, bedrockdb02, papamart, STL-SSIS-P-01, and the Fabric Data Warehouse/Lakehouse endpoint) plus PowerBI (reports, pages, visuals, measures, Power Query source). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, SQL Agent jobs, and PowerBI reports/semantic models in the BAB Engineering Data Architecture documentation, spanning all eight SQL servers (bearcluster01, bedrockdb01, bedrockdb02, papamart, STL-SSIS-P-01, and three Fabric Data Warehouse/Lakehouse endpoints) plus PowerBI (reports, pages, visuals, measures, Power Query source). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **6 SQL servers (~87 databases, ~14,799 tables, ~11,961 stored procedures, ~198 functions, ~3,858 views, 265 SSIS packages, 621 SQL Agent jobs) plus PowerBI (433 reports, 85 semantic models, 6,726 DAX measures)**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, determine which SQL Agent jobs or SSIS packages run them, and trace which PowerBI reports/semantic models pull from a given SQL table.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **8 SQL servers (~124 databases, ~21,720 tables, ~11,967 stored procedures, ~206 functions, ~4,754 views, 265 SSIS packages, 621 SQL Agent jobs) plus PowerBI (433 reports, 85 semantic models, 6,726 DAX measures)**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, determine which SQL Agent jobs or SSIS packages run them, and trace which PowerBI reports/semantic models pull from a given SQL table.
 
 The documentation is **bundled inside this skill** at `Documentation/`, organized by server (SQL) or platform (PowerBI), so no external paths are needed:
 
@@ -18,9 +18,11 @@ The documentation is **bundled inside this skill** at `Documentation/`, organize
 | bedrockdb02 | ~4,971 | ~4,408 | ~35 | ~870 | 0 | ~170 |
 | papamart | ~1,676 | ~1,035 | ~76 | ~742 | 0 | ~59 |
 | STL-SSIS-P-01 | ~931 | ~547 | ~21 | ~305 | ~265 | ~289 |
-| 4db76...fabric.microsoft.com (Fabric DW/Lakehouse) | ~2,296 | ~24 | ~7 | ~977 | 0 | 0 |
+| 4db76...ovsykae...fabric.microsoft.com (Fabric DW/Lakehouse) | ~2,296 | ~24 | ~7 | ~977 | 0 | 0 |
+| 4db76...m2o53...fabric.microsoft.com (Fabric DW/Lakehouse) | ~3,530 | ~2 | ~4 | ~486 | 0 | 0 |
+| 4db76...oxjjwe...fabric.microsoft.com (Fabric DW/Lakehouse) | ~3,391 | ~4 | ~4 | ~410 | 0 | 0 |
 
-> The Fabric server's identifier is the full endpoint hostname `4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com` - it's the backing SQL endpoint for several Fabric Lakehouses/Warehouses (`LH_Source`, `LH_Mart`, `LH_D365`, `WH_Papamart`, etc.) that multiple PowerBI semantic models connect to directly. `--server 4db76` (a substring) is enough to filter to it.
+> There are **three** Fabric warehouse servers, all sharing the same Fabric capacity prefix `4db76rlxaxcuvmuh5kw37wbnqq-` but with distinct workspace suffixes - `--server 4db76` alone matches all three at once, so use enough of the suffix to disambiguate (e.g. `--server ovsykae`, `--server m2o53`, `--server oxjjwe`). Each is the backing SQL endpoint for several Fabric Lakehouses/Warehouses (`LH_Source`, `LH_Mart`, `LH_D365`, `WH_Papamart`, etc. as their "databases") that PowerBI semantic models connect to directly via Power Query. Their inventories were extracted directly from the live endpoints via T-SQL system catalog queries (`Get-FabricSqlInventory.ps1`, repo root - Azure AD token auth through `Az.Accounts`), not from a pre-collected CSV export like the other servers.
 
 | Platform | Reports | Semantic Models | Measures |
 |---|---|---|---|
@@ -134,7 +136,8 @@ Lists the servers/platforms found in the documentation set and per-server object
 ## Regenerating Documentation
 This skill's `Documentation/` folder is a **manually-synced copy** of the master copy at the repo root (`BABEngineering/Documentation/`) — the same pattern used for SSIS. After refreshing any inventory and regenerating docs, copy the updated folder(s) in:
 - SQL servers: `py GenerateServerDocs.py <server>` / `py GenerateFunctionDocs.py` / `py GenerateSsisDocs.py`, then copy the changed `Documentation/<server>/...` subfolder into `bab-docs-explorer/Documentation/<server>/...`.
-- PowerBI: `py GeneratePowerBIDocs.py` (reads `Inventory/PowerBI/*.csv`, itself refreshed via `Get-PowerBIReportInventory.ps1` / `Get-PowerBIFullInventory.ps1` / `Get-PowerBISemanticModelInventory.ps1`), then copy `Documentation/PowerBI/` into `bab-docs-explorer/Documentation/PowerBI/`.
+- Fabric warehouse servers specifically: their CSV inventory isn't hand-collected - refresh it live with `powershell -File Get-FabricSqlInventory.ps1 -Endpoint <hostname>` (queries `sys.tables`/`sys.sql_modules`/`sys.parameters`/`sys.sql_expression_dependencies` directly via an Azure AD token for `https://database.windows.net/`), then run `GenerateServerDocs.py <hostname>` and copy as above. If a *new* Fabric endpoint turns up (e.g. referenced in a PowerBI semantic model's Power Query source but not yet in `Inventory/`), this is also how to onboard it - same script, just point `-Endpoint` at the new hostname.
+- PowerBI: `py GeneratePowerBIDocs.py` (reads `Inventory/PowerBI/*.csv`, itself refreshed via `Get-PowerBIReportInventory.ps1` / `Get-PowerBIFullInventory.ps1` / `Get-PowerBISemanticModelInventory.ps1`), then copy `Documentation/PowerBI/` into `bab-docs-explorer/Documentation/PowerBI/`. If you add a new SQL server (Fabric or otherwise), also add its hostname to the `SQL_SERVERS` list in `GeneratePowerBIDocs.py` so its Data Source Cross-References resolve instead of showing "not found."
 
 ## Key Flags
 - `--server <name>`: Restrict results to a single server (loose/substring match), e.g. `--server bedrockdb02`, `--server bearcluster01`, `--server STL`. Applies to every command above.

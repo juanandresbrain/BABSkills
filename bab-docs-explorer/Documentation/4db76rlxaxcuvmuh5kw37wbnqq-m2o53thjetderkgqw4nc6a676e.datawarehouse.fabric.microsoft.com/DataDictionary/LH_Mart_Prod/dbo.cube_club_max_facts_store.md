@@ -1,0 +1,14 @@
+# dbo.cube_club_max_facts_store
+
+**Database:** LH_Mart_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| store_club_max_key | int | 4 | 1 |  |  |  |
+| first_dom_date_key | int | 4 | 1 |  |  |  |
+| rank | int | 4 | 1 |  |  |  |
+| out_of_count | int | 4 | 1 |  |  |  |
+| store_key | int | 4 | 1 |  |  |  |
