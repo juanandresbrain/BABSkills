@@ -1,0 +1,55 @@
+# dbo.docuref
+
+**Database:** LH_D365_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Id | varchar | 8000 | 1 |  |  |  |
+| SinkCreatedOn | datetime2 | 8 | 1 |  |  |  |
+| SinkModifiedOn | datetime2 | 8 | 1 |  |  |  |
+| intercompanyskipupdate | bigint | 8 | 1 |  |  |  |
+| restriction | bigint | 8 | 1 |  |  |  |
+| defaultattachment | bigint | 8 | 1 |  |  |  |
+| isjustification | bigint | 8 | 1 |  |  |  |
+| smmtable | bigint | 8 | 1 |  |  |  |
+| sysdatastatecode | bigint | 8 | 1 |  |  |  |
+| refcompanyid | varchar | 8000 | 1 |  |  |  |
+| actualcompanyid | varchar | 8000 | 1 |  |  |  |
+| author | bigint | 8 | 1 |  |  |  |
+| name | varchar | 8000 | 1 |  |  |  |
+| notes | varchar | 8000 | 1 |  |  |  |
+| party | bigint | 8 | 1 |  |  |  |
+| refrecid | bigint | 8 | 1 |  |  |  |
+| reftableid | bigint | 8 | 1 |  |  |  |
+| typeid | varchar | 8000 | 1 |  |  |  |
+| valuerecid | bigint | 8 | 1 |  |  |  |
+| documentid | varchar | 8000 | 1 |  |  |  |
+| contactpersonid | varchar | 8000 | 1 |  |  |  |
+| smmemailentryid | varchar | 8000 | 1 |  |  |  |
+| smmemailstoreid | varchar | 8000 | 1 |  |  |  |
+| encyclopediaitemid | varchar | 8000 | 1 |  |  |  |
+| engchgengineeringreference | varchar | 8000 | 1 |  |  |  |
+| engchgengineeringdocument | bigint | 8 | 1 |  |  |  |
+| modifieddatetime | datetime2 | 8 | 1 |  |  |  |
+| modifiedby | varchar | 8000 | 1 |  |  |  |
+| modifiedtransactionid | bigint | 8 | 1 |  |  |  |
+| createddatetime | datetime2 | 8 | 1 |  |  |  |
+| createdby | varchar | 8000 | 1 |  |  |  |
+| createdtransactionid | bigint | 8 | 1 |  |  |  |
+| dataareaid | varchar | 8000 | 1 |  |  |  |
+| recversion | bigint | 8 | 1 |  |  |  |
+| partition | bigint | 8 | 1 |  |  |  |
+| sysrowversion | bigint | 8 | 1 |  |  |  |
+| recid | bigint | 8 | 1 |  |  |  |
+| tableid | bigint | 8 | 1 |  |  |  |
+| versionnumber | bigint | 8 | 1 |  |  |  |
+| createdon | datetime2 | 8 | 1 |  |  |  |
+| modifiedon | datetime2 | 8 | 1 |  |  |  |
+| IsDelete | bit | 1 | 1 |  |  |  |
+| createdonpartition | varchar | 8000 | 1 |  |  |  |
+| PartitionId | varchar | 2048 | 1 |  |  |  |
+| isenabledforvirtualentitysync | bigint | 8 | 1 |  |  |  |
+| iscashexpense | bigint | 8 | 1 |  |  |  |

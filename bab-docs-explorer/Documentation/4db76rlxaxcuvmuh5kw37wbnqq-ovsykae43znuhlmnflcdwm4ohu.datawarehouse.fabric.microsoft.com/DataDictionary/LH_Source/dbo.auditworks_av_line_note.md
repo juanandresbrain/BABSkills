@@ -1,0 +1,14 @@
+# dbo.auditworks_av_line_note
+
+**Database:** LH_Source  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| av_transaction_id | decimal | 9 | 1 |  |  |  |
+| line_id | decimal | 5 | 1 |  |  |  |
+| note_type | int | 4 | 1 |  |  |  |
+| line_note | varchar | 8000 | 1 |  |  |  |
+| transaction_date | datetime2 | 8 | 1 |  |  |  |

@@ -20,6 +20,6 @@ flowchart LR
 ## View Code
 
 ```sql
-CREATE VIEW [dbo].[nsb_db_install_detail] (execution_id, module_id, object_version_id, object_name, object_type_name, execution_status, error_message) AS SELECT execution_id, module_id, object_version_id, object_name, object_type_name, execution_status, error_message FROM [dbo].[db_install_detail]
+CREATE VIEW [dbo].[nsb_db_install_detail] (execution_id
 ```
 

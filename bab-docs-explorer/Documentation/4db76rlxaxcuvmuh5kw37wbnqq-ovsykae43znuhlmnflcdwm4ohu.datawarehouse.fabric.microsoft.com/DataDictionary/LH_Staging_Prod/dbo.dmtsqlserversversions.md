@@ -1,0 +1,18 @@
+# dbo.dmtsqlserversversions
+
+**Database:** LH_Staging_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Team | varchar | 8000 | 1 |  |  |  |
+| Environment | varchar | 8000 | 1 |  |  |  |
+| Device_Name | varchar | 8000 | 1 |  |  |  |
+| SQL_Version | varchar | 8000 | 1 |  |  |  |
+| Edition | varchar | 8000 | 1 |  |  |  |
+| Service_Pack | varchar | 8000 | 1 |  |  |  |
+| Max_Service_Pack | int | 4 | 1 |  |  |  |
+| UpdatedTo | varchar | 8000 | 1 |  |  |  |
+| What_is_Needed_to_Retire | varchar | 8000 | 1 |  |  |  |

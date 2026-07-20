@@ -1,0 +1,101 @@
+# dbo.ledgerjournaltable
+
+**Database:** LH_D365  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Id | varchar | 8000 | 1 |  |  |  |
+| SinkCreatedOn | datetime2 | 8 | 1 |  |  |  |
+| SinkModifiedOn | datetime2 | 8 | 1 |  |  |  |
+| assettransfertype_lt | bigint | 8 | 1 |  |  |  |
+| bankremittancetype | bigint | 8 | 1 |  |  |  |
+| currentoperationstax | bigint | 8 | 1 |  |  |  |
+| custvendneginstprotestprocess | bigint | 8 | 1 |  |  |  |
+| detailsummaryposting | bigint | 8 | 1 |  |  |  |
+| eurotriangulation | bigint | 8 | 1 |  |  |  |
+| fixedexchrate | bigint | 8 | 1 |  |  |  |
+| fixedoffsetaccount | bigint | 8 | 1 |  |  |  |
+| journaltype | bigint | 8 | 1 |  |  |  |
+| ledgerjournalincltax | bigint | 8 | 1 |  |  |  |
+| offsetaccounttype | bigint | 8 | 1 |  |  |  |
+| paymentsgenerated_it | bigint | 8 | 1 |  |  |  |
+| posted | bigint | 8 | 1 |  |  |  |
+| protestsettledbill | bigint | 8 | 1 |  |  |  |
+| removelineafterposting | bigint | 8 | 1 |  |  |  |
+| reverseentry | bigint | 8 | 1 |  |  |  |
+| systemblocked | bigint | 8 | 1 |  |  |  |
+| taxobligationcompany | bigint | 8 | 1 |  |  |  |
+| voucherallocatedatposting | bigint | 8 | 1 |  |  |  |
+| workflowapprovalstatus | bigint | 8 | 1 |  |  |  |
+| isledgerdimensionnameupdated | bigint | 8 | 1 |  |  |  |
+| reportingcurrencyfixedexchrate | bigint | 8 | 1 |  |  |  |
+| delaytaxcalculation | bigint | 8 | 1 |  |  |  |
+| overridesalestax | bigint | 8 | 1 |  |  |  |
+| isadjustmentjournal | bigint | 8 | 1 |  |  |  |
+| systemblockedreason | bigint | 8 | 1 |  |  |  |
+| simulationposted_it | bigint | 8 | 1 |  |  |  |
+| banktranssummarizationenabled | bigint | 8 | 1 |  |  |  |
+| banktranssummarizationcriteria | bigint | 8 | 1 |  |  |  |
+| sysdatastatecode | bigint | 8 | 1 |  |  |  |
+| userblockid | varchar | 8000 | 1 |  |  |  |
+| approver | bigint | 8 | 1 |  |  |  |
+| bankaccountid | varchar | 8000 | 1 |  |  |  |
+| currencycode | varchar | 8000 | 1 |  |  |  |
+| defaultdimension | bigint | 8 | 1 |  |  |  |
+| documentnum | varchar | 8000 | 1 |  |  |  |
+| endbalance | decimal | 17 | 1 |  |  |  |
+| exchrate | decimal | 17 | 1 |  |  |  |
+| exchratesecondary | decimal | 17 | 1 |  |  |  |
+| groupblockid | varchar | 8000 | 1 |  |  |  |
+| inuseby | varchar | 8000 | 1 |  |  |  |
+| journalbalance | decimal | 17 | 1 |  |  |  |
+| journalname | varchar | 8000 | 1 |  |  |  |
+| journalnum | varchar | 8000 | 1 |  |  |  |
+| journaltotalcredit | decimal | 17 | 1 |  |  |  |
+| journaltotaldebit | decimal | 17 | 1 |  |  |  |
+| journaltotaloffsetbalance | decimal | 17 | 1 |  |  |  |
+| lineslimitbeforedistribution | bigint | 8 | 1 |  |  |  |
+| log | varchar | 8000 | 1 |  |  |  |
+| name | varchar | 8000 | 1 |  |  |  |
+| numbersequencetable | bigint | 8 | 1 |  |  |  |
+| numoflines | bigint | 8 | 1 |  |  |  |
+| offsetledgerdimension | bigint | 8 | 1 |  |  |  |
+| originalcompany | varchar | 8000 | 1 |  |  |  |
+| originaljournalnum | varchar | 8000 | 1 |  |  |  |
+| parentjournalnum | varchar | 8000 | 1 |  |  |  |
+| posteddatetime | datetime2 | 8 | 1 |  |  |  |
+| rejectedby | varchar | 8000 | 1 |  |  |  |
+| reportedasreadyby | varchar | 8000 | 1 |  |  |  |
+| retailstatementid | varchar | 8000 | 1 |  |  |  |
+| reversedate | datetime2 | 8 | 1 |  |  |  |
+| sessionid | bigint | 8 | 1 |  |  |  |
+| sessionlogindatetime | datetime2 | 8 | 1 |  |  |  |
+| reportingcurrencyexchrate | decimal | 17 | 1 |  |  |  |
+| reportingcurrencyexchratesecondary | decimal | 17 | 1 |  |  |  |
+| journaltotalcreditreportingcurrency | decimal | 17 | 1 |  |  |  |
+| journaltotaldebitreportingcurrency | decimal | 17 | 1 |  |  |  |
+| integrationkey | varchar | 8000 | 1 |  |  |  |
+| fintag | bigint | 8 | 1 |  |  |  |
+| assetleaseprocessid | varchar | 8000 | 1 |  |  |  |
+| revrecreallocationid | varchar | 8000 | 1 |  |  |  |
+| modifieddatetime | datetime2 | 8 | 1 |  |  |  |
+| modifiedby | varchar | 8000 | 1 |  |  |  |
+| modifiedtransactionid | bigint | 8 | 1 |  |  |  |
+| createddatetime | datetime2 | 8 | 1 |  |  |  |
+| createdby | varchar | 8000 | 1 |  |  |  |
+| createdtransactionid | bigint | 8 | 1 |  |  |  |
+| dataareaid | varchar | 8000 | 1 |  |  |  |
+| recversion | bigint | 8 | 1 |  |  |  |
+| partition | bigint | 8 | 1 |  |  |  |
+| sysrowversion | bigint | 8 | 1 |  |  |  |
+| recid | bigint | 8 | 1 |  |  |  |
+| tableid | bigint | 8 | 1 |  |  |  |
+| versionnumber | bigint | 8 | 1 |  |  |  |
+| createdon | datetime2 | 8 | 1 |  |  |  |
+| modifiedon | datetime2 | 8 | 1 |  |  |  |
+| IsDelete | bit | 1 | 1 |  |  |  |
+| createdonpartition | varchar | 8000 | 1 |  |  |  |
+| PartitionId | varchar | 2048 | 1 |  |  |  |

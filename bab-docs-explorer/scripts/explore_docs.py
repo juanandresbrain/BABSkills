@@ -340,6 +340,159 @@ def parse_job_file(file_path, server_fallback):
         "steps": steps
     }
 
+def parse_pbi_report_file(file_path, server_fallback):
+    """Power BI report doc: DataDictionary/<Workspace>/<Report>.md. Covers both
+    fully-documented reports (pages/visuals/field dependencies) and the
+    "model only" stub emitted when the report's own layout couldn't be
+    extracted but its semantic model was."""
+    try:
+        content = file_path.read_text(encoding='utf-8-sig', errors='ignore')
+    except Exception:
+        return None
+
+    h1_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+    report_name = h1_match.group(1).strip() if h1_match else file_path.stem
+
+    def meta(label):
+        m = re.search(r'\*\*' + re.escape(label) + r':\*\*\s*(.+?)\s*$', content, re.MULTILINE)
+        return m.group(1).strip() if m else ""
+
+    model_name, model_path = "", ""
+    m = re.search(r'\*\*Semantic Model:\*\*\s*\[([^\]]+)\]\(([^)]+)\)', content)
+    if m:
+        model_name, model_path = m.group(1), m.group(2)
+
+    fields = []
+    dep_sec = re.search(r'## Field Dependencies\s*\n\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if dep_sec:
+        table_lines = dep_sec.group(1).strip().split('\n')
+        if len(table_lines) > 2:
+            for line in table_lines[2:]:
+                parts = [p.strip() for p in line.split('|')[1:-1]]
+                if parts and parts[0]:
+                    fields.append(parts[0])
+
+    pages = []
+    pages_sec = re.search(r'## Pages\s*\n\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if pages_sec:
+        table_lines = pages_sec.group(1).strip().split('\n')
+        if len(table_lines) > 2:
+            for line in table_lines[2:]:
+                parts = [p.strip() for p in line.split('|')[1:-1]]
+                if len(parts) >= 2:
+                    pages.append({"page": parts[0], "visual_count": parts[1]})
+
+    visuals = []
+    visuals_sec = re.search(r'## Visuals\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if visuals_sec:
+        for block in re.split(r'(?m)^### ', visuals_sec.group(1))[1:]:
+            lines = block.strip().split('\n')
+            page_name = lines[0].strip()
+            for line in lines[1:]:
+                if line.strip().startswith('|') and not re.match(r'^\|[\s\-|]+\|$', line.strip()) \
+                        and not line.strip().startswith('| Visual |'):
+                    parts = [p.strip() for p in line.split('|')[1:-1]]
+                    if len(parts) >= 3:
+                        visuals.append({"page": page_name, "visual": parts[0], "type": parts[1], "fields": parts[2]})
+
+    is_stub = False
+    reason = ""
+    stub_m = re.search(r'## Visual Layout\s*\n\s*\n_Not available:\s*(.+?)\._', content, re.DOTALL)
+    if stub_m:
+        is_stub = True
+        reason = stub_m.group(1).strip()
+
+    return {
+        "file_path": str(file_path),
+        "report_name": report_name,
+        "workspace": meta("Workspace") or server_fallback,
+        "server": server_fallback,
+        "report_id": meta("Report ID"),
+        "dataset_id": meta("Dataset ID"),
+        "web_url": meta("Web URL"),
+        "model_name": model_name,
+        "model_path": model_path,
+        "fields": fields,
+        "pages": pages,
+        "visuals": visuals,
+        "is_stub": is_stub,
+        "reason": reason,
+    }
+
+
+def parse_pbi_model_file(file_path, server_fallback):
+    """Power BI semantic model doc: SemanticModels/<Workspace>/<Dataset>.md -
+    tables, DAX measures, Power Query (M) source per table, shared
+    expressions, and detected SQL data-source cross-references."""
+    try:
+        content = file_path.read_text(encoding='utf-8-sig', errors='ignore')
+    except Exception:
+        return None
+
+    h1_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+    model_name = h1_match.group(1).strip() if h1_match else file_path.stem
+
+    def meta(label):
+        m = re.search(r'\*\*' + re.escape(label) + r':\*\*\s*(.+?)\s*$', content, re.MULTILINE)
+        return m.group(1).strip() if m else ""
+
+    tables = []
+    tbl_sec = re.search(r'## Tables\s*\n\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if tbl_sec:
+        table_lines = tbl_sec.group(1).strip().split('\n')
+        if len(table_lines) > 2:
+            for line in table_lines[2:]:
+                parts = [p.strip() for p in line.split('|')[1:-1]]
+                if len(parts) >= 3:
+                    tables.append({"table": parts[0], "columns": parts[1], "measures": parts[2]})
+
+    measures = []
+    ms_split = re.search(r'## Measures\s*\n(.*?)(?=\n## Power Query Source|\Z)', content, re.DOTALL)
+    if ms_split:
+        for mm in re.finditer(r'(?m)^### (.+?)\.(.+?)\s*\n\s*\n```sql\n(.*?)\n```', ms_split.group(1), re.DOTALL):
+            measures.append({"table": mm.group(1).strip(), "measure": mm.group(2).strip(),
+                              "expression": mm.group(3).strip()})
+
+    queries = []
+    pq_split = re.search(
+        r'## Power Query Source \(per table\)\s*\n(.*?)(?=\n## Shared Expressions|\n## Data Source Cross-References|\Z)',
+        content, re.DOTALL)
+    if pq_split:
+        for mm in re.finditer(r'(?m)^### (.+?)\s*\n\s*\n```sql\n(.*?)\n```', pq_split.group(1), re.DOTALL):
+            queries.append({"table": mm.group(1).strip(), "query": mm.group(2).strip()})
+
+    expressions = []
+    ex_split = re.search(r'## Shared Expressions\s*\n(.*?)(?=\n## Data Source Cross-References|\Z)',
+                          content, re.DOTALL)
+    if ex_split:
+        for mm in re.finditer(r'(?m)^### (.+?)\s*\n\s*\n```sql\n(.*?)\n```', ex_split.group(1), re.DOTALL):
+            expressions.append({"name": mm.group(1).strip(), "expression": mm.group(2).strip()})
+
+    cross_refs = []
+    cr_sec = re.search(r'## Data Source Cross-References\s*\n\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if cr_sec:
+        table_lines = cr_sec.group(1).strip().split('\n')
+        if len(table_lines) > 2:
+            for line in table_lines[2:]:
+                parts = [p.strip() for p in line.split('|')[1:-1]]
+                if len(parts) >= 3:
+                    cross_refs.append({"server": parts[0], "database": parts[1], "link": parts[2]})
+
+    return {
+        "file_path": str(file_path),
+        "model_name": model_name,
+        "workspace": meta("Workspace") or server_fallback,
+        "server": server_fallback,
+        "dataset_id": meta("Dataset ID"),
+        "tables": tables,
+        "measures": measures,
+        "queries": queries,
+        "expressions": expressions,
+        "cross_refs": cross_refs,
+        "raw_content": content,
+    }
+
+
 class DocExplorer:
     def __init__(self, docs_dir, server_filter=None):
         self.docs_dir = Path(docs_dir).resolve()
@@ -351,6 +504,8 @@ class DocExplorer:
         self.views = []
         self.packages = []
         self.jobs = []
+        self.pbi_reports = []
+        self.pbi_models = []
         self.servers = []
         self._loaded = False
 
@@ -360,7 +515,8 @@ class DocExplorer:
         Supports both the multi-server layout (docs_dir/<server>/DataDictionary/...)
         and a flat single-server layout (docs_dir/DataDictionary/...).
         """
-        if any((self.docs_dir / k).is_dir() for k in OBJECT_FOLDERS):
+        trigger_folders = OBJECT_FOLDERS + ["SemanticModels"]
+        if any((self.docs_dir / k).is_dir() for k in trigger_folders):
             yield (self.docs_dir.name, self.docs_dir)
             return
         try:
@@ -368,7 +524,7 @@ class DocExplorer:
         except Exception:
             children = []
         for child in children:
-            if any((child / k).is_dir() for k in OBJECT_FOLDERS):
+            if any((child / k).is_dir() for k in trigger_folders):
                 yield (child.name, child)
 
     def load_all(self):
@@ -378,13 +534,32 @@ class DocExplorer:
         for server_name, root in self._server_roots():
             self.servers.append(server_name)
 
+            # A "SemanticModels" sibling folder is the signal this is the
+            # Power BI tree (Documentation/PowerBI/...), where DataDictionary
+            # holds report docs (Workspace/Report ID/Pages/Visuals), not
+            # SQL-shaped table docs (Database/Columns) - route accordingly.
+            is_pbi = (root / "SemanticModels").is_dir()
+
             table_dir = root / "DataDictionary"
             if table_dir.exists():
                 for f in table_dir.rglob("*.md"):
                     if f.name != "_index.md":
-                        tbl = parse_table_file(f, server_name)
-                        if tbl:
-                            self.tables.append(tbl)
+                        if is_pbi:
+                            rpt = parse_pbi_report_file(f, server_name)
+                            if rpt:
+                                self.pbi_reports.append(rpt)
+                        else:
+                            tbl = parse_table_file(f, server_name)
+                            if tbl:
+                                self.tables.append(tbl)
+
+            if is_pbi:
+                model_dir = root / "SemanticModels"
+                for f in model_dir.rglob("*.md"):
+                    if f.name != "_index.md":
+                        mdl = parse_pbi_model_file(f, server_name)
+                        if mdl:
+                            self.pbi_models.append(mdl)
 
             sp_dir = root / "StoredProcedures"
             if sp_dir.exists():
@@ -455,6 +630,19 @@ class DocExplorer:
         self.load_all()
         return [j for j in self.jobs if self._server_ok(j) and name_matches(j["job_name"], query)]
 
+    def find_report(self, query):
+        self.load_all()
+        return [r for r in self.pbi_reports if name_matches(r["report_name"], query)]
+
+    def find_semantic_model(self, query):
+        self.load_all()
+        return [m for m in self.pbi_models if name_matches(m["model_name"], query)]
+
+    def find_reports_for_model(self, dataset_id):
+        if not dataset_id:
+            return []
+        return [r for r in self.pbi_reports if r.get("dataset_id") == dataset_id]
+
     def trace_table(self, query):
         self.load_all()
 
@@ -472,7 +660,8 @@ class DocExplorer:
             "functions": [],
             "views": [],
             "ssis_packages": [],
-            "sql_agent_jobs": []
+            "sql_agent_jobs": [],
+            "powerbi_semantic_models": []
         }
 
         for table in matching_tables:
@@ -583,6 +772,31 @@ class DocExplorer:
                         "server": job["server"],
                         "enabled": job["enabled"],
                         "steps": matched_steps
+                    })
+
+            # 5. Check PowerBI semantic models (Data Source Cross-References
+            # table, plus a raw text fallback over the Power Query/M source).
+            norm_table = normalize_name(table)
+            for mdl in self.pbi_models:
+                if not self._server_ok(mdl):
+                    continue
+                matched_cr = [cr for cr in mdl["cross_refs"]
+                              if name_matches(cr.get("database", ""), table)]
+                in_query = False
+                if not matched_cr:
+                    for q in mdl["queries"]:
+                        if norm_table in normalize_name(q["query"]):
+                            in_query = True
+                            break
+                if matched_cr or in_query:
+                    reports = self.find_reports_for_model(mdl.get("dataset_id"))
+                    trace_results["powerbi_semantic_models"].append({
+                        "name": mdl["model_name"],
+                        "workspace": mdl["workspace"],
+                        "file_path": mdl["file_path"],
+                        "type": "cross_reference" if matched_cr else "referenced_in_query",
+                        "matched_databases": [cr["database"] for cr in matched_cr],
+                        "reports": [{"name": r["report_name"], "file_path": r["file_path"]} for r in reports]
                     })
 
         return trace_results
@@ -797,6 +1011,21 @@ class DocExplorer:
             if kw_lower in job["job_name"].lower() or step_match:
                 results.append({"type": "SQL Agent Job", "name": job["job_name"], "server": job["server"], "file": job["file_path"]})
 
+        for rpt in self.pbi_reports:
+            if not self._server_ok(rpt):
+                continue
+            field_match = any(kw_lower in f.lower() for f in rpt["fields"])
+            if kw_lower in rpt["report_name"].lower() or field_match:
+                results.append({"type": "PowerBI Report", "name": rpt["report_name"], "server": rpt["workspace"], "file": rpt["file_path"]})
+
+        for mdl in self.pbi_models:
+            if not self._server_ok(mdl):
+                continue
+            measure_match = any(kw_lower in m["measure"].lower() or kw_lower in m["expression"].lower() for m in mdl["measures"])
+            query_match = any(kw_lower in q["table"].lower() or kw_lower in q["query"].lower() for q in mdl["queries"])
+            if kw_lower in mdl["model_name"].lower() or measure_match or query_match:
+                results.append({"type": "PowerBI Semantic Model", "name": mdl["model_name"], "server": mdl["workspace"], "file": mdl["file_path"]})
+
         return results
 
 # Text output formatters
@@ -940,6 +1169,86 @@ def format_job_markdown(job):
             md.append("_No command text._\n")
     return "\n".join(md)
 
+def format_report_markdown(rpt):
+    md = []
+    md.append(f"# PowerBI Report: {rpt['report_name']}")
+    md.append(f"**Workspace:** {rpt.get('workspace', 'Unknown')}  ")
+    if rpt.get("report_id"):
+        md.append(f"**Report ID:** {rpt['report_id']}  ")
+    if rpt.get("web_url"):
+        md.append(f"**Web URL:** {rpt['web_url']}  ")
+    if rpt.get("model_name"):
+        md.append(f"**Semantic Model:** {rpt['model_name']}  ")
+    md.append(f"**Documentation File:** [{Path(rpt['file_path']).name}](file:///{rpt['file_path'].replace(os.sep, '/')})  \n")
+
+    if rpt.get("is_stub"):
+        md.append(f"_Visual layout not available: {rpt['reason']}._")
+        md.append("_(Full detail may still exist in the linked semantic model above: tables, measures, Power Query source.)_")
+        return "\n".join(md)
+
+    md.append("## Field Dependencies\n")
+    if rpt["fields"]:
+        for f in rpt["fields"]:
+            md.append(f"- {f}")
+    else:
+        md.append("_No documented field dependencies._")
+
+    md.append("\n## Pages\n")
+    if rpt["pages"]:
+        md.append("| Page | Visuals |")
+        md.append("|---|---|")
+        for p in rpt["pages"]:
+            md.append(f"| {p['page']} | {p['visual_count']} |")
+    else:
+        md.append("_No pages detected._")
+
+    md.append("\n## Visuals\n")
+    if rpt["visuals"]:
+        md.append("| Page | Visual | Type | Fields |")
+        md.append("|---|---|---|---|")
+        for v in rpt["visuals"]:
+            md.append(f"| {v['page']} | {v['visual']} | {v['type']} | {v['fields']} |")
+    else:
+        md.append("_No visuals detected._")
+    return "\n".join(md)
+
+
+def format_semanticmodel_markdown(mdl):
+    md = []
+    md.append(f"# PowerBI Semantic Model: {mdl['model_name']}")
+    md.append(f"**Workspace:** {mdl.get('workspace', 'Unknown')}  ")
+    if mdl.get("dataset_id"):
+        md.append(f"**Dataset ID:** {mdl['dataset_id']}  ")
+    md.append(f"**Documentation File:** [{Path(mdl['file_path']).name}](file:///{mdl['file_path'].replace(os.sep, '/')})  \n")
+
+    md.append("## Tables\n")
+    if mdl["tables"]:
+        md.append("| Table | Columns | Measures |")
+        md.append("|---|---|---|")
+        for t in mdl["tables"]:
+            md.append(f"| {t['table']} | {t['columns']} | {t['measures']} |")
+    else:
+        md.append("_No tables detected._")
+
+    md.append("\n## Measures\n")
+    if mdl["measures"]:
+        for m in mdl["measures"]:
+            md.append(f"### {m['table']}.{m['measure']}\n")
+            md.append(f"```sql\n{m['expression']}\n```\n")
+    else:
+        md.append("_No measures detected._")
+
+    md.append("\n## Data Source Cross-References\n")
+    if mdl["cross_refs"]:
+        md.append("| Server | Database | Linked SQL Documentation |")
+        md.append("|---|---|---|")
+        for cr in mdl["cross_refs"]:
+            md.append(f"| {cr['server']} | {cr['database']} | {cr['link']} |")
+    else:
+        md.append("_No recognized SQL data source references detected._")
+    return "\n".join(md)
+
+
 def format_trace_markdown(trace):
     md = []
     md.append(f"# Lineage Trace: {trace['query']}")
@@ -978,6 +1287,16 @@ def format_trace_markdown(trace):
         for job in trace["sql_agent_jobs"]:
             steps_desc = ", ".join(f"Step {s['step_num']} ({s['subsystem']})" for s in job["steps"])
             md.append(f"- **{job['name']}** (Server: {job.get('server', '?')}, Enabled: {job['enabled']}) - steps: {steps_desc} - [File]({job['file_path']})")
+    else:
+        md.append("_None found._")
+
+    md.append("\n## PowerBI Semantic Models referencing table")
+    if trace.get("powerbi_semantic_models"):
+        for mdl in trace["powerbi_semantic_models"]:
+            dbs = f" (matched database: {', '.join(mdl['matched_databases'])})" if mdl.get("matched_databases") else ""
+            md.append(f"- **{mdl['name']}** (Workspace: {mdl['workspace']}, Match: {mdl['type']}){dbs} - [File]({mdl['file_path']})")
+            for r in mdl.get("reports", []):
+                md.append(f"  - Used by report: **{r['name']}** - [File]({r['file_path']})")
     else:
         md.append("_None found._")
 
@@ -1092,6 +1411,12 @@ def main():
     p_desc_pkg = subparsers.add_parser("describe-package", help="Inspect an SSIS package by name")
     p_desc_pkg.add_argument("package_name", help="Name of the SSIS package")
 
+    p_desc_report = subparsers.add_parser("describe-report", help="Inspect a PowerBI report by name")
+    p_desc_report.add_argument("report_name", help="Name of the PowerBI report")
+
+    p_desc_model = subparsers.add_parser("describe-semantic-model", help="Inspect a PowerBI semantic model (dataset) by name")
+    p_desc_model.add_argument("model_name", help="Name of the PowerBI semantic model/dataset")
+
     p_search = subparsers.add_parser("search-all", help="Perform a text search across all documentation files")
     p_search.add_argument("keyword", help="Term to search for")
 
@@ -1137,14 +1462,17 @@ def main():
                     "views": sum(1 for x in explorer.views if x["server"] == s),
                     "ssis_packages": sum(1 for x in explorer.packages if x["server"] == s),
                     "jobs": sum(1 for x in explorer.jobs if x["server"] == s),
+                    "pbi_reports": sum(1 for x in explorer.pbi_reports if x["server"] == s),
+                    "pbi_models": sum(1 for x in explorer.pbi_models if x["server"] == s),
                 }
             result_data = {"servers": explorer.servers, "counts": counts}
             md = ["# Servers in Documentation Set\n"]
-            md.append("| Server | Tables | Stored Procedures | Functions | Views | SSIS | Jobs |")
-            md.append("|---|---|---|---|---|---|---|")
+            md.append("| Server | Tables | Stored Procedures | Functions | Views | SSIS | Jobs | PBI Reports | PBI Models |")
+            md.append("|---|---|---|---|---|---|---|---|---|")
             for s in explorer.servers:
                 c = counts[s]
-                md.append(f"| {s} | {c['tables']} | {c['stored_procedures']} | {c['functions']} | {c['views']} | {c['ssis_packages']} | {c['jobs']} |")
+                md.append(f"| {s} | {c['tables']} | {c['stored_procedures']} | {c['functions']} | {c['views']} | "
+                          f"{c['ssis_packages']} | {c['jobs']} | {c['pbi_reports']} | {c['pbi_models']} |")
             output_text = "\n".join(md)
 
         elif args.command == "find-table":
@@ -1211,6 +1539,26 @@ def main():
             else:
                 result_data = pkgs[0] if len(pkgs) == 1 else pkgs
                 output_text = "\n\n---\n\n".join(format_package_markdown(p) for p in pkgs)
+
+        elif args.command == "describe-report":
+            rpts = explorer.find_report(args.report_name)
+            if not rpts:
+                print(f"[WARNING] No PowerBI report matched query '{args.report_name}'", file=sys.stderr)
+                result_data = {"error": f"No PowerBI report matched query '{args.report_name}'"}
+                output_text = f"# PowerBI Report Search: {args.report_name}\n\nNo matching report found."
+            else:
+                result_data = rpts[0] if len(rpts) == 1 else rpts
+                output_text = "\n\n---\n\n".join(format_report_markdown(r) for r in rpts)
+
+        elif args.command == "describe-semantic-model":
+            mdls = explorer.find_semantic_model(args.model_name)
+            if not mdls:
+                print(f"[WARNING] No PowerBI semantic model matched query '{args.model_name}'", file=sys.stderr)
+                result_data = {"error": f"No PowerBI semantic model matched query '{args.model_name}'"}
+                output_text = f"# PowerBI Semantic Model Search: {args.model_name}\n\nNo matching semantic model found."
+            else:
+                result_data = mdls[0] if len(mdls) == 1 else mdls
+                output_text = "\n\n---\n\n".join(format_semanticmodel_markdown(m) for m in mdls)
 
         elif args.command == "search-all":
             search_res = explorer.search_all(args.keyword)

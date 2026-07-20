@@ -1,15 +1,15 @@
 ---
 name: bab-docs-explorer
 description: >-
-  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, and SQL Agent jobs in the BAB Engineering Data Architecture documentation, spanning all five servers (bearcluster01, bedrockdb01, bedrockdb02, papamart, STL-SSIS-P-01). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
+  Search, navigate, and trace upstream/downstream data lineage across tables, stored procedures, functions, views, SSIS packages, SQL Agent jobs, and PowerBI reports/semantic models in the BAB Engineering Data Architecture documentation, spanning all six SQL servers (bearcluster01, bedrockdb01, bedrockdb02, papamart, STL-SSIS-P-01, and the Fabric Data Warehouse/Lakehouse endpoint) plus PowerBI (reports, pages, visuals, measures, Power Query source). Useful for debugging data discrepancies and resolving report bugs from ConnectWise tickets.
 ---
 
 # BAB Data Architecture Explorer
 
 ## Overview
-This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **5 servers, ~66 databases, ~12,425 tables, ~9,310 stored procedures, ~191 functions, ~2,867 views, 265 SSIS packages, and 621 SQL Agent jobs**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, and determine which SQL Agent jobs or SSIS packages run them.
+This skill provides automated commands to explore the BAB Engineering Data Architecture documentation. It traces data lineage across **6 SQL servers (~87 databases, ~14,799 tables, ~11,961 stored procedures, ~198 functions, ~3,858 views, 265 SSIS packages, 621 SQL Agent jobs) plus PowerBI (433 reports, 85 semantic models, 6,726 DAX measures)**. Use it to investigate data discrepancies, identify where specific tables/columns are populated, determine which SQL Agent jobs or SSIS packages run them, and trace which PowerBI reports/semantic models pull from a given SQL table.
 
-The documentation is **bundled inside this skill** at `Documentation/`, organized by server, so no external paths are needed:
+The documentation is **bundled inside this skill** at `Documentation/`, organized by server (SQL) or platform (PowerBI), so no external paths are needed:
 
 | Server | Tables | Stored Procedures | Functions | Views | SSIS | Jobs |
 |---|---|---|---|---|---|---|
@@ -18,8 +18,15 @@ The documentation is **bundled inside this skill** at `Documentation/`, organize
 | bedrockdb02 | ~4,971 | ~4,408 | ~35 | ~870 | 0 | ~170 |
 | papamart | ~1,676 | ~1,035 | ~76 | ~742 | 0 | ~59 |
 | STL-SSIS-P-01 | ~931 | ~547 | ~21 | ~305 | ~265 | ~289 |
+| 4db76...fabric.microsoft.com (Fabric DW/Lakehouse) | ~2,296 | ~24 | ~7 | ~977 | 0 | 0 |
 
-> Because names repeat across servers (e.g. `dbo.CommandLog` exists on several), most queries return **one result per server**. Use `--server` to narrow to a single server. Run `list-servers` to see the current breakdown.
+> The Fabric server's identifier is the full endpoint hostname `4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com` - it's the backing SQL endpoint for several Fabric Lakehouses/Warehouses (`LH_Source`, `LH_Mart`, `LH_D365`, `WH_Papamart`, etc.) that multiple PowerBI semantic models connect to directly. `--server 4db76` (a substring) is enough to filter to it.
+
+| Platform | Reports | Semantic Models | Measures |
+|---|---|---|---|
+| PowerBI | 433 (129 full page/visual detail, 240 model-only, 64 not available) | 85 | 6,726 |
+
+> Because names repeat across servers (e.g. `dbo.CommandLog` exists on several, and PowerBI report names repeat across workspaces), most queries return **one result per server/workspace**. Use `--server` to narrow to a single server (also matches `PowerBI`). Run `list-servers` to see the current breakdown.
 
 ## Dependencies
 Python 3 only. On Windows, if `python` is not found, use the `py` launcher instead (e.g. `py scripts/explore_docs.py ...`).
@@ -47,7 +54,7 @@ Generates a structured, tree-like lineage map tracing who populates the table.
   `Table` 🡨 `View` / `SSIS Package` / `Stored Procedure` 🡨 `SQL Agent Job(s)` 🡨 `Parent Job(s)`
 
 ### 2. `trace-table <table_name>`
-Finds all Stored Procedures, Functions, Views, SSIS Packages, and SQL Agent Jobs referencing the table (each result tagged with its server).
+Finds all Stored Procedures, Functions, Views, SSIS Packages, SQL Agent Jobs, and **PowerBI semantic models** referencing the table (each result tagged with its server/workspace). A PowerBI match comes from either the model's `Data Source Cross-References` table (precise: the Power Query source literally connects to `<server>`/`<database>`) or a loose text match inside the Power Query/M source, and lists which PowerBI report(s) use that semantic model.
 - **Example**:
   ```bash
   python scripts/explore_docs.py trace-table CustomerLeadGenStage
@@ -96,19 +103,38 @@ Shows step-by-step instructions, subsystems (TSQL, SSIS, CmdExec), and source co
   python scripts/explore_docs.py describe-job CustomerTransactionETL
   ```
 
-### 9. `search-all <keyword>`
-Searches for text references in names, column descriptions, and code blocks across all components (Tables, SPs, Functions, Views, SSIS, Jobs) on every server. Results include the server column.
+### 9. `describe-report <report_name>`
+Inspects a PowerBI report: workspace, dataset it's built on, field dependencies, pages, and every visual (type + fields used per visual). If the report's own page/visual layout couldn't be extracted (Fabric/Premium storage format, Direct Lake, or viewer-only permissions), shows the reason instead and points to the linked semantic model, which is documented independently via the XMLA endpoint regardless of that limitation.
+- **Example**:
+  ```bash
+  python scripts/explore_docs.py describe-report "GAAP Flash Sales Report"
+  ```
+
+### 10. `describe-semantic-model <model_name>`
+Inspects a PowerBI semantic model (dataset): tables, DAX measures (full expression), Power Query (M) source per table, shared expressions, and detected SQL data-source cross-references (e.g. a table's Power Query source connecting to `Sql.Database("papamart", "dw")` is linked straight back to that server's data dictionary).
+- **Example**:
+  ```bash
+  python scripts/explore_docs.py describe-semantic-model "GAAP Flash Sales Report"
+  ```
+
+### 11. `search-all <keyword>`
+Searches for text references in names, column descriptions, and code blocks across all components (Tables, SPs, Functions, Views, SSIS, Jobs, PowerBI Reports, PowerBI Semantic Models) on every server/workspace. Results include the server column.
 - **Example**:
   ```bash
   python scripts/explore_docs.py search-all "FirstData"
   ```
 
-### 10. `list-servers`
-Lists the servers found in the documentation set and per-server object counts. Useful to confirm coverage before filtering with `--server`.
+### 12. `list-servers`
+Lists the servers/platforms found in the documentation set and per-server object counts (including PowerBI report/semantic-model counts). Useful to confirm coverage before filtering with `--server`.
 - **Example**:
   ```bash
   python scripts/explore_docs.py list-servers
   ```
+
+## Regenerating Documentation
+This skill's `Documentation/` folder is a **manually-synced copy** of the master copy at the repo root (`BABEngineering/Documentation/`) — the same pattern used for SSIS. After refreshing any inventory and regenerating docs, copy the updated folder(s) in:
+- SQL servers: `py GenerateServerDocs.py <server>` / `py GenerateFunctionDocs.py` / `py GenerateSsisDocs.py`, then copy the changed `Documentation/<server>/...` subfolder into `bab-docs-explorer/Documentation/<server>/...`.
+- PowerBI: `py GeneratePowerBIDocs.py` (reads `Inventory/PowerBI/*.csv`, itself refreshed via `Get-PowerBIReportInventory.ps1` / `Get-PowerBIFullInventory.ps1` / `Get-PowerBISemanticModelInventory.ps1`), then copy `Documentation/PowerBI/` into `bab-docs-explorer/Documentation/PowerBI/`.
 
 ## Key Flags
 - `--server <name>`: Restrict results to a single server (loose/substring match), e.g. `--server bedrockdb02`, `--server bearcluster01`, `--server STL`. Applies to every command above.
@@ -122,3 +148,5 @@ Lists the servers found in the documentation set and per-server object counts. U
 3. **Missing Out-of-Doc references**: Tracing highlights when a Stored Procedure, View, or Job command references an object that has no dedicated documentation file (noted as a reference, but its columns can't be fetched).
 4. **Checking stdout instead of output files**: The script writes details to `explorer_output.md` to prevent terminal output truncation. Always view the generated file to read the full report.
 5. **`python` not found on Windows**: Use the `py` launcher instead (`py scripts/explore_docs.py ...`).
+6. **PowerBI report names repeat across workspaces even more than SQL objects do** (e.g. "GAAP Flash Sales Report" exists in multiple workspaces with different data) — always check the `**Workspace:**` line on each result.
+7. **A PowerBI report with no page/visual detail isn't necessarily undocumented** — check its `**Semantic Model:**` link; tables, measures, and Power Query source are often still fully documented even when the report's own layout couldn't be extracted (see the "Model Only" count in `list-servers`/the workspace `_index.md`).

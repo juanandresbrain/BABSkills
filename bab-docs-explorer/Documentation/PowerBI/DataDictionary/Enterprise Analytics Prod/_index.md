@@ -1,0 +1,80 @@
+# Data Dictionary: Enterprise Analytics Prod
+
+| Report | Pages | Visuals | Status |
+|---|---|---|---|
+| [Bonus Club Capture Report](Bonus Club Capture Report.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [Cycle Count Approval Report](Cycle Count Approval Report.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [E-Commerce - Daily Inventory - Daily](E-Commerce - Daily Inventory - Daily.md) | 1 | 4 | Documented |
+| [Finance – End of Period Sales Reconciliation – Monthly](Finance – End of Period Sales Reconciliation – Monthly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Freight Factor – Ad Hoc](Finance – Freight Factor – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Freight On Board (FOB) Royalty Report – On Demand](Finance – Freight On Board (FOB) Royalty Report – On Demand.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Inventory Transaction Detail – Ad Hoc](Finance – Inventory Transaction Detail – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Receipt Cost Analysis – Ad Hoc](Finance – Receipt Cost Analysis – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Receipts Report– Ad Hoc](Finance – Receipts Report– Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Royalty Reports – Monthly & Quarterly](Finance – Royalty Reports – Monthly & Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Finance – Royalty SKUs by Licensor – Ad Hoc](Finance – Royalty SKUs by Licensor – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [FlashSales](FlashSales.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [FlashSales_](FlashSales_.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [GAAP Sales Report](GAAP Sales Report.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [Gift Card Activations](Gift Card Activations.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Gift Card Bonus Report](Gift Card Bonus Report.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [Guest Transactions Report](Guest Transactions Report.md) | 1 | 33 | Documented |
+| [JM GC Sold by GC #](JM GC Sold by GC #.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Logistics – Style Master and Supply Chain Attribute Reference – Weekly](Logistics – Style Master and Supply Chain Attribute Reference – Weekly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [MIN MAX PROFILES - LOC](MIN MAX PROFILES - LOC.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Merchandise Aggregate Semantic Model](Merchandise Aggregate Semantic Model.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Merchandise Aggregate Semantic Model 2](Merchandise Aggregate Semantic Model 2.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Merchandise Aggregate Semantic Model Report](Merchandise Aggregate Semantic Model Report.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Merchandise Transactional Model](Merchandise Transactional Model.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Merchandise Transactional Model Report](Merchandise Transactional Model Report.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| Min Max | - | - | Parse: Exception calling "OpenRead" with "1" argument(s): "End of Central Directory record could not be found." |
+| [PBI_Adhoc](PBI_Adhoc.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [Planning and Allocation –  Store Inventory Evaluation – Ad Hoc](Planning and Allocation –  Store Inventory Evaluation – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – 53 Week Inventory and Sales Ladder Analysis – Annual](Planning and Allocation – 53 Week Inventory and Sales Ladder Analysis – Annual.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – 53 Week Item Unit Sales by Style and Location – Ad Hoc](Planning and Allocation – 53 Week Item Unit Sales by Style and Location – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – ATRIUM Channel Inventory and 12 Week On Order Position – Ad Hoc](Planning and Allocation – ATRIUM Channel Inventory and 12 Week On Order Position – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Comprehensive On Order Detail – Ad Hoc](Planning and Allocation – Comprehensive On Order Detail – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Corporate Product Master Data – Ad Hoc](Planning and Allocation – Corporate Product Master Data – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Cost and Inventory Position Detail – Ad Hoc](Planning and Allocation – Cost and Inventory Position Detail – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Daily Sales Summary – Daily](Planning and Allocation – Daily Sales Summary – Daily.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Daily Sales by Style and Location Detail – Ad Hoc](Planning and Allocation – Daily Sales by Style and Location Detail – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Daily Sales by Style – Daily](Planning and Allocation – Daily Sales by Style – Daily.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Distribution Center On Hand Inventory Availability – Ad Hoc](Planning and Allocation – Distribution Center On Hand Inventory Availability – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Franchisee On Order and Receipt Tracking – Ad Hoc](Planning and Allocation – Franchisee On Order and Receipt Tracking – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Inventory Review – Ad Hoc](Planning and Allocation – Inventory Review – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Key Story Performance Review – Weekly](Planning and Allocation – Key Story Performance Review – Weekly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Licensed Product Performance Summary – Quarterly](Planning and Allocation – Licensed Product Performance Summary – Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Multi Year Sales Comparison by Style and Location – Ad Hoc](Planning and Allocation – Multi Year Sales Comparison by Style and Location – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – On Hand Inventory by Style and Location – Ad Hoc](Planning and Allocation – On Hand Inventory by Style and Location – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – On Order Cost Analysis – Quarterly](Planning and Allocation – On Order Cost Analysis – Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – On Order and Receipts – Ad Hoc](Planning and Allocation – On Order and Receipts – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Product Hierarchy and Attribute Reference - Ad Hoc](Planning and Allocation – Product Hierarchy and Attribute Reference - Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Product Lifecycle Date Reference – Ad Hoc](Planning and Allocation – Product Lifecycle Date Reference – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Product Style Attribute Reference – Ad Hoc](Planning and Allocation – Product Style Attribute Reference – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Purchase Order Receipt Detail – Ad Hoc](Planning and Allocation – Purchase Order Receipt Detail – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Q2 Sales Year Over Year Comparison – Quarterly](Planning and Allocation – Q2 Sales Year Over Year Comparison – Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Replenishment Product Copy Configuration – Ad Hoc](Planning and Allocation – Replenishment Product Copy Configuration – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Sounds Royalty Report – Ad Hoc](Planning and Allocation – Sounds Royalty Report – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Style Order and Distribution Multiples Reference – Ad Hoc](Planning and Allocation – Style Order and Distribution Multiples Reference – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Style and Location Replenishment Eligibility Reference – Ad Hoc](Planning and Allocation – Style and Location Replenishment Eligibility Reference – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Style and Location Replenishment Eligibility – Ad Hoc](Planning and Allocation – Style and Location Replenishment Eligibility – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Top Style Performance and Availability – Ad Hoc](Planning and Allocation – Top Style Performance and Availability – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Unstuffed Four Week Sales by Location – Weekly](Planning and Allocation – Unstuffed Four Week Sales by Location – Weekly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Vendor and Factory Receipt and Buy Plan Analysis – Ad Hoc](Planning and Allocation – Vendor and Factory Receipt and Buy Plan Analysis – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Web Style Unit Buffer Reference – Ad Hoc](Planning and Allocation – Web Style Unit Buffer Reference – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Week to Date Sales Summary – Ad Hoc](Planning and Allocation – Week to Date Sales Summary – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Weekly Retail Performance – Weekly](Planning and Allocation – Weekly Retail Performance – Weekly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Weekly Sales Units Trend – Quarterly](Planning and Allocation – Weekly Sales Units Trend – Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Weekly Sales Units and Retail Trend – Quarterly](Planning and Allocation – Weekly Sales Units and Retail Trend – Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Planning and Allocation – Wholesale Pricing and Cost Master Reference – Ad Hoc](Planning and Allocation – Wholesale Pricing and Cost Master Reference – Ad Hoc.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| Report Usage Metrics Report | - | - | Export: ExportPBIX_ModelessWorkbookNotFound |
+| [Retail Replenishment Data Model V5](Retail Replenishment Data Model V5.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [SFSActivity](SFSActivity.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [SSRS_2026-04-07](SSRS_2026-04-07.md) | 1 | 0 | Documented |
+| [Sales Audit Data Model](Sales Audit Data Model.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Sales Audit Data Model Original](Sales Audit Data Model Original.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Sourcing – On Order Cost Analysis – Quarterly](Sourcing – On Order Cost Analysis – Quarterly.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [Top 20 Items By Department](Top 20 Items By Department.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [UK Gift Card Store Summary Updated](UK Gift Card Store Summary Updated.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |
+| [Usage Metrics Report](Usage Metrics Report.md) | - | - | Model only: Export: ServerError_PremiumFilesErrors_OperationIsNotSupportedForPremiumFilesModel |
+| [WBHoursByPosition_TimeCode_byDate](WBHoursByPosition_TimeCode_byDate.md) | - | - | Model only: Export: ExportData_DisabledForModelWithDirectLakeMode |

@@ -1,0 +1,102 @@
+# dbo.retailstoretendertypetable
+
+**Database:** LH_D365_Prod  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Id | varchar | 8000 | 1 |  |  |  |
+| SinkCreatedOn | datetime2 | 8 | 1 |  |  |  |
+| SinkModifiedOn | datetime2 | 8 | 1 |  |  |  |
+| accounttype | bigint | 8 | 1 |  |  |  |
+| accounttypegiftcardcompany | bigint | 8 | 1 |  |  |  |
+| activeaccount | bigint | 8 | 1 |  |  |  |
+| allowfloat | bigint | 8 | 1 |  |  |  |
+| allowovertender | bigint | 8 | 1 |  |  |  |
+| allowreturnnegative | bigint | 8 | 1 |  |  |  |
+| allowundertender | bigint | 8 | 1 |  |  |  |
+| askfordate | bigint | 8 | 1 |  |  |  |
+| bankbagaccounttype | bigint | 8 | 1 |  |  |  |
+| compresspaymententries | bigint | 8 | 1 |  |  |  |
+| countingrequired | bigint | 8 | 1 |  |  |  |
+| endorsecheck | bigint | 8 | 1 |  |  |  |
+| frontofcheck | bigint | 8 | 1 |  |  |  |
+| function | bigint | 8 | 1 |  |  |  |
+| hidecardinputdetailsinpos | bigint | 8 | 1 |  |  |  |
+| multiplyintenderoperations | bigint | 8 | 1 |  |  |  |
+| opendrawer | bigint | 8 | 1 |  |  |  |
+| payaccountbill | bigint | 8 | 1 |  |  |  |
+| poscountentries | bigint | 8 | 1 |  |  |  |
+| roundingmethod | bigint | 8 | 1 |  |  |  |
+| safeaccounttype | bigint | 8 | 1 |  |  |  |
+| safeactiveaccount | bigint | 8 | 1 |  |  |  |
+| seekauthorization | bigint | 8 | 1 |  |  |  |
+| sigcapenabled | bigint | 8 | 1 |  |  |  |
+| takentobank | bigint | 8 | 1 |  |  |  |
+| takentosafe | bigint | 8 | 1 |  |  |  |
+| cashdrawerlimitenabled | bigint | 8 | 1 |  |  |  |
+| restrictreturnswithoutreceipt | bigint | 8 | 1 |  |  |  |
+| usefordeclarestartamount | bigint | 8 | 1 |  |  |  |
+| sysdatastatecode | bigint | 8 | 1 |  |  |  |
+| changetenderid | varchar | 8000 | 1 |  |  |  |
+| aboveminimumtenderid | varchar | 8000 | 1 |  |  |  |
+| bankbagledgerdimension | bigint | 8 | 1 |  |  |  |
+| changelineonreceipt | varchar | 8000 | 1 |  |  |  |
+| channel | bigint | 8 | 1 |  |  |  |
+| checkpayee | varchar | 8000 | 1 |  |  |  |
+| connectorname | varchar | 8000 | 1 |  |  |  |
+| defaultdimension | bigint | 8 | 1 |  |  |  |
+| diffaccbigdiffledgerdimension | bigint | 8 | 1 |  |  |  |
+| differenceaccledgerdimension | bigint | 8 | 1 |  |  |  |
+| endorsmentline1 | varchar | 8000 | 1 |  |  |  |
+| endorsmentline2 | varchar | 8000 | 1 |  |  |  |
+| fiscalprintertendertype_br | varchar | 8000 | 1 |  |  |  |
+| giftcardcompany | varchar | 8000 | 1 |  |  |  |
+| giftcarditemid | varchar | 8000 | 1 |  |  |  |
+| giftcardcashoutthreshold | decimal | 17 | 1 |  |  |  |
+| ledgerdimension | bigint | 8 | 1 |  |  |  |
+| ledgerdimensiongiftcardcompany | bigint | 8 | 1 |  |  |  |
+| linenumintransaction | varchar | 8000 | 1 |  |  |  |
+| maxcountingdifference | decimal | 17 | 1 |  |  |  |
+| maximumamountallowed | decimal | 17 | 1 |  |  |  |
+| maximumamountentered | decimal | 17 | 1 |  |  |  |
+| maximumovertenderamount | decimal | 17 | 1 |  |  |  |
+| maxnormaldifferenceamount | decimal | 17 | 1 |  |  |  |
+| maxrecount | bigint | 8 | 1 |  |  |  |
+| minimumamountallowed | decimal | 17 | 1 |  |  |  |
+| minimumamountentered | decimal | 17 | 1 |  |  |  |
+| minimumchangeamount | decimal | 17 | 1 |  |  |  |
+| name | varchar | 8000 | 1 |  |  |  |
+| paymtermid | varchar | 8000 | 1 |  |  |  |
+| posoperation | bigint | 8 | 1 |  |  |  |
+| rounding | decimal | 17 | 1 |  |  |  |
+| safeaccledgerdimension | bigint | 8 | 1 |  |  |  |
+| sigcapminamount | decimal | 17 | 1 |  |  |  |
+| slipbackinprinter | varchar | 8000 | 1 |  |  |  |
+| slipfrontinprinter | varchar | 8000 | 1 |  |  |  |
+| tenderflowledgerdimension_ru | bigint | 8 | 1 |  |  |  |
+| tendertypeid | varchar | 8000 | 1 |  |  |  |
+| undertenderamount | decimal | 17 | 1 |  |  |  |
+| banktransactiontype | varchar | 8000 | 1 |  |  |  |
+| legacyconnectorname | varchar | 8000 | 1 |  |  |  |
+| cashdrawerlimit | decimal | 17 | 1 |  |  |  |
+| modifieddatetime | datetime2 | 8 | 1 |  |  |  |
+| modifiedby | varchar | 8000 | 1 |  |  |  |
+| modifiedtransactionid | bigint | 8 | 1 |  |  |  |
+| createddatetime | datetime2 | 8 | 1 |  |  |  |
+| createdby | varchar | 8000 | 1 |  |  |  |
+| createdtransactionid | bigint | 8 | 1 |  |  |  |
+| dataareaid | varchar | 8000 | 1 |  |  |  |
+| recversion | bigint | 8 | 1 |  |  |  |
+| partition | bigint | 8 | 1 |  |  |  |
+| sysrowversion | bigint | 8 | 1 |  |  |  |
+| recid | bigint | 8 | 1 |  |  |  |
+| tableid | bigint | 8 | 1 |  |  |  |
+| versionnumber | bigint | 8 | 1 |  |  |  |
+| createdon | datetime2 | 8 | 1 |  |  |  |
+| modifiedon | datetime2 | 8 | 1 |  |  |  |
+| IsDelete | bit | 1 | 1 |  |  |  |
+| createdonpartition | varchar | 8000 | 1 |  |  |  |
+| PartitionId | varchar | 2048 | 1 |  |  |  |

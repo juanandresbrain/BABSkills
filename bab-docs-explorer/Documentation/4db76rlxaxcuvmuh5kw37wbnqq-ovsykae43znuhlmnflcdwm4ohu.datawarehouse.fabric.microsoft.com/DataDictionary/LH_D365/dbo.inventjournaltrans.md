@@ -1,0 +1,105 @@
+# dbo.inventjournaltrans
+
+**Database:** LH_D365  
+**Server:** 4db76rlxaxcuvmuh5kw37wbnqq-ovsykae43znuhlmnflcdwm4ohu.datawarehouse.fabric.microsoft.com  
+
+## Columns
+
+| Column | Type | Max Length | Nullable | PK | FK | Description |
+|---|---|---|---|---|---|---|
+| Id | varchar | 8000 | 1 |  |  |  |
+| SinkCreatedOn | datetime2 | 8 | 1 |  |  |  |
+| SinkModifiedOn | datetime2 | 8 | 1 |  |  |  |
+| assettranstype | bigint | 8 | 1 |  |  |  |
+| bomline | bigint | 8 | 1 |  |  |  |
+| dsa_in | bigint | 8 | 1 |  |  |  |
+| exciserecordtype_in | bigint | 8 | 1 |  |  |  |
+| excisetype_in | bigint | 8 | 1 |  |  |  |
+| inventreftype | bigint | 8 | 1 |  |  |  |
+| journaltype | bigint | 8 | 1 |  |  |  |
+| pdscopybatchattrib | bigint | 8 | 1 |  |  |  |
+| profitset | bigint | 8 | 1 |  |  |  |
+| storno_ru | bigint | 8 | 1 |  |  |  |
+| itmoverundertransfer | bigint | 8 | 1 |  |  |  |
+| sysdatastatecode | bigint | 8 | 1 |  |  |  |
+| activitynumber | varchar | 8000 | 1 |  |  |  |
+| assetbookid | varchar | 8000 | 1 |  |  |  |
+| assetid | varchar | 8000 | 1 |  |  |  |
+| costamount | decimal | 17 | 1 |  |  |  |
+| costmarkup | decimal | 17 | 1 |  |  |  |
+| costprice | decimal | 17 | 1 |  |  |  |
+| counted | decimal | 17 | 1 |  |  |  |
+| defaultdimension | bigint | 8 | 1 |  |  |  |
+| excisetariffcodes_in | bigint | 8 | 1 |  |  |  |
+| intrastatfulfillmentdate_hu | datetime2 | 8 | 1 |  |  |  |
+| inventdimid | varchar | 8000 | 1 |  |  |  |
+| inventonhand | decimal | 17 | 1 |  |  |  |
+| inventrefid | varchar | 8000 | 1 |  |  |  |
+| inventreftransid | varchar | 8000 | 1 |  |  |  |
+| inventtransid | varchar | 8000 | 1 |  |  |  |
+| inventtransidfather | varchar | 8000 | 1 |  |  |  |
+| inventtransidreturn | varchar | 8000 | 1 |  |  |  |
+| itemid | varchar | 8000 | 1 |  |  |  |
+| journalid | varchar | 8000 | 1 |  |  |  |
+| ledgerdimension | bigint | 8 | 1 |  |  |  |
+| linenum | decimal | 17 | 1 |  |  |  |
+| pdscwinventonhand | decimal | 17 | 1 |  |  |  |
+| pdscwinventqtycounted | decimal | 17 | 1 |  |  |  |
+| pdscwqty | decimal | 17 | 1 |  |  |  |
+| postaladdress_in | bigint | 8 | 1 |  |  |  |
+| priceunit | decimal | 17 | 1 |  |  |  |
+| projcategoryid | varchar | 8000 | 1 |  |  |  |
+| projid | varchar | 8000 | 1 |  |  |  |
+| projlinepropertyid | varchar | 8000 | 1 |  |  |  |
+| projsalescurrencyid | varchar | 8000 | 1 |  |  |  |
+| projsalesprice | decimal | 17 | 1 |  |  |  |
+| projtaxgroupid | varchar | 8000 | 1 |  |  |  |
+| projtaxitemgroupid | varchar | 8000 | 1 |  |  |  |
+| projtransid | varchar | 8000 | 1 |  |  |  |
+| projunitid | varchar | 8000 | 1 |  |  |  |
+| qty | decimal | 17 | 1 |  |  |  |
+| reasonrefrecid | bigint | 8 | 1 |  |  |  |
+| releasedate | datetime2 | 8 | 1 |  |  |  |
+| reqpoid | varchar | 8000 | 1 |  |  |  |
+| retailinfocodeidex2 | varchar | 8000 | 1 |  |  |  |
+| retailinformationsubcodeidex2 | varchar | 8000 | 1 |  |  |  |
+| salesamount | decimal | 17 | 1 |  |  |  |
+| scraptypeid_ru | varchar | 8000 | 1 |  |  |  |
+| toinventdimid | varchar | 8000 | 1 |  |  |  |
+| toinventtransid | varchar | 8000 | 1 |  |  |  |
+| transdate | datetime2 | 8 | 1 |  |  |  |
+| voucher | varchar | 8000 | 1 |  |  |  |
+| warehouselocation_in | bigint | 8 | 1 |  |  |  |
+| worker | bigint | 8 | 1 |  |  |  |
+| countingreasoncode | varchar | 8000 | 1 |  |  |  |
+| unit | varchar | 8000 | 1 |  |  |  |
+| unitqty | decimal | 17 | 1 |  |  |  |
+| inventoryserviceadjustmentoffsetdatasource | varchar | 8000 | 1 |  |  |  |
+| inventoryserviceadjustmentoffsetphysicalmeasure | varchar | 8000 | 1 |  |  |  |
+| inventoryservicetransactionid | varchar | 8000 | 1 |  |  |  |
+| entassetworkorderline | bigint | 8 | 1 |  |  |  |
+| subbilldeferralrecidoriginal | bigint | 8 | 1 |  |  |  |
+| modifieddatetime | datetime2 | 8 | 1 |  |  |  |
+| modifiedby | varchar | 8000 | 1 |  |  |  |
+| modifiedtransactionid | bigint | 8 | 1 |  |  |  |
+| createddatetime | datetime2 | 8 | 1 |  |  |  |
+| createdby | varchar | 8000 | 1 |  |  |  |
+| createdtransactionid | bigint | 8 | 1 |  |  |  |
+| dataareaid | varchar | 8000 | 1 |  |  |  |
+| recversion | bigint | 8 | 1 |  |  |  |
+| partition | bigint | 8 | 1 |  |  |  |
+| sysrowversion | bigint | 8 | 1 |  |  |  |
+| recid | bigint | 8 | 1 |  |  |  |
+| tableid | bigint | 8 | 1 |  |  |  |
+| versionnumber | bigint | 8 | 1 |  |  |  |
+| createdon | datetime2 | 8 | 1 |  |  |  |
+| modifiedon | datetime2 | 8 | 1 |  |  |  |
+| IsDelete | bit | 1 | 1 |  |  |  |
+| createdonpartition | varchar | 8000 | 1 |  |  |  |
+| PartitionId | varchar | 2048 | 1 |  |  |  |
+| fintag | bigint | 8 | 1 |  |  |  |
+| nbscode_br | bigint | 8 | 1 |  |  |  |
+| indopcode_br | bigint | 8 | 1 |  |  |  |
+| rentalaffectbookvalue | bigint | 8 | 1 |  |  |  |
+| rentalitemmovedtofrom | bigint | 8 | 1 |  |  |  |
+| rentalitem | bigint | 8 | 1 |  |  |  |
