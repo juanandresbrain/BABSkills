@@ -224,4 +224,4 @@ in
 
 | Server | Database | Linked SQL Documentation |
 |---|---|---|
-| 4DB76RLXAXCUVMUH5KW37WBNQQ-M2O53THJETDERKGQW4NC6A676E.datawarehouse.fabric.microsoft.com | df4bc93b-70c0-47b1-adc7-8e261129b151 | _(not found in SQL documentation)_ |
+| 4DB76RLXAXCUVMUH5KW37WBNQQ-M2O53THJETDERKGQW4NC6A676E.datawarehouse.fabric.microsoft.com | df4bc93b-70c0-47b1-adc7-8e261129b151 → LH_Reporting | [4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com/LH_Reporting](../../../4db76rlxaxcuvmuh5kw37wbnqq-m2o53thjetderkgqw4nc6a676e.datawarehouse.fabric.microsoft.com/DataDictionary/LH_Reporting/) |

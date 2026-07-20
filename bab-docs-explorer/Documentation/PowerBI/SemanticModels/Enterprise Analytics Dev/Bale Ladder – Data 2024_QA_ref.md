@@ -178,4 +178,4 @@ in
 
 | Server | Database | Linked SQL Documentation |
 |---|---|---|
-| powerbi://api.powerbi.com/v1.0/myorg/Enterprise%20Analytics%20QA | Merchandise Aggregate Semantic Model | _(PowerBI composite-model link, not a SQL source → dataset "Merchandise Aggregate Semantic Model")_ |
+| powerbi://api.powerbi.com/v1.0/myorg/Enterprise%20Analytics%20QA | Merchandise Aggregate Semantic Model | _(PowerBI composite-model link, not a SQL source → dataset "Merchandise Aggregate Semantic Model" in workspace "Enterprise Analytics QA")_ |
